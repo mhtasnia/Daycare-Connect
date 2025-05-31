@@ -25,4 +25,3 @@ jobs:
           args: >
             -Dsonar.organization=mhtasnia
             -Dsonar.projectKey=mhtasnia_Daycare-Connect
-            -Dsonar.projectName=Daycare-Connect
