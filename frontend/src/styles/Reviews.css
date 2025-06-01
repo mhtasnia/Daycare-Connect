@@ -1,0 +1,29 @@
+.review-card {
+  min-height: 180px;
+  transition: opacity 0.6s, transform 0.6s;
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-out {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.section-header {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #23395d;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.review-card:hover {
+  transform: translateY(-8px) scale(1.04);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}

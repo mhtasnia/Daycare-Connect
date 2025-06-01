@@ -1,0 +1,76 @@
+.landing-navbar {
+  background: rgba(255,255,255,0.95);
+  border-bottom: 2px solid #f8bbd0;
+  padding: 0.7rem 0;
+  transition: box-shadow 0.3s;
+}
+
+.landing-navbar-brand {
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  color: #23395d !important;
+  transition: color 0.2s;
+}
+
+.landing-navbar-brand .brand-highlight {
+  color: #f48fb1;
+  font-weight: 700;
+}
+
+.landing-navbar .navbar-toggler {
+  border: none;
+}
+
+.modern-btn-parent {
+  background: #f48fb1 !important;
+  color: #fff !important;
+  border-radius: 2rem !important;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  box-shadow: 0 2px 8px 0 rgba(244, 143, 177, 0.10);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.modern-btn-parent:hover, .modern-btn-parent:focus {
+  background: #ce93d8 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px 0 rgba(244, 143, 177, 0.18);
+}
+
+.modern-btn-daycare {
+  background: #fff !important;
+  color: #90caf9 !important;
+  border: 2px solid #90caf9 !important;
+  border-radius: 2rem !important;
+  font-weight: 600;
+  margin: 0 1rem 0 1rem;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.10);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.modern-btn-daycare:hover, .modern-btn-daycare:focus {
+  background: #90caf9 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px 0 rgba(144, 202, 249, 0.18);
+}
+
+.landing-navbar-links .nav-link.active,
+.landing-navbar-links .nav-link:focus {
+  color: #f48fb1 !important;
+  font-weight: 700;
+  border-bottom: 3px solid #f48fb1;
+  background: rgba(248,187,208,0.10);
+  border-radius: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+@media (max-width: 991px) {
+  .landing-navbar-brand {
+    font-size: 1.3rem;
+  }
+  .modern-btn-parent,
+  .modern-btn-daycare {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+}
