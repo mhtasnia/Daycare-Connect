@@ -6,14 +6,14 @@
 
 ## 📌 Table of Contents
 
-- [Project Overview](#project-overview)
-- [Objectives](#objectives)
-- [Target Users](#target-users)
-- [Key Features (MVP)](#key-features-mvp)
-- [Tech Stack](#tech-stack)
-- [Expected Outcomes](#expected-outcomes)
-- [Future Roadmap](#future-roadmap)
-- [License](#license)
+- [Project Overview](#-project-overview)
+- [Objectives](#-objectives)
+- [Target Users](#-target-users)
+- [Key Features (MVP)](#-key-features-mvp)
+- [Tech Stack](#-tech-stack)
+- [Expected Outcomes](#-expected-outcomes)
+- [Future Roadmap](#-future-roadmap)
+- [License](#-license)
 
 ---
 
