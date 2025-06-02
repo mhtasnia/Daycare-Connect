@@ -1,5 +1,5 @@
 .landing-navbar {
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   border-bottom: 2px solid #f8bbd0;
   padding: 0.7rem 0;
   transition: box-shadow 0.3s;
@@ -28,10 +28,11 @@
   font-weight: 600;
   padding: 0.5rem 1.5rem;
   border: none;
-  box-shadow: 0 2px 8px 0 rgba(244, 143, 177, 0.10);
+  box-shadow: 0 2px 8px 0 rgba(244, 143, 177, 0.1);
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.modern-btn-parent:hover, .modern-btn-parent:focus {
+.modern-btn-parent:hover,
+.modern-btn-parent:focus {
   background: #ce93d8 !important;
   color: #fff !important;
   box-shadow: 0 4px 16px 0 rgba(244, 143, 177, 0.18);
@@ -45,10 +46,11 @@
   font-weight: 600;
   margin: 0 1rem 0 1rem;
   padding: 0.5rem 1.5rem;
-  box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.10);
+  box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.1);
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-.modern-btn-daycare:hover, .modern-btn-daycare:focus {
+.modern-btn-daycare:hover,
+.modern-btn-daycare:focus {
   background: #90caf9 !important;
   color: #fff !important;
   box-shadow: 0 4px 16px 0 rgba(144, 202, 249, 0.18);
@@ -59,9 +61,65 @@
   color: #f48fb1 !important;
   font-weight: 700;
   border-bottom: 3px solid #f48fb1;
-  background: rgba(248,187,208,0.10);
+  background: rgba(248, 187, 208, 0.1);
   border-radius: 0;
   transition: background 0.2s, color 0.2s;
+}
+
+/* Parent Dropdown Styles */
+.parent-dropdown .dropdown-toggle {
+  background: linear-gradient(45deg, #f48fb1, #ce93d8) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 2rem !important;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  margin: 0 0.5rem;
+  box-shadow: 0 2px 8px 0 rgba(244, 143, 177, 0.1);
+  transition: all 0.2s ease;
+}
+
+.parent-dropdown .dropdown-toggle:hover,
+.parent-dropdown .dropdown-toggle:focus,
+.parent-dropdown .dropdown-toggle.show {
+  background: linear-gradient(45deg, #ce93d8, #f48fb1) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px 0 rgba(244, 143, 177, 0.18);
+  transform: translateY(-1px);
+}
+
+.parent-dropdown .dropdown-toggle::after {
+  margin-left: 0.5rem;
+}
+
+.parent-dropdown .dropdown-menu {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(244, 143, 177, 0.2) !important;
+  border-radius: 15px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.5rem 0 !important;
+  margin-top: 0.5rem !important;
+}
+
+.parent-dropdown .dropdown-item {
+  color: #23395d !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease !important;
+  border-radius: 10px !important;
+  margin: 0.25rem 0.5rem !important;
+}
+
+.parent-dropdown .dropdown-item:hover,
+.parent-dropdown .dropdown-item:focus {
+  background: linear-gradient(
+    45deg,
+    rgba(244, 143, 177, 0.1),
+    rgba(206, 147, 216, 0.1)
+  ) !important;
+  color: #f48fb1 !important;
+  transform: translateX(5px) !important;
 }
 
 @media (max-width: 991px) {
@@ -72,5 +130,19 @@
   .modern-btn-daycare {
     padding: 0.5rem 1rem;
     font-size: 1rem;
+  }
+
+  .parent-dropdown .dropdown-toggle {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .parent-dropdown .dropdown-menu {
+    width: 100% !important;
+    margin-top: 0 !important;
+    border-radius: 10px !important;
   }
 }

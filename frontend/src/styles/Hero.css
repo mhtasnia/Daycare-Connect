@@ -2,8 +2,6 @@
   background: transparent;
 }
 
-
-
 .btn {
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -19,4 +17,29 @@
   height: 110%;
   margin: 0 auto;
   padding: 1.5rem;
+}
+
+/* Parent Button Styling */
+.hero-card .btn-outline-primary {
+  background: linear-gradient(45deg, #f48fb1, #ce93d8) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  padding: 12px 24px !important;
+  box-shadow: 0 4px 15px rgba(244, 143, 177, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-card .btn-outline-primary:hover {
+  background: linear-gradient(45deg, #ce93d8, #f48fb1) !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(244, 143, 177, 0.4) !important;
+}
+
+.hero-card .btn-outline-primary:focus {
+  background: linear-gradient(45deg, #f48fb1, #ce93d8) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25) !important;
 }

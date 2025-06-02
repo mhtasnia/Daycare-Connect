@@ -1,38 +1,58 @@
-import { useEffect } from 'react';
-import { Navbar, Nav, Container } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import '../styles/LandingNavbar.css';
+import { useEffect } from "react";
+import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import "../styles/LandingNavbar.css";
 
 function LandingNavbar() {
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['hero', 'howitworks', 'whoitsfor', 'whychoose', 'reviews', 'faq'];
+      const sections = [
+        "hero",
+        "howitworks",
+        "whoitsfor",
+        "whychoose",
+        "reviews",
+        "faq",
+      ];
       let found = false;
       for (let id of sections) {
         const section = document.getElementById(id);
         if (section) {
           const rect = section.getBoundingClientRect();
           if (rect.top <= 90 && rect.bottom >= 90 && !found) {
-            document.querySelectorAll('.landing-navbar-links .nav-link').forEach(link => {
-              link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-            });
+            document
+              .querySelectorAll(".landing-navbar-links .nav-link")
+              .forEach((link) => {
+                link.classList.toggle(
+                  "active",
+                  link.getAttribute("href") === `#${id}`
+                );
+              });
             found = true;
           }
         }
       }
       if (!found) {
-        document.querySelectorAll('.landing-navbar-links .nav-link').forEach(link => {
-          link.classList.remove('active');
-        });
+        document
+          .querySelectorAll(".landing-navbar-links .nav-link")
+          .forEach((link) => {
+            link.classList.remove("active");
+          });
       }
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <Navbar expand="lg" className="landing-navbar shadow-sm animate__animated animate__fadeInDown" bg="white" variant="light" fixed="top">
+    <Navbar
+      expand="lg"
+      className="landing-navbar shadow-sm animate__animated animate__fadeInDown"
+      bg="white"
+      variant="light"
+      fixed="top"
+    >
       <Container fluid>
         <Navbar.Brand as={Link} to="/" className="fw-bold landing-navbar-brand">
           Daycare <span className="brand-highlight">Connect</span>
@@ -46,7 +66,26 @@ function LandingNavbar() {
             <Nav.Link href="#whychoose">Why Choose</Nav.Link>
             <Nav.Link href="#reviews">Reviews</Nav.Link>
             <Nav.Link href="#faq">FAQ</Nav.Link>
-            <Nav.Link href="#whoitsfor" className="btn modern-btn-daycare animate__animated animate__fadeInRight ms-2">
+            <NavDropdown
+              title="I'm a Parent"
+              id="parent-dropdown"
+              className="parent-dropdown"
+            >
+              <NavDropdown.Item as={Link} to="/parent">
+                Parent Portal
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/parent/register">
+                Register as Parent
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/parent/login">
+                Parent Login
+              </NavDropdown.Item>
+            </NavDropdown>
+            <Nav.Link
+              as={Link}
+              to="/parent"
+              className="btn modern-btn-daycare animate__animated animate__fadeInRight ms-2"
+            >
               Join Us
             </Nav.Link>
           </Nav>

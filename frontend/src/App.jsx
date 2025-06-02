@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import './App.css'
-import Landing from './screens/Landing'
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import "./App.css";
+import Landing from "./screens/Landing";
+import ParentLanding from "./screens/ParentLanding";
+import ParentRegister from "./screens/ParentRegister";
+import ParentLogin from "./screens/ParentLogin";
 
 function App() {
   return (
@@ -10,10 +11,13 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/parent" element={<ParentLanding />} />
+          <Route path="/parent/register" element={<ParentRegister />} />
+          <Route path="/parent/login" element={<ParentLogin />} />
         </Routes>
       </Router>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
