@@ -1,0 +1,79 @@
+/* Shared style with LandingNavbar */
+.parent-navbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 2px solid #f8bbd0;
+  padding: 0.7rem 0;
+  transition: box-shadow 0.3s;
+  box-shadow: 0 2px 12px 0 rgba(144, 202, 249, 0.08);
+  z-index: 1050;
+}
+
+.parent-navbar .navbar-brand {
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  color: #23395d !important;
+  transition: color 0.2s;
+  font-weight: 700;
+}
+
+.parent-navbar .brand-highlight {
+  color: #f48fb1;
+  font-weight: 700;
+}
+
+.parent-navbar .navbar-brand .text-muted {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #90caf9 !important;
+}
+
+.parent-navbar .nav-link {
+  color: #2a7be4;
+  font-weight: 500;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  border-radius: 0;
+  padding: 0.5rem 1.5rem;
+  transition: background 0.18s, color 0.18s, border-bottom 0.18s;
+  font-size: 1.05rem;
+  background: none;
+  border-bottom: 3px solid transparent;
+}
+
+/* Minimalistic and classy active style */
+.parent-navbar .nav-link.active,
+.parent-navbar .nav-link:focus {
+  color: #f48fb1 !important;
+  font-weight: 700;
+  border-bottom: 3px solid #f48fb1;
+  background: rgba(248, 187, 208, 0.1);
+  border-radius: 0;
+  transition: background 0.2s, color 0.2s;
+}
+
+.parent-navbar .nav-link:hover {
+  color: #f48fb1 !important;
+  background: rgba(248, 187, 208, 0.08);
+  border-bottom: 3px solid #f48fb1;
+  border-radius: 0;
+}
+
+.parent-navbar .navbar-toggler {
+  border: none;
+  outline: none;
+}
+
+.parent-navbar .navbar-toggler:focus {
+  box-shadow: 0 0 0 2px #90caf9;
+}
+
+@media (max-width: 991.98px) {
+  .parent-navbar .nav-link {
+    margin: 0.25rem 0;
+    padding: 0.5rem 1rem;
+    text-align: left;
+  }
+  .parent-navbar .navbar-brand {
+    font-size: 1.3rem;
+  }
+}

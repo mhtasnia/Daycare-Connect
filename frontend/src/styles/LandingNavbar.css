@@ -122,6 +122,62 @@
   transform: translateX(5px) !important;
 }
 
+/* Daycare Dropdown Styles */
+.daycare-dropdown .dropdown-toggle {
+  background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
+  color: #23395d !important;
+  border: none !important;
+  border-radius: 2rem !important;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  margin: 0 0.5rem;
+  box-shadow: 0 2px 8px 0 rgba(153, 242, 200, 0.10);
+  transition: all 0.2s ease;
+}
+
+.daycare-dropdown .dropdown-toggle:hover,
+.daycare-dropdown .dropdown-toggle:focus,
+.daycare-dropdown .dropdown-toggle.show {
+  background: linear-gradient(45deg, #90caf9, #99f2c8) !important;
+  color: #23395d !important;
+  box-shadow: 0 4px 16px 0 rgba(153, 242, 200, 0.18);
+  transform: translateY(-1px);
+}
+
+.daycare-dropdown .dropdown-toggle::after {
+  margin-left: 0.5rem;
+}
+
+.daycare-dropdown .dropdown-menu {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(153, 242, 200, 0.2) !important;
+  border-radius: 15px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.5rem 0 !important;
+  margin-top: 0.5rem !important;
+}
+
+.daycare-dropdown .dropdown-item {
+  color: #23395d !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.5rem !important;
+  transition: all 0.2s ease !important;
+  border-radius: 10px !important;
+  margin: 0.25rem 0.5rem !important;
+}
+
+.daycare-dropdown .dropdown-item:hover,
+.daycare-dropdown .dropdown-item:focus {
+  background: linear-gradient(
+    45deg,
+    rgba(153, 242, 200, 0.13),
+    rgba(144, 202, 249, 0.13)
+  ) !important;
+  color: #099e6a !important;
+  transform: translateX(5px) !important;
+}
+
 @media (max-width: 991px) {
   .landing-navbar-brand {
     font-size: 1.3rem;
@@ -141,6 +197,20 @@
   }
 
   .parent-dropdown .dropdown-menu {
+    width: 100% !important;
+    margin-top: 0 !important;
+    border-radius: 10px !important;
+  }
+
+  .daycare-dropdown .dropdown-toggle {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  .daycare-dropdown .dropdown-menu {
     width: 100% !important;
     margin-top: 0 !important;
     border-radius: 10px !important;

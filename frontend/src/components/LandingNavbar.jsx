@@ -81,13 +81,21 @@ function LandingNavbar() {
                 Parent Login
               </NavDropdown.Item>
             </NavDropdown>
-            <Nav.Link
-              as={Link}
-              to="/parent"
-              className="btn modern-btn-daycare animate__animated animate__fadeInRight ms-2"
+            <NavDropdown
+              title="I'm a Daycare"
+              id="daycare-dropdown"
+              className="daycare-dropdown ms-2"
             >
-              Join Us
-            </Nav.Link>
+              <NavDropdown.Item as={Link} to="/daycare">
+                Daycare Portal
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/daycare/register">
+                Register as Daycare
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/daycare/login">
+                Daycare Login
+              </NavDropdown.Item>
+            </NavDropdown>
           </Nav>
         </Navbar.Collapse>
       </Container>

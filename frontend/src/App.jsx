@@ -4,6 +4,9 @@ import Landing from "./screens/Landing";
 import ParentLanding from "./screens/ParentLanding";
 import ParentRegister from "./screens/ParentRegister";
 import ParentLogin from "./screens/ParentLogin";
+import DaycareLanding from "./screens/DaycareLanding";
+import DaycareRegister from "./screens/DaycareRegister";
+import DaycareLogin from "./screens/DaycareLogin";
 
 function App() {
   return (
@@ -14,6 +17,9 @@ function App() {
           <Route path="/parent" element={<ParentLanding />} />
           <Route path="/parent/register" element={<ParentRegister />} />
           <Route path="/parent/login" element={<ParentLogin />} />
+          <Route path="/daycare" element={<DaycareLanding />} />
+          <Route path="/daycare/register" element={<DaycareRegister />} />
+          <Route path="/daycare/login" element={<DaycareLogin />} />
         </Routes>
       </Router>
     </div>

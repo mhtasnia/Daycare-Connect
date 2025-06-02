@@ -19,6 +19,7 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import "../styles/ParentAuth.css";
+import ParentNavbar from '../components/ParentNavbar'; // Add this line
 
 function ParentRegister() {
   const [formData, setFormData] = useState({
@@ -132,6 +133,7 @@ function ParentRegister() {
 
   return (
     <div className="auth-wrapper">
+      <ParentNavbar /> {/* Add this line */}
       <Container>
         <Row className="justify-content-center align-items-center min-vh-100">
           <Col lg={8} xl={7}>

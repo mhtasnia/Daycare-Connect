@@ -3,6 +3,7 @@ import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap'
 import { Link } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaArrowLeft, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../styles/ParentAuth.css';
+import ParentNavbar from '../components/ParentNavbar'; // Add this line
 
 function ParentLogin() {
   const [formData, setFormData] = useState({
@@ -98,6 +99,7 @@ function ParentLogin() {
 
   return (
     <div className="auth-wrapper">
+      <ParentNavbar /> {/* Add this line */}
       <Container>
         <Row className="justify-content-center align-items-center min-vh-100">
           <Col lg={5} md={7} sm={9}>
