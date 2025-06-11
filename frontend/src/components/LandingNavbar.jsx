@@ -80,6 +80,28 @@ function LandingNavbar() {
               <NavDropdown.Item as={Link} to="/parent/login">
                 Parent Login
               </NavDropdown.Item>
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/parent/home">
+                Parent Dashboard
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/parent/profile">
+                Update Profile
+              </NavDropdown.Item>
+            </NavDropdown>
+            <NavDropdown
+              title="I'm a Provider"
+              id="provider-dropdown"
+              className="provider-dropdown"
+            >
+              <NavDropdown.Item as={Link} to="/provider">
+                Provider Portal
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/provider/register">
+                Register Daycare
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/provider/login">
+                Provider Login
+              </NavDropdown.Item>
             </NavDropdown>
             <Nav.Link
               as={Link}
