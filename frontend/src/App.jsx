@@ -7,11 +7,13 @@ import ParentLogin from "./screens/ParentLogin";
 import DaycareLanding from "./screens/DaycareLanding";
 import DaycareRegister from "./screens/DaycareRegister";
 import DaycareLogin from "./screens/DaycareLogin";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <div className="full-width-theme">
       <Router>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/parent" element={<ParentLanding />} />

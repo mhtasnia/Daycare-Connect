@@ -45,6 +45,7 @@ function Hero() {
                   to="/daycare"
                   variant="outline-secondary"
                   size="lg"
+                  className="modern-btn-daycare"
                 >
                   <FaSchool className="me-2" />
                   I’m a Daycare Provider

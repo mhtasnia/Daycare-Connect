@@ -38,23 +38,8 @@
   box-shadow: 0 4px 16px 0 rgba(244, 143, 177, 0.18);
 }
 
-.modern-btn-daycare {
-  background: #fff !important;
-  color: #90caf9 !important;
-  border: 2px solid #90caf9 !important;
-  border-radius: 2rem !important;
-  font-weight: 600;
-  margin: 0 1rem 0 1rem;
-  padding: 0.5rem 1.5rem;
-  box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.1);
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-}
-.modern-btn-daycare:hover,
-.modern-btn-daycare:focus {
-  background: #90caf9 !important;
-  color: #fff !important;
-  box-shadow: 0 4px 16px 0 rgba(144, 202, 249, 0.18);
-}
+
+
 
 .landing-navbar-links .nav-link.active,
 .landing-navbar-links .nav-link:focus {

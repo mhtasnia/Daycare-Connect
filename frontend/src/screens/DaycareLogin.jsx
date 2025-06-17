@@ -35,7 +35,7 @@ function DaycareLogin() {
       <DaycareNavbar />
       <Container className="py-5">
         <Row className="justify-content-center">
-          <Col md={6} lg={5}>
+          <Col md={6} lg={5} className="mt-5">
             <Card className="shadow-lg">
               <Card.Body>
                 <h2 className="mb-4 text-center">Daycare Login</h2>

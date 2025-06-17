@@ -1,5 +1,6 @@
 import { Container, Row, Col } from 'react-bootstrap'
 import { FaGlobe, FaPhoneAlt, FaFileAlt, FaLanguage, FaFacebook, FaTwitter, FaMobileAlt, FaSearch, FaUserFriends, FaCheckCircle, FaStar, FaQuestionCircle } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 import '../styles/Footer.css'
 
 function Footer() {
@@ -8,20 +9,17 @@ function Footer() {
       <Container fluid>
         {/* Navigation Links */}
         <Row className="justify-content-center mb-4">
-          <Col xs={12}>
-            <nav className="footer-nav d-flex flex-wrap justify-content-center gap-4 mb-3">
-              <a href="#howitworks"><FaSearch className="me-2" />How It Works</a>
-              <a href="#whoitsfor"><FaUserFriends className="me-2" />Who It's For</a>
-              <a href="#whychoose"><FaCheckCircle className="me-2" />Why Choose</a>
-              <a href="#reviews"><FaStar className="me-2" />Reviews</a>
-              <a href="#faq"><FaQuestionCircle className="me-2" />FAQ</a>
-            </nav>
+          <Col xs={8}>
           </Col>
         </Row>
         {/* Info Columns */}
         <Row className="justify-content-center mb-3">
           <Col md={3} sm={6}>
-            <div><FaGlobe /> <b>About Daycare Connect</b></div>
+            <div>
+              <Link to="/" className="footer-link">
+                <FaGlobe /> <b>About Daycare Connect</b>
+              </Link>
+            </div>
           </Col>
           <Col md={3} sm={6}>
             <div><FaPhoneAlt /> <b>Contact Us</b></div>

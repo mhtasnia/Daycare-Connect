@@ -67,7 +67,7 @@ function LandingNavbar() {
             <Nav.Link href="#reviews">Reviews</Nav.Link>
             <Nav.Link href="#faq">FAQ</Nav.Link>
             <NavDropdown
-              title="I'm a Parent"
+              title="Parent"
               id="parent-dropdown"
               className="parent-dropdown"
             >
@@ -82,7 +82,7 @@ function LandingNavbar() {
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown
-              title="I'm a Daycare"
+              title="Daycare Provider"
               id="daycare-dropdown"
               className="daycare-dropdown ms-2"
             >

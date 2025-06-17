@@ -48,7 +48,7 @@ function DaycareRegister() {
       <DaycareNavbar />
       <Container className="py-5">
         <Row className="justify-content-center">
-          <Col md={7} lg={6}>
+          <Col md={7} lg={6} className="mt-5">
             <Card className="shadow-lg">
               <Card.Body>
                 <h2 className="mb-4 text-center">Register Your Daycare</h2>
