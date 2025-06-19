@@ -13,4 +13,5 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: code test
-          args: --all-projects --exclude=tests/**,test_*.py
+         
+          args: --all-projects --exclude=tests/** --exclude=test_*.py
