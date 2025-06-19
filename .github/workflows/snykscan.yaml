@@ -14,4 +14,4 @@ jobs:
         with:
           command: code test
          
-          args: --all-projects --exclude=tests/** --exclude=test_*.py
+          args: --all-projects --exclude=tests.py
