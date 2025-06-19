@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Parent
+from rest_framework_simplejwt.token_blacklist import models as blacklist_models
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -35,3 +36,6 @@ class ParentAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Parent, ParentAdmin)
+admin.site.unregister(blacklist_models.BlacklistedToken)
+admin.site.unregister(blacklist_models.OutstandingToken)
+
