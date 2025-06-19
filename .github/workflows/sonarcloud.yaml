@@ -16,12 +16,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Required for SonarCloud analysis
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.12.4'
 
       - name: Install dependencies
         run: pip install -r core/requirements.txt
@@ -29,17 +29,18 @@ jobs:
       - name: Create .env file
         working-directory: core
         run: |
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-          echo "DEBUG=True" >> .env
+          touch .env
+          echo "SECRET_KEY= ${{ secrets.SECRET_KEY }}" >> .env
+          
 
       - name: Run tests and generate coverage report
         working-directory: core
         run: |
           python manage.py makemigrations
           python manage.py migrate
+          coverage erase
           coverage run manage.py test
-          coverage xml
-
+          coverage xml -o coverage.xml
         env:
           DJANGO_SETTINGS_MODULE: core.settings
 
@@ -47,13 +48,12 @@ jobs:
         uses: sonarsource/sonarcloud-github-action@v3
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io"
         with:
           args: >
             -Dsonar.organization=mhtasnia
             -Dsonar.projectKey=mhtasnia_Daycare-Connect
-            -Dsonar.sources=.
             -Dsonar.projectBaseDir=core
+            -Dsonar.sources=.
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.12
