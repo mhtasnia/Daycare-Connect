@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializers import ParentRegisterSerializer
 from django.contrib.auth import authenticate
+from rest_framework.throttling import UserRateThrottle
+from rest_framework.decorators import throttle_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -20,8 +22,12 @@ def parent_register(request):
         return Response({'detail': 'Registration successful.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class LoginThrottle(UserRateThrottle):
+    rate = '3/min'  
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([LoginThrottle])
 def parent_login(request):
     email = request.data.get('email')
     password = request.data.get('password')
