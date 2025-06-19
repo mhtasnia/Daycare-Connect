@@ -4,10 +4,14 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout repository
+        uses: actions/checkout@v4 
+
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/python@master
+        uses: snyk/actions/python@master 
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-            command: code test
+          
+          command: code test
+          args: --exclude=tests/** --exclude=test_*.py
