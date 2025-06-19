@@ -1,0 +1,3 @@
+ignore:
+  - path: tests/**
+  - path: test_*.py
