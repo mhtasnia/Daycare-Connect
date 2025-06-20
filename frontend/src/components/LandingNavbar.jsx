@@ -67,7 +67,7 @@ function LandingNavbar() {
             <Nav.Link href="#reviews">Reviews</Nav.Link>
             <Nav.Link href="#faq">FAQ</Nav.Link>
             <NavDropdown
-              title="I'm a Parent"
+              title="Parent"
               id="parent-dropdown"
               className="parent-dropdown"
             >
@@ -80,29 +80,10 @@ function LandingNavbar() {
               <NavDropdown.Item as={Link} to="/parent/login">
                 Parent Login
               </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="/parent/home">
-                Parent Dashboard
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/parent/profile">
-                Update Profile
-              </NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown
-              title="I'm a Provider"
-              id="provider-dropdown"
-              className="provider-dropdown"
-            >
-              <NavDropdown.Item as={Link} to="/provider">
-                Provider Portal
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/provider/register">
-                Register Daycare
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/provider/login">
-                Provider Login
-              </NavDropdown.Item>
-            </NavDropdown>
+            <Nav.Link href="#provider" className="provider-link">
+              Provider
+            </Nav.Link>
             <Nav.Link
               as={Link}
               to="/parent"

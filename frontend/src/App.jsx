@@ -6,10 +6,6 @@ import ParentRegister from "./screens/ParentRegister";
 import ParentLogin from "./screens/ParentLogin";
 import ParentHome from "./screens/ParentHome";
 import ParentProfile from "./screens/ParentProfile";
-import ProviderLanding from "./screens/ProviderLanding";
-import ProviderRegister from "./screens/ProviderRegister";
-import ProviderLogin from "./screens/ProviderLogin";
-import ProviderHome from "./screens/ProviderHome";
 
 function App() {
   return (
@@ -22,10 +18,6 @@ function App() {
           <Route path="/parent/login" element={<ParentLogin />} />
           <Route path="/parent/home" element={<ParentHome />} />
           <Route path="/parent/profile" element={<ParentProfile />} />
-          <Route path="/provider" element={<ProviderLanding />} />
-          <Route path="/provider/register" element={<ProviderRegister />} />
-          <Route path="/provider/login" element={<ProviderLogin />} />
-          <Route path="/provider/home" element={<ProviderHome />} />
         </Routes>
       </Router>
     </div>
