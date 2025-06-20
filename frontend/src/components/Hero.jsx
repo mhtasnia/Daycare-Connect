@@ -42,6 +42,7 @@ function Hero() {
                 </Button>
                 <Button
                   as={Link}
+
                   to="/daycare"
                   variant="outline-secondary"
                   size="lg"
