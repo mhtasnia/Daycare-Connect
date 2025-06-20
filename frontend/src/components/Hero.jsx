@@ -42,9 +42,11 @@ function Hero() {
                 </Button>
                 <Button
                   as={Link}
-                  to="/provider"
+
+                  to="/daycare"
                   variant="outline-secondary"
                   size="lg"
+                  className="modern-btn-daycare"
                 >
                   <FaSchool className="me-2" />
                   I’m a Daycare Provider

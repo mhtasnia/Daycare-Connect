@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa";
 import "../styles/ParentAuth.css";
 
+
 function ParentLogin() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -114,6 +115,7 @@ function ParentLogin() {
 
   return (
     <div className="auth-wrapper">
+      <ParentNavbar /> {/* Add this line */}
       <Container>
         <Row className="justify-content-center align-items-center min-vh-100">
           <Col lg={5} md={7} sm={9}>

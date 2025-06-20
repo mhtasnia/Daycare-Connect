@@ -4,17 +4,20 @@ import Landing from "./screens/Landing";
 import ParentLanding from "./screens/ParentLanding";
 import ParentRegister from "./screens/ParentRegister";
 import ParentLogin from "./screens/ParentLogin";
+
 import ParentHome from "./screens/ParentHome";
 import ParentProfile from "./screens/ParentProfile";
-import ProviderLanding from "./screens/ProviderLanding";
-import ProviderRegister from "./screens/ProviderRegister";
-import ProviderLogin from "./screens/ProviderLogin";
-import ProviderHome from "./screens/ProviderHome";
+import DaycareLanding from "./screens/DaycareLanding";
+import DaycareRegister from "./screens/DaycareRegister";
+import DaycareLogin from "./screens/DaycareLogin";
+import ScrollToTop from "./components/ScrollToTop";
+
 
 function App() {
   return (
     <div className="full-width-theme">
       <Router>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/parent" element={<ParentLanding />} />
@@ -22,10 +25,9 @@ function App() {
           <Route path="/parent/login" element={<ParentLogin />} />
           <Route path="/parent/home" element={<ParentHome />} />
           <Route path="/parent/profile" element={<ParentProfile />} />
-          <Route path="/provider" element={<ProviderLanding />} />
-          <Route path="/provider/register" element={<ProviderRegister />} />
-          <Route path="/provider/login" element={<ProviderLogin />} />
-          <Route path="/provider/home" element={<ProviderHome />} />
+          <Route path="/daycare" element={<DaycareLanding />} />
+          <Route path="/daycare/register" element={<DaycareRegister />} />
+          <Route path="/daycare/login" element={<DaycareLogin />} />
         </Routes>
       </Router>
     </div>

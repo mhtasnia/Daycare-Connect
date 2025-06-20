@@ -5,9 +5,9 @@ import '../styles/HowItWorks.css'
 
 function HowItWorks() {
   const steps = [
-    { icon: <FaSearch className="howitworks-icon text-primary" />, title: "Search", desc: "Discover nearby verified daycare centers." },
+    { icon: <FaSearch className="howitworks-icon text-primary" />, title: "Search", desc: "Discover nearby verified daycares." },
     { icon: <FaCalendarAlt className="howitworks-icon text-info" />, title: "Book", desc: "Reserve flexible slots for your child." },
-    { icon: <FaCameraRetro className="howitworks-icon text-success" />, title: "Stay Informed", desc: "Get real-time updates, photos, and notifications." },
+    { icon: <FaCameraRetro className="howitworks-icon text-success" />, title: "Stay Informed", desc: "Get real-time updates." },
     { icon: <FaStar className="howitworks-icon text-warning" />, title: "Rate & Review", desc: "Share your experience to help others." }
   ]
   return (
