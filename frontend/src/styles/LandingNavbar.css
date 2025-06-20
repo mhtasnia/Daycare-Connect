@@ -38,23 +38,8 @@
   box-shadow: 0 4px 16px 0 rgba(244, 143, 177, 0.18);
 }
 
-.modern-btn-daycare {
-  background: #fff !important;
-  color: #90caf9 !important;
-  border: 2px solid #90caf9 !important;
-  border-radius: 2rem !important;
-  font-weight: 600;
-  margin: 0 1rem 0 1rem;
-  padding: 0.5rem 1.5rem;
-  box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.1);
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-}
-.modern-btn-daycare:hover,
-.modern-btn-daycare:focus {
-  background: #90caf9 !important;
-  color: #fff !important;
-  box-shadow: 0 4px 16px 0 rgba(144, 202, 249, 0.18);
-}
+
+
 
 .landing-navbar-links .nav-link.active,
 .landing-navbar-links .nav-link:focus {
@@ -122,6 +107,7 @@
   transform: translateX(5px) !important;
 }
 
+<<<<<<< HEAD
 /* Provider Link Styles */
 .provider-link {
   color: #6c757d !important;
@@ -143,21 +129,37 @@
 .daycare-dropdown .dropdown-toggle {
   background: linear-gradient(45deg, #90caf9, #64b5f6) !important;
   color: #fff !important;
+=======
+/* Daycare Dropdown Styles */
+.daycare-dropdown .dropdown-toggle {
+  background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
+  color: #23395d !important;
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
   border: none !important;
   border-radius: 2rem !important;
   font-weight: 600;
   padding: 0.5rem 1.5rem;
   margin: 0 0.5rem;
+<<<<<<< HEAD
   box-shadow: 0 2px 8px 0 rgba(144, 202, 249, 0.1);
+=======
+  box-shadow: 0 2px 8px 0 rgba(153, 242, 200, 0.10);
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
   transition: all 0.2s ease;
 }
 
 .daycare-dropdown .dropdown-toggle:hover,
 .daycare-dropdown .dropdown-toggle:focus,
 .daycare-dropdown .dropdown-toggle.show {
+<<<<<<< HEAD
   background: linear-gradient(45deg, #64b5f6, #42a5f5) !important;
   color: #fff !important;
   box-shadow: 0 4px 16px 0 rgba(144, 202, 249, 0.18);
+=======
+  background: linear-gradient(45deg, #90caf9, #99f2c8) !important;
+  color: #23395d !important;
+  box-shadow: 0 4px 16px 0 rgba(153, 242, 200, 0.18);
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
   transform: translateY(-1px);
 }
 
@@ -168,7 +170,11 @@
 .daycare-dropdown .dropdown-menu {
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(10px) !important;
+<<<<<<< HEAD
   border: 1px solid rgba(144, 202, 249, 0.2) !important;
+=======
+  border: 1px solid rgba(153, 242, 200, 0.2) !important;
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
   border-radius: 15px !important;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
   padding: 0.5rem 0 !important;
@@ -188,10 +194,17 @@
 .daycare-dropdown .dropdown-item:focus {
   background: linear-gradient(
     45deg,
+<<<<<<< HEAD
     rgba(144, 202, 249, 0.1),
     rgba(100, 181, 246, 0.1)
   ) !important;
   color: #90caf9 !important;
+=======
+    rgba(153, 242, 200, 0.13),
+    rgba(144, 202, 249, 0.13)
+  ) !important;
+  color: #099e6a !important;
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
   transform: translateX(5px) !important;
 }
 
@@ -219,11 +232,24 @@
     border-radius: 10px !important;
   }
 
+<<<<<<< HEAD
   .provider-link {
+=======
+  .daycare-dropdown .dropdown-toggle {
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
     padding: 0.5rem 1rem;
     font-size: 1rem;
     margin: 0.5rem 0;
     width: 100%;
     text-align: center;
   }
+<<<<<<< HEAD
+=======
+
+  .daycare-dropdown .dropdown-menu {
+    width: 100% !important;
+    margin-top: 0 !important;
+    border-radius: 10px !important;
+  }
+>>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
 }

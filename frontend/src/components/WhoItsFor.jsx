@@ -1,5 +1,6 @@
 import { Container, Row, Col, Card, Button } from 'react-bootstrap'
 import { FaUserFriends, FaSchool } from 'react-icons/fa'
+import { Link } from 'react-router-dom'
 import '../styles/WhoItsFor.css'
 
 function WhoItsFor() {
@@ -18,7 +19,9 @@ function WhoItsFor() {
               <li>• Add authorized pickup persons</li>
               <li>• Receive updates and emergency alerts</li>
             </ul>
-            <Button 
+            <Button
+              as={Link}
+              to="/parent/register"
               className="rounded-pill whoitsfor-btn-parent"
             >
               Create an Account
@@ -36,7 +39,14 @@ function WhoItsFor() {
               <li>• Manage bookings and send updates</li>
               <li>• Build trust with parent reviews</li>
             </ul>
-            <Button variant="outline-secondary" className="rounded-pill">Register Your Daycare</Button>
+            <Button
+              as={Link}
+              to="/daycare/register"
+              variant="outline-secondary"
+              className="rounded-pill"
+            >
+              Register Your Daycare
+            </Button>
           </Card>
         </Col>
       </Row>

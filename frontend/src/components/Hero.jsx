@@ -40,7 +40,13 @@ function Hero() {
                   <FaUserFriends className="me-2" />
                   Parent
                 </Button>
-                <Button variant="outline-secondary" size="lg">
+                <Button
+                  as={Link}
+                  to="/daycare"
+                  variant="outline-secondary"
+                  size="lg"
+                  className="modern-btn-daycare"
+                >
                   <FaSchool className="me-2" />
                   Provider
                 </Button>

@@ -3,10 +3,13 @@ import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FaChild, FaSearch, FaCalendarAlt, FaShieldAlt, FaStar, FaComments } from 'react-icons/fa';
 import '../styles/ParentLanding.css';
+import Footer from '../components/Footer';
+import ParentNavbar from '../components/ParentNavbar'; // Add this line
 
 function ParentLanding() {
   return (
     <div className="parent-landing-wrapper">
+      <ParentNavbar />
       {/* Hero Section */}
       <section className="parent-hero-section">
         <Container>
@@ -47,8 +50,8 @@ function ParentLanding() {
       {/* Features Section */}
       <section className="parent-features-section py-5">
         <Container>
-          <Row className="text-center mb-5">
-            <Col>
+          <Row className="mb-5">
+            <Col className="text-center">
               <h2 className="section-title">Why Parents Choose Daycare Connect</h2>
               <p className="section-subtitle">Everything you need to find the perfect daycare for your child</p>
             </Col>
@@ -97,8 +100,8 @@ function ParentLanding() {
       {/* How It Works Section */}
       <section className="parent-how-it-works py-5">
         <Container>
-          <Row className="text-center mb-5">
-            <Col>
+          <Row className="mb-5">
+            <Col className="text-center">
               <h2 className="section-title">How It Works</h2>
               <p className="section-subtitle">Get started in just 3 simple steps</p>
             </Col>
@@ -132,8 +135,8 @@ function ParentLanding() {
       {/* Testimonials Section */}
       <section className="parent-testimonials py-5">
         <Container>
-          <Row className="text-center mb-5">
-            <Col>
+          <Row className="mb-5">
+            <Col className="text-center">
               <h2 className="section-title">What Parents Say</h2>
               <p className="section-subtitle">Real experiences from real parents</p>
             </Col>
@@ -188,8 +191,8 @@ function ParentLanding() {
       {/* CTA Section */}
       <section className="parent-cta-section py-5">
         <Container>
-          <Row className="text-center">
-            <Col>
+          <Row>
+            <Col className="text-center">
               <div className="cta-content">
                 <h2 className="cta-title">Ready to Find Your Perfect Daycare?</h2>
                 <p className="cta-subtitle">
@@ -209,6 +212,7 @@ function ParentLanding() {
           </Row>
         </Container>
       </section>
+      <Footer />
     </div>
   );
 }
