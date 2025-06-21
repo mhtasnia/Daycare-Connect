@@ -203,7 +203,7 @@ function ParentLanding() {
                     <FaChild className="me-2" />
                     Start Your Search
                   </Button>
-                  <Button as={Link} to="/parent/login" variant="outline-light" size="lg">
+                  <Button as={Link} to="/parent/login" variant="outline-primary" size="lg">
                     Sign In
                   </Button>
                 </div>

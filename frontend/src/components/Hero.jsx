@@ -38,17 +38,18 @@ function Hero() {
                   size="lg"
                 >
                   <FaUserFriends className="me-2" />
-                  Parent
+                  I’m a Parent
                 </Button>
                 <Button
                   as={Link}
+
                   to="/daycare"
                   variant="outline-secondary"
                   size="lg"
                   className="modern-btn-daycare"
                 >
                   <FaSchool className="me-2" />
-                  Provider
+                  I’m a Daycare Provider
                 </Button>
               </div>
             </Card.Body>

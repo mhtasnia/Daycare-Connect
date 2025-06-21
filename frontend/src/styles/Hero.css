@@ -44,54 +44,7 @@
   box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25) !important;
 }
 
-<<<<<<< HEAD
-/* Provider Button Styling */
-.hero-card .btn-outline-secondary {
-  background: linear-gradient(45deg, #6c757d, #495057) !important;
-  border: none !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-radius: 50px !important;
-  padding: 12px 24px !important;
-  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
 
-.hero-card .btn-outline-secondary:hover {
-  background: linear-gradient(45deg, #495057, #343a40) !important;
-  color: white !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4) !important;
-}
-
-.hero-card .btn-outline-secondary:focus {
-  background: linear-gradient(45deg, #6c757d, #495057) !important;
-  color: white !important;
-  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
-}
-  border: none !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-radius: 50px !important;
-  padding: 12px 24px !important;
-  box-shadow: 0 4px 15px rgba(144, 202, 249, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.hero-card .btn-outline-secondary:hover {
-  background: linear-gradient(45deg, #64b5f6, #42a5f5) !important;
-  color: white !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(144, 202, 249, 0.4) !important;
-}
-
-.hero-card .btn-outline-secondary:focus {
-  background: linear-gradient(45deg, #90caf9, #64b5f6) !important;
-  color: white !important;
-  box-shadow: 0 0 0 0.2rem rgba(144, 202, 249, 0.25) !important;
-}
-=======
-/* Use this class for the Daycare Provider button */
 .modern-btn-daycare {
   background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
   color: #23395d !important;
@@ -110,4 +63,4 @@
   color: #1f4037 !important;
   box-shadow: 0 4px 16px 0 rgba(153, 242, 200, 0.18);
 }
->>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
+

@@ -81,20 +81,10 @@ function LandingNavbar() {
                 Parent Login
               </NavDropdown.Item>
             </NavDropdown>
-<<<<<<< HEAD
-            <Nav.Link href="#provider" className="provider-link">
-              Provider
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/parent"
-              className="btn modern-btn-daycare animate__animated animate__fadeInRight ms-2"
-=======
             <NavDropdown
               title="Daycare Provider"
               id="daycare-dropdown"
               className="daycare-dropdown ms-2"
->>>>>>> 7f034523dd7cb1b2d82f3fdbe5ee6cd9c04d6d14
             >
               <NavDropdown.Item as={Link} to="/daycare">
                 Daycare Portal

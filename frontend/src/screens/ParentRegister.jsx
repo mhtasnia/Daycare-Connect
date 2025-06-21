@@ -12,7 +12,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaEnvelope,
   FaLock,
-  FaPhone,
   FaArrowLeft,
   FaEye,
   FaEyeSlash,
@@ -24,7 +23,6 @@ function ParentRegister() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -58,13 +56,6 @@ function ParentRegister() {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
-    }
-
-    // Phone validation (Bangladesh format)
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^01[3-9]\d{8}$/.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid Bangladesh phone number";
     }
 
     // Password validation
@@ -149,7 +140,7 @@ function ParentRegister() {
                   </Alert>
                 )}
 
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} className="form-with-extra-margin">
                   <Form.Group className="mb-3">
                     <Form.Label>
                       <FaEnvelope className="me-2" />
@@ -166,25 +157,6 @@ function ParentRegister() {
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.email}
-                    </Form.Control.Feedback>
-                  </Form.Group>
-
-                  <Form.Group className="mb-3">
-                    <Form.Label>
-                      <FaPhone className="me-2" />
-                      Phone Number
-                    </Form.Label>
-                    <Form.Control
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      isInvalid={!!errors.phone}
-                      placeholder="01XXXXXXXXX"
-                      size="lg"
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.phone}
                     </Form.Control.Feedback>
                   </Form.Group>
 
