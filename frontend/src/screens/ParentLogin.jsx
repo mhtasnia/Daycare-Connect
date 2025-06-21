@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaArrowLeft, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaArrowLeft, FaEye, FaEyeSlash, FaGoogle, FaFacebookF } from 'react-icons/fa'; // Add FaGoogle, FaFacebookF
 import '../styles/ParentAuth.css';
-import ParentNavbar from '../components/ParentNavbar'; // Add this line
+import ParentNavbar from '../components/ParentNavbar';
+
+import axios from 'axios'; // Import axios for API calls
 
 function ParentLogin() {
   const [formData, setFormData] = useState({
@@ -61,31 +63,49 @@ function ParentLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       setIsLoading(true);
-      
+
       try {
-        // Here you would typically send the data to your backend
-        console.log('Login data:', formData);
-        
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Simulate successful login
+        const response = await axios.post(
+          "http://localhost:8000/api/user-auth/parents/login/",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+          
+        );
+
         setAlertType('success');
         setAlertMessage('Login successful! Redirecting to your dashboard...');
         setShowAlert(true);
-        
-        // Redirect after successful login
         setTimeout(() => {
-          // Navigate to parent dashboard
-          console.log('Redirecting to parent dashboard...');
+          navigate("/parent/home");
         }, 2000);
-        
+
+        // Save tokens to localStorage/sessionStorage if needed
+        // localStorage.setItem('access', response.data.access);
+        // localStorage.setItem('refresh', response.data.refresh);
+
+        setTimeout(() => {
+          // Redirect to parent dashboard
+          // navigate("/parent/dashboard");
+        }, 2000);
+
       } catch (error) {
-        setAlertType('danger');
-        setAlertMessage('Login failed. Please check your credentials and try again.');
+        if (error.response && error.response.data) {
+          // Show backend error message
+          setAlertType('danger');
+          setAlertMessage(
+            error.response.data.detail ||
+            error.response.data.non_field_errors?.[0] ||
+            "Login failed. Please check your credentials and try again."
+          );
+        } else {
+          setAlertType('danger');
+          setAlertMessage('Login failed. Please try again.');
+        }
         setShowAlert(true);
       } finally {
         setIsLoading(false);
@@ -97,9 +117,15 @@ function ParentLogin() {
     setShowPassword(!showPassword);
   };
 
+  const handleSocialLogin = (provider) => {
+    setAlertType('info');
+    setAlertMessage(`${provider} login coming soon!`);
+    setShowAlert(true);
+  };
+
   return (
     <div className="auth-wrapper">
-      <ParentNavbar /> {/* Add this line */}
+      <ParentNavbar />
       <Container>
         <Row className="justify-content-center align-items-center min-vh-100">
           <Col lg={5} md={7} sm={9}>
@@ -123,7 +149,7 @@ function ParentLogin() {
                   </Alert>
                 )}
 
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} className="form-with-extra-margin">
                   <Form.Group className="mb-3">
                     <Form.Label>
                       <FaEnvelope className="me-2" />
@@ -157,6 +183,7 @@ function ParentLogin() {
                         isInvalid={!!errors.password}
                         placeholder="Enter your password"
                         size="lg"
+                        autoComplete="current-password" // Add this line
                       />
                       <Button
                         variant="link"
@@ -221,26 +248,22 @@ function ParentLogin() {
                   </div>
                   
                   <div className="social-buttons">
-                    <Button variant="outline-secondary" className="social-btn">
-                      <img src="/images/google-icon.png" alt="Google" className="social-icon" />
+                    <Button
+                      variant="outline-secondary"
+                      className="social-btn"
+                      onClick={() => handleSocialLogin('Google')}
+                    >
+                      <FaGoogle className="me-2" style={{ color: "#DB4437" }} />
                       Google
                     </Button>
-                    <Button variant="outline-secondary" className="social-btn">
-                      <img src="/images/facebook-icon.png" alt="Facebook" className="social-icon" />
+                    <Button
+                      variant="outline-secondary"
+                      className="social-btn"
+                      onClick={() => handleSocialLogin('Facebook')}
+                    >
+                      <FaFacebookF className="me-2" style={{ color: "#1877F3" }} />
                       Facebook
                     </Button>
-                  </div>
-                </div>
-
-                {/* Quick Demo Access */}
-                <div className="demo-section mt-4">
-                  <div className="text-center">
-                    <small className="text-muted">
-                      Want to explore first?{' '}
-                      <Link to="/parent/demo" className="demo-link">
-                        Try Demo Account
-                      </Link>
-                    </small>
                   </div>
                 </div>
               </Card.Body>
@@ -248,6 +271,11 @@ function ParentLogin() {
           </Col>
         </Row>
       </Container>
+      <div className="auth-footer text-center py-3">
+        <p className="mb-0 text-muted">
+          &copy; {new Date().getFullYear()} Daycare Connect. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 }

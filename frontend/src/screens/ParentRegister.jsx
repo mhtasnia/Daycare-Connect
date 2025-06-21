@@ -8,39 +8,31 @@ import {
   Button,
   Alert,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  FaUser,
   FaEnvelope,
   FaLock,
-  FaPhone,
-  FaMapMarkerAlt,
-  FaChild,
   FaArrowLeft,
+  FaEye,
+  FaEyeSlash,
 } from "react-icons/fa";
 import "../styles/ParentAuth.css";
 import ParentNavbar from '../components/ParentNavbar'; // Add this line
+import axios from "axios";
 
 function ParentRegister() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
-    phone: "",
     password: "",
     confirmPassword: "",
-    address: "",
-    city: "",
-    childName: "",
-    childAge: "",
-    childGender: "",
-    specialNeeds: "",
-    emergencyContact: "",
-    emergencyPhone: "",
   });
 
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,75 +52,70 @@ function ParentRegister() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Required field validation
-    if (!formData.firstName.trim())
-      newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
-    if (!formData.password) newErrors.password = "Password is required";
-    if (!formData.confirmPassword)
-      newErrors.confirmPassword = "Please confirm your password";
-    if (!formData.address.trim()) newErrors.address = "Address is required";
-    if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.childName.trim())
-      newErrors.childName = "Child name is required";
-    if (!formData.childAge) newErrors.childAge = "Child age is required";
-    if (!formData.childGender)
-      newErrors.childGender = "Child gender is required";
-    if (!formData.emergencyContact.trim())
-      newErrors.emergencyContact = "Emergency contact is required";
-    if (!formData.emergencyPhone.trim())
-      newErrors.emergencyPhone = "Emergency phone is required";
-
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.email && !emailRegex.test(formData.email)) {
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
-    // Phone validation (Bangladesh format)
-    const phoneRegex = /^(\+88)?01[3-9]\d{8}$/;
-    if (formData.phone && !phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid Bangladesh phone number";
-    }
-
     // Password validation
-    if (formData.password && formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long";
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters long";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password =
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number";
     }
 
-    // Confirm password validation
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    // Child age validation
-    if (
-      formData.childAge &&
-      (formData.childAge < 0 || formData.childAge > 12)
-    ) {
-      newErrors.childAge = "Child age must be between 0 and 12 years";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (validateForm()) {
-      // Here you would typically send the data to your backend
-      console.log("Registration data:", formData);
-      setShowAlert(true);
+      setIsLoading(true);
+      try {
+        const response = await axios.post(
+          "http://localhost:8000/api/user-auth/parents/register/",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
 
-      // Reset form after successful submission
-      setTimeout(() => {
-        setShowAlert(false);
-        // Redirect to login or dashboard
-      }, 3000);
+        setShowAlert(true);
+
+        // Redirect to parent home after successful registration
+        setTimeout(() => {
+          navigate("/parent/login");
+        }, 2000);
+      } catch (error) {
+        if (error.response && error.response.data) {
+          setErrors(error.response.data);
+        } else {
+          setErrors({ general: "Registration failed. Please try again." });
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -136,7 +123,7 @@ function ParentRegister() {
       <ParentNavbar /> {/* Add this line */}
       <Container>
         <Row className="justify-content-center align-items-center min-vh-100">
-          <Col lg={8} xl={7}>
+          <Col lg={5} md={7} sm={9}>
             <Card className="auth-card">
               <Card.Body className="p-5">
                 <div className="text-center mb-4">
@@ -159,307 +146,119 @@ function ParentRegister() {
                     Registration successful! Welcome to Daycare Connect.
                   </Alert>
                 )}
+                {errors.non_field_errors && (
+                  <Alert variant="danger" className="mb-4">
+                    {Array.isArray(errors.non_field_errors) ? errors.non_field_errors[0] : errors.non_field_errors}
+                  </Alert>
+                )}
+                {errors.detail && (
+                  <Alert variant="danger" className="mb-4">
+                    {Array.isArray(errors.detail) ? errors.detail[0] : errors.detail}
+                  </Alert>
+                )}
+                {errors.general && (
+                  <Alert variant="danger" className="mb-4">
+                    {errors.general}
+                  </Alert>
+                )}
 
-                <Form onSubmit={handleSubmit}>
-                  {/* Personal Information */}
-                  <div className="form-section">
-                    <h5 className="section-title">
-                      <FaUser className="me-2" />
-                      Personal Information
-                    </h5>
+                <Form onSubmit={handleSubmit} className="form-with-extra-margin">
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      <FaEnvelope className="me-2" />
+                      Email Address
+                    </Form.Label>
+                    <Form.Control
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      isInvalid={!!errors.email}
+                      placeholder="Enter your email"
+                      size="lg"
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.email}
+                    </Form.Control.Feedback>
+                  </Form.Group>
 
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>First Name *</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            isInvalid={!!errors.firstName}
-                            placeholder="Enter your first name"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.firstName}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Last Name *</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            isInvalid={!!errors.lastName}
-                            placeholder="Enter your last name"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.lastName}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>
-                            <FaEnvelope className="me-2" />
-                            Email Address *
-                          </Form.Label>
-                          <Form.Control
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            isInvalid={!!errors.email}
-                            placeholder="Enter your email"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.email}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>
-                            <FaPhone className="me-2" />
-                            Phone Number *
-                          </Form.Label>
-                          <Form.Control
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            isInvalid={!!errors.phone}
-                            placeholder="01XXXXXXXXX"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.phone}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>
-                            <FaLock className="me-2" />
-                            Password *
-                          </Form.Label>
-                          <Form.Control
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            isInvalid={!!errors.password}
-                            placeholder="Create a password"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.password}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>
-                            <FaLock className="me-2" />
-                            Confirm Password *
-                          </Form.Label>
-                          <Form.Control
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            isInvalid={!!errors.confirmPassword}
-                            placeholder="Confirm your password"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.confirmPassword}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-                  </div>
-
-                  {/* Address Information */}
-                  <div className="form-section">
-                    <h5 className="section-title">
-                      <FaMapMarkerAlt className="me-2" />
-                      Address Information
-                    </h5>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>Address *</Form.Label>
+                  <Form.Group className="mb-3">
+                    <Form.Label>
+                      <FaLock className="me-2" />
+                      Password
+                    </Form.Label>
+                    <div className="password-input-wrapper">
                       <Form.Control
-                        type="text"
-                        name="address"
-                        value={formData.address}
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
                         onChange={handleChange}
-                        isInvalid={!!errors.address}
-                        placeholder="Enter your full address"
+                        isInvalid={!!errors.password}
+                        placeholder="Create a password"
+                        size="lg"
                       />
-                      <Form.Control.Feedback type="invalid">
-                        {errors.address}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>City *</Form.Label>
-                      <Form.Select
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        isInvalid={!!errors.city}
+                      <Button
+                        variant="link"
+                        className="password-toggle"
+                        onClick={togglePasswordVisibility}
+                        type="button"
                       >
-                        <option value="">Select your city</option>
-                        <option value="Dhaka">Dhaka</option>
-                        <option value="Chittagong">Chittagong</option>
-                        <option value="Sylhet">Sylhet</option>
-                        <option value="Rajshahi">Rajshahi</option>
-                        <option value="Khulna">Khulna</option>
-                        <option value="Barisal">Barisal</option>
-                        <option value="Rangpur">Rangpur</option>
-                        <option value="Mymensingh">Mymensingh</option>
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
-                        {errors.city}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </div>
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </div>
+                    <Form.Control.Feedback type="invalid">
+                      {Array.isArray(errors.password) ? errors.password[0] : errors.password}
+                    </Form.Control.Feedback>
+                  </Form.Group>
 
-                  {/* Child Information */}
-                  <div className="form-section">
-                    <h5 className="section-title">
-                      <FaChild className="me-2" />
-                      Child Information
-                    </h5>
+                  <Form.Group className="mb-4">
+                    <Form.Label>
+                      <FaLock className="me-2" />
+                      Confirm Password
+                    </Form.Label>
+                    <div className="password-input-wrapper">
+                      <Form.Control
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        isInvalid={!!errors.confirmPassword}
+                        placeholder="Confirm your password"
+                        size="lg"
+                      />
+                      <Button
+                        variant="link"
+                        className="password-toggle"
+                        onClick={toggleConfirmPasswordVisibility}
+                        type="button"
+                      >
+                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                    </div>
+                    <Form.Control.Feedback type="invalid">
+                      {errors.confirmPassword}
+                    </Form.Control.Feedback>
+                  </Form.Group>
 
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Child's Name *</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="childName"
-                            value={formData.childName}
-                            onChange={handleChange}
-                            isInvalid={!!errors.childName}
-                            placeholder="Enter child's name"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.childName}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Child's Age *</Form.Label>
-                          <Form.Control
-                            type="number"
-                            name="childAge"
-                            value={formData.childAge}
-                            onChange={handleChange}
-                            isInvalid={!!errors.childAge}
-                            placeholder="Age in years"
-                            min="0"
-                            max="12"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.childAge}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Child's Gender *</Form.Label>
-                          <Form.Select
-                            name="childGender"
-                            value={formData.childGender}
-                            onChange={handleChange}
-                            isInvalid={!!errors.childGender}
-                          >
-                            <option value="">Select gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                          </Form.Select>
-                          <Form.Control.Feedback type="invalid">
-                            {errors.childGender}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Special Needs (Optional)</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="specialNeeds"
-                            value={formData.specialNeeds}
-                            onChange={handleChange}
-                            placeholder="Any special requirements"
-                          />
-                        </Form.Group>
-                      </Col>
-                    </Row>
-                  </div>
-
-                  {/* Emergency Contact */}
-                  <div className="form-section">
-                    <h5 className="section-title">
-                      <FaPhone className="me-2" />
-                      Emergency Contact
-                    </h5>
-
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Emergency Contact Name *</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="emergencyContact"
-                            value={formData.emergencyContact}
-                            onChange={handleChange}
-                            isInvalid={!!errors.emergencyContact}
-                            placeholder="Emergency contact person"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.emergencyContact}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Emergency Phone *</Form.Label>
-                          <Form.Control
-                            type="tel"
-                            name="emergencyPhone"
-                            value={formData.emergencyPhone}
-                            onChange={handleChange}
-                            isInvalid={!!errors.emergencyPhone}
-                            placeholder="01XXXXXXXXX"
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {errors.emergencyPhone}
-                          </Form.Control.Feedback>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-                  </div>
-
-                  <div className="text-center">
+                  <div className="text-center mb-4">
                     <Button
                       type="submit"
                       className="btn-auth-primary"
                       size="lg"
+                      disabled={isLoading}
                     >
-                      Create Account
+                      {isLoading ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Account"
+                      )}
                     </Button>
                   </div>
 
@@ -477,6 +276,11 @@ function ParentRegister() {
           </Col>
         </Row>
       </Container>
+       <div className="auth-footer text-center py-3">
+        <p className="mb-0 text-muted">
+          &copy; {new Date().getFullYear()} Daycare Connect. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 }

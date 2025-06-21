@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -30,11 +31,11 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     USER_TYPE_CHOICES = (
         ('parent', 'Parent'),
-        ('daycare_staff', 'Daycare Staff'),
-        ('pickup_person', 'Pickup Person'),
-        ('admin', 'Admin'),
+        ('daycare', 'Daycare'),
+        ('super_admin', 'Super Admin'),
     )
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    is_verified = models.BooleanField(default=False)  # For daycares
     joined_at = models.DateTimeField(default=timezone.now)  # Automatically set on creation
 
     USERNAME_FIELD = 'email'
@@ -59,3 +60,19 @@ class Parent(models.Model):
         
     def __str__(self):
         return self.full_name
+
+class DaycareCenter(models.Model):
+    user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='daycare_profile')
+    name = models.CharField(max_length=200)
+    address = models.TextField()
+    area = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    is_verified = models.BooleanField(default=False)
+    rating = models.FloatField(default=0.0)
+    services = models.TextField()
+    images = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+

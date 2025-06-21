@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Parent
+from .models import User, Parent, DaycareCenter
+from django.utils import timezone
 from rest_framework_simplejwt.token_blacklist import models as blacklist_models
 
 class UserAdmin(BaseUserAdmin):
@@ -33,6 +34,30 @@ class ParentAdmin(admin.ModelAdmin):
     )
     ordering = ('id',)
     readonly_fields = ('joined_at',)
+
+
+@admin.register(DaycareCenter)
+class DaycareCenterAdmin(admin.ModelAdmin):
+    list_display = ('user', 'user_email', 'is_verified', 'area', 'created_at')
+    search_fields = ('user__email', 'area')
+
+    def is_verified(self, obj):
+        return obj.user.is_verified
+    is_verified.boolean = True
+
+    def save_model(self, request, obj, form, change):
+        # Sync verification status to user
+        obj.user.is_verified = obj.is_verified
+        obj.user.save()
+        super().save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(user__user_type='daycare')  # <-- FIXED HERE
+
+    def user_email(self, obj):
+        return obj.user.email
+
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Parent, ParentAdmin)
