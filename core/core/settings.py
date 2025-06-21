@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "auth_app",
     "api_app",
-    "parent_auth",
+    "users",
     "corsheaders",
 ]
 
@@ -139,7 +139,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom user model
-AUTH_USER_MODEL = 'parent_auth.User'
+AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -214,7 +214,7 @@ JAZZMIN_SETTINGS = {
 
     # List of model admins to search from the search bar, search bar omitted if excluded
     # If you want to use a single search field you dont need to use a list, you can use a simple string 
-    "search_model": ["parent_auth.User", "parent_auth.Parent"],
+    "search_model": ["users.User"],
 
     # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
     "user_avatar": None,
@@ -227,16 +227,16 @@ JAZZMIN_SETTINGS = {
     "topmenu_links": [
 
         # Url that gets reversed (Permissions can be added)
-        {"name": "Home",  "url": "admin:index", "permissions": ["parent_auth.view_user"]},
+        {"name": "Home",  "url": "admin:index", "permissions": ["users.view_user"]},
 
         # external url that opens in a new window (Permissions can be added)
         {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
 
         # model admin to link to (Permissions checked against model)
-        {"model": "parent_auth.User"},
+        {"model": "users.User"},
 
         # App with dropdown menu to all its models pages (Permissions checked against models)
-        {"app": "parent_auth"},
+        {"app": "users"},
     ],
 
     #############
@@ -246,7 +246,7 @@ JAZZMIN_SETTINGS = {
     # Additional links to include in the user menu on the top right ("app" url type is not allowed)
     "usermenu_links": [
         {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
-        {"model": "parent_auth.User"}
+        {"model": "users.User"}
     ],
 
     #############
@@ -266,24 +266,24 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["parent_auth", "parent_auth.user", "parent_auth.parent", "auth", "auth.user", "auth.group"],
+    "order_with_respect_to": ["users", "users.user", "users.parent", "auth", "auth.user", "auth.group"],
 
     # Custom links to append to app groups, keyed on app name
     "custom_links": {
-        "parent_auth": [{
+        "users": [{
             "name": "Parent Reports",
             "url": "parent_reports",  # This should be a named url in your app
             "icon": "fas fa-file-alt",
-            "permissions": ["parent_auth.view_parent"]
+            "permissions": ["users.view_parent"]
         }]
     },
 
     # Custom icons for side menu apps/models See https://fontawesome.com/icons?d=gallery&m=free&v=5.0.0,5.0.1,5.0.10,5.0.11,5.0.12,5.0.13,5.0.2,5.0.3,5.0.4,5.0.5,5.0.6,5.0.7,5.0.8,5.0.9,5.1.0,5.1.1,5.2.0,5.3.0,5.3.1,5.4.0,5.4.1,5.4.2,5.13.0,5.12.0,5.11.2,5.11.1,5.10.0,5.9.0,5.8.2,5.8.1,5.7.2,5.7.1,5.7.0,5.6.3,5.5.0,5.4.2
     # for the full list of 5.13.0 free icon classes
     "icons": {
-        "parent_auth": "fas fa-users",
-        "parent_auth.user": "fas fa-user-shield",
-        "parent_auth.parent": "fas fa-user-friends",
+        "users": "fas fa-users",
+        "users.user": "fas fa-user-shield",
+        "users.parent": "fas fa-user-friends",
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",

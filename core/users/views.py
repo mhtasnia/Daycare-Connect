@@ -10,6 +10,7 @@ from rest_framework.throttling import UserRateThrottle
 from rest_framework.decorators import throttle_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
+from .permissions import IsParent
 
 
 
@@ -54,3 +55,9 @@ def parent_logout(request):
         return Response({"detail": "Logout successful."}, status=status.HTTP_205_RESET_CONTENT)
     except Exception:
         return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsParent])
+def parent_dashboard(request):
+    # Only parents can access this view
+    return Response({"detail": "Welcome to the parent dashboard."}, status=status.HTTP_200_OK)
