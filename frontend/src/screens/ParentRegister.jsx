@@ -254,6 +254,11 @@ function ParentRegister() {
           </Col>
         </Row>
       </Container>
+       <div className="auth-footer text-center py-3">
+        <p className="mb-0 text-muted">
+          &copy; {new Date().getFullYear()} Daycare Connect. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 }
