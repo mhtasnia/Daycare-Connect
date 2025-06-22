@@ -14,8 +14,6 @@ function DaycareNavbar() {
         <Navbar.Collapse id="daycareNavbar">
           <Nav className="ms-auto">
             <Nav.Link as={Link} to="/daycare" active={location.pathname === "/daycare"}>Home</Nav.Link>
-            <Nav.Link href="#howitworks">How It Works</Nav.Link>
-            <Nav.Link href="#benefits">Benefits</Nav.Link>
             <Nav.Link as={Link} to="/daycare/login" active={location.pathname === "/daycare/login"}>Login</Nav.Link>
             <Nav.Link as={Link} to="/daycare/register" active={location.pathname === "/daycare/register"}>Register as Daycare</Nav.Link>
           </Nav>

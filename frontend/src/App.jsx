@@ -8,6 +8,7 @@ import DaycareLanding from "./screens/DaycareLanding";
 import DaycareRegister from "./screens/DaycareRegister";
 import DaycareLogin from "./screens/DaycareLogin";
 import ScrollToTop from "./components/ScrollToTop";
+import DaycareDashboard from "./screens/DaycareDashboard";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/daycare" element={<DaycareLanding />} />
           <Route path="/daycare/register" element={<DaycareRegister />} />
           <Route path="/daycare/login" element={<DaycareLogin />} />
+          <Route path="/daycare/dashboard" element={<DaycareDashboard />} />
         </Routes>
       </Router>
     </div>

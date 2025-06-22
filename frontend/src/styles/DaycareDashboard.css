@@ -1,0 +1,38 @@
+.dashboard-bg {
+  background: linear-gradient(120deg, #f8fffc 0%, #e0eafc 100%);
+  min-height: 100vh;
+}
+
+.sidebar-dashboard {
+  min-height: 100vh;
+  padding-top: 64px;
+}
+
+.dashboard-nav .nav-link {
+  color: #1f4037;
+  font-weight: 500;
+  font-size: 1.1rem;
+  border-radius: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  transition: background 0.18s, color 0.18s;
+}
+
+.dashboard-nav .nav-link.active,
+.dashboard-nav .nav-link:focus {
+  background: #fff;
+  color: #1f4037;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(153,242,200,0.10);
+}
+
+.dashboard-nav .nav-link.disabled {
+  color: #bdbdbd;
+  pointer-events: none;
+  background: none;
+}
+
+.dashboard-card {
+  border-radius: 1.5rem;
+  background: #fff;
+  border: none;
+}
