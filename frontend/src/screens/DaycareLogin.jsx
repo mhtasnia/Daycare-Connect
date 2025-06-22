@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import axios from "axios";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
 
@@ -8,6 +9,8 @@ function DaycareLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
+  const [alertMsg, setAlertMsg] = useState("");
+  const [alertVariant, setAlertVariant] = useState("success");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,13 +23,32 @@ function DaycareLogin() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validateForm();
     setErrors(errs);
     if (Object.keys(errs).length === 0) {
-      setShowAlert(true);
-      // Submit logic here
+      try {
+        const res = await axios.post(
+          "http://localhost:8000/api/user-auth/daycares/login/",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+        setShowAlert(true);
+        setAlertVariant("success");
+        setAlertMsg("Login successful!");
+        // Save tokens or redirect as needed
+      } catch (error) {
+        setShowAlert(true);
+        setAlertVariant("danger");
+        if (error.response && error.response.data && error.response.data.detail) {
+          setAlertMsg(error.response.data.detail);
+        } else {
+          setAlertMsg("Login failed. Please try again.");
+        }
+      }
     }
   };
 
@@ -39,7 +61,7 @@ function DaycareLogin() {
             <Card className="shadow-lg">
               <Card.Body>
                 <h2 className="mb-4 text-center">Daycare Login</h2>
-                {showAlert && <Alert variant="success">Login successful!</Alert>}
+                {showAlert && <Alert variant={alertVariant}>{alertMsg}</Alert>}
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3" controlId="email">
                     <Form.Label><FaEnvelope className="me-2" />Email</Form.Label>
@@ -65,7 +87,11 @@ function DaycareLogin() {
                     />
                     <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
                   </Form.Group>
-                  <Button type="submit" className="btn-parent-primary w-100 mt-2" size="lg">
+                  <Button
+                    type="submit"
+                    className="btn-parent-primary w-100 mt-2"
+                    size="lg"
+                  >
                     Log In
                   </Button>
                 </Form>

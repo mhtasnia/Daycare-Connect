@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User, Parent, DaycareCenter
 from django.utils import timezone
 from rest_framework_simplejwt.token_blacklist import models as blacklist_models
+from django.utils.html import format_html
 
 class UserAdmin(BaseUserAdmin):
     model = User
@@ -38,7 +39,7 @@ class ParentAdmin(admin.ModelAdmin):
 
 @admin.register(DaycareCenter)
 class DaycareCenterAdmin(admin.ModelAdmin):
-    list_display = ('user', 'user_email', 'is_verified', 'area', 'created_at')
+    list_display = ('user', 'user_email', 'is_verified', 'area', 'created_at', 'image_tag')
     search_fields = ('user__email', 'area')
 
     def is_verified(self, obj):
@@ -57,6 +58,12 @@ class DaycareCenterAdmin(admin.ModelAdmin):
 
     def user_email(self, obj):
         return obj.user.email
+
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 60px;"/>', obj.image.url)
+        return "-"
+    image_tag.short_description = 'Image'
 
 
 admin.site.register(User, UserAdmin)

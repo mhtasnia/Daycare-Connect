@@ -84,7 +84,9 @@ def parent_dashboard(request):
 def daycare_register_request(request):
     serializer = DaycareCenterRegisterSerializer(data=request.data)
     if serializer.is_valid():
-        serializer.save(is_verified=False)
+        instance = serializer.save()
+        instance.user.is_verified = False
+        instance.user.save()
         return Response({'detail': 'Registration request submitted. Await admin verification.'}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

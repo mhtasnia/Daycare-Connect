@@ -72,6 +72,8 @@ class DaycareCenter(models.Model):
     services = models.TextField()
     images = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    license = models.CharField(max_length=100, default='UNKNOWN')  # <-- must exist and be named 'license'
+    image = models.ImageField(upload_to='daycare_docs/')
 
     def __str__(self):
         return self.name
