@@ -14,13 +14,25 @@ function ParentNavbar() {
         <Navbar.Toggle aria-controls="parentNavbar" />
         <Navbar.Collapse id="parentNavbar">
           <Nav className="ms-auto">
-            <Nav.Link as={Link} to="/parent" active={location.pathname === "/parent"}>
+            <Nav.Link
+              as={Link}
+              to="/parent"
+              active={location.pathname === "/parent"}
+            >
               Home
             </Nav.Link>
-            <Nav.Link as={Link} to="/parent/register" active={location.pathname === "/parent/register"}>
+            <Nav.Link
+              as={Link}
+              to="/parent/register"
+              active={location.pathname.startsWith("/parent/register")}
+            >
               Register
             </Nav.Link>
-            <Nav.Link as={Link} to="/parent/login" active={location.pathname === "/parent/login"}>
+            <Nav.Link
+              as={Link}
+              to="/parent/login"
+              active={location.pathname.startsWith("/parent/login")}
+            >
               Login
             </Nav.Link>
           </Nav>

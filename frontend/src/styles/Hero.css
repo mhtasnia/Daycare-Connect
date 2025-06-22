@@ -44,7 +44,7 @@
   box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25) !important;
 }
 
-/* Use this class for the Daycare Provider button */
+
 .modern-btn-daycare {
   background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
   color: #23395d !important;
@@ -63,3 +63,4 @@
   color: #1f4037 !important;
   box-shadow: 0 4px 16px 0 rgba(153, 242, 200, 0.18);
 }
+
