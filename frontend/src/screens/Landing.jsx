@@ -1,12 +1,11 @@
-import Hero from '../components/Hero'
-import HowItWorks from '../components/HowItWorks'
-import WhoItsFor from '../components/WhoItsFor'
-import WhyChoose from '../components/WhyChoose'
-import Reviews from '../components/Reviews'
-import FAQ from '../components/FAQ'
-import Footer from '../components/Footer'
-import LandingNavbar from '../components/LandingNavbar'
-
+import Hero from "../components/Hero";
+import HowItWorks from "../components/HowItWorks";
+import WhoItsFor from "../components/WhoItsFor";
+import WhyChoose from "../components/WhyChoose";
+import Reviews from "../components/Reviews";
+import FAQ from "../components/FAQ";
+import Footer from "../components/Footer";
+import LandingNavbar from "../components/LandingNavbar";
 
 function Landing() {
   return (
@@ -15,7 +14,7 @@ function Landing() {
         <LandingNavbar />
       </section>
       {/* Add margin below navbar */}
-      <div style={{ marginTop: '10rem' }} />
+      <div style={{ marginTop: "10rem" }} />
       <section id="hero">
         <Hero />
       </section>
@@ -36,7 +35,7 @@ function Landing() {
       </section>
       <Footer />
     </div>
-  )
+  );
 }
 
-export default Landing
+export default Landing;

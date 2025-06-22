@@ -5,8 +5,6 @@ import { FaEnvelope, FaLock, FaArrowLeft, FaEye, FaEyeSlash, FaGoogle, FaFaceboo
 import '../styles/ParentAuth.css';
 import ParentNavbar from '../components/ParentNavbar';
 
-import axios from 'axios'; // Import axios for API calls
-
 function ParentLogin() {
   const [formData, setFormData] = useState({
     email: '',
@@ -63,49 +61,31 @@ function ParentLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (validateForm()) {
       setIsLoading(true);
-
+      
       try {
-        const response = await axios.post(
-          "http://localhost:8000/api/user-auth/parents/login/",
-          {
-            email: formData.email,
-            password: formData.password,
-          }
-          
-        );
-
+        // Here you would typically send the data to your backend
+        console.log('Login data:', formData);
+        
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Simulate successful login
         setAlertType('success');
         setAlertMessage('Login successful! Redirecting to your dashboard...');
         setShowAlert(true);
+        
+        // Redirect after successful login
         setTimeout(() => {
-          navigate("/parent/home");
+          // Navigate to parent dashboard
+          console.log('Redirecting to parent dashboard...');
         }, 2000);
-
-        // Save tokens to localStorage/sessionStorage if needed
-        // localStorage.setItem('access', response.data.access);
-        // localStorage.setItem('refresh', response.data.refresh);
-
-        setTimeout(() => {
-          // Redirect to parent dashboard
-          // navigate("/parent/dashboard");
-        }, 2000);
-
+        
       } catch (error) {
-        if (error.response && error.response.data) {
-          // Show backend error message
-          setAlertType('danger');
-          setAlertMessage(
-            error.response.data.detail ||
-            error.response.data.non_field_errors?.[0] ||
-            "Login failed. Please check your credentials and try again."
-          );
-        } else {
-          setAlertType('danger');
-          setAlertMessage('Login failed. Please try again.');
-        }
+        setAlertType('danger');
+        setAlertMessage('Login failed. Please check your credentials and try again.');
         setShowAlert(true);
       } finally {
         setIsLoading(false);
@@ -115,12 +95,6 @@ function ParentLogin() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleSocialLogin = (provider) => {
-    setAlertType('info');
-    setAlertMessage(`${provider} login coming soon!`);
-    setShowAlert(true);
   };
 
   return (
@@ -183,7 +157,6 @@ function ParentLogin() {
                         isInvalid={!!errors.password}
                         placeholder="Enter your password"
                         size="lg"
-                        autoComplete="current-password" // Add this line
                       />
                       <Button
                         variant="link"
@@ -248,19 +221,11 @@ function ParentLogin() {
                   </div>
                   
                   <div className="social-buttons">
-                    <Button
-                      variant="outline-secondary"
-                      className="social-btn"
-                      onClick={() => handleSocialLogin('Google')}
-                    >
+                    <Button variant="outline-secondary" className="social-btn">
                       <FaGoogle className="me-2" style={{ color: "#DB4437" }} />
                       Google
                     </Button>
-                    <Button
-                      variant="outline-secondary"
-                      className="social-btn"
-                      onClick={() => handleSocialLogin('Facebook')}
-                    >
+                    <Button variant="outline-secondary" className="social-btn">
                       <FaFacebookF className="me-2" style={{ color: "#1877F3" }} />
                       Facebook
                     </Button>
@@ -271,11 +236,6 @@ function ParentLogin() {
           </Col>
         </Row>
       </Container>
-      <div className="auth-footer text-center py-3">
-        <p className="mb-0 text-muted">
-          &copy; {new Date().getFullYear()} Daycare Connect. All rights reserved.
-        </p>
-      </div>
     </div>
   );
 }
