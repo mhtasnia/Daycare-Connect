@@ -49,34 +49,36 @@ function ParentHome() {
     });
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      const refresh = localStorage.getItem("refresh");
-      const access = localStorage.getItem("access");
-      if (refresh && access) {
-        await axios.post(
-          "http://localhost:8000/api/user-auth/parents/logout/",
-          { refresh },
-          {
-            headers: {
-              Authorization: `Bearer ${access}`, // <-- Correct interpolation
-            },
-          }
-        );
-      }
-      // Remove tokens and user info from storage
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      localStorage.removeItem("user_name");
-      localStorage.removeItem("user_email");
-      localStorage.removeItem("profile_complete");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      // Redirect to login page
-      navigate("/parent/login");
+ const handleLogout = async () => {
+  console.log("Logout button clicked");
+  try {
+    const refresh = localStorage.getItem("refresh");
+    const access = localStorage.getItem("access");
+    console.log("Tokens:", { refresh, access }); // Add this line
+
+    if (refresh && access) {
+      const response = await axios.post(
+        "http://localhost:8000/api/user-auth/parents/logout/",
+        { refresh },
+        {
+          headers: {
+            Authorization: `Bearer ${access}`,
+          },
+        }
+      );
+      console.log("Logout response:", response.data);
+    } else {
+      console.warn("Tokens missing");
     }
-  };
+  } catch (error) {
+    console.error("Logout error:", error.response?.data || error.message);
+  } finally {
+    // Always clear storage and navigate
+    localStorage.clear();
+    navigate("/parent/login");
+  }
+};
+
 
   const quickActions = [
     {
@@ -137,15 +139,17 @@ function ParentHome() {
               <Nav.Link className="nav-item">
                 <FaBell className="me-1" /> Notifications
               </Nav.Link>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={handleLogout}
-                className="ms-2"
-              >
-                <FaSignOutAlt className="me-1" /> Logout
-              </Button>
             </Nav>
+            
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={handleLogout}
+              className="ms-2"
+            >
+              <FaSignOutAlt className="me-1" /> Logout
+            </Button>
+
           </Navbar.Collapse>
         </Container>
       </Navbar>

@@ -99,9 +99,13 @@ function ParentLogin() {
         setAlertMessage("Login successful! Redirecting to your dashboard...");
         setShowAlert(true);
 
-        // Save tokens if needed
-        // localStorage.setItem('access', response.data.access);
-        // localStorage.setItem('refresh', response.data.refresh);
+        // Save tokens to localStorage
+        localStorage.setItem('access', response.data.access);
+        localStorage.setItem('refresh', response.data.refresh);
+        console.log("Tokens saved:", {
+          access: localStorage.getItem('access'),
+          refresh: localStorage.getItem('refresh')
+        });
 
         setTimeout(() => {
           navigate("/parent/home");
