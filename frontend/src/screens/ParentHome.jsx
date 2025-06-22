@@ -1,66 +1,90 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Button, Alert, Nav, Navbar } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FaUser, 
-  FaChild, 
-  FaCalendarAlt, 
-  FaSearch, 
-  FaBell, 
-  FaCog, 
+import React, { useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Alert,
+  Nav,
+  Navbar,
+} from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaUser,
+  FaChild,
+  FaCalendarAlt,
+  FaSearch,
+  FaBell,
+  FaCog,
   FaSignOutAlt,
   FaHome,
   FaEdit,
-  FaPlus
-} from 'react-icons/fa';
-import '../styles/ParentHome.css';
+  FaPlus,
+} from "react-icons/fa";
+import axios from "axios";
+import "../styles/ParentHome.css";
 
 function ParentHome() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Mock user data - in real app this would come from authentication context
   const user = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    profileComplete: false
+    name: "John Doe",
+    email: "john.doe@example.com",
+    profileComplete: false,
   };
 
-  const handleLogout = () => {
-    // Handle logout logic here
-    navigate('/parent/login');
+  const handleLogout = async () => {
+    try {
+      const refresh = localStorage.getItem("refresh");
+      if (refresh) {
+        await axios.post(
+          "http://localhost:8000/api/user-auth/parents/logout/",
+          { refresh }
+        );
+      }
+      // Remove tokens from storage
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+    } catch (error) {
+      // Optionally handle error (e.g., show a message)
+    } finally {
+      navigate("/parent/login");
+    }
   };
 
   const quickActions = [
     {
-      title: 'Complete Profile',
-      description: 'Add your personal and child information',
+      title: "Complete Profile",
+      description: "Add your personal and child information",
       icon: FaUser,
-      link: '/parent/profile',
-      variant: 'primary',
-      urgent: !user.profileComplete
+      link: "/parent/profile",
+      variant: "primary",
+      urgent: !user.profileComplete,
     },
     {
-      title: 'Search Daycares',
-      description: 'Find the perfect daycare for your child',
+      title: "Search Daycares",
+      description: "Find the perfect daycare for your child",
       icon: FaSearch,
-      link: '/parent/search',
-      variant: 'success'
+      link: "/parent/search",
+      variant: "success",
     },
     {
-      title: 'My Bookings',
-      description: 'View and manage your daycare bookings',
+      title: "My Bookings",
+      description: "View and manage your daycare bookings",
       icon: FaCalendarAlt,
-      link: '/parent/bookings',
-      variant: 'info'
+      link: "/parent/bookings",
+      variant: "info",
     },
     {
-      title: 'Add Child',
-      description: 'Add another child to your profile',
+      title: "Add Child",
+      description: "Add another child to your profile",
       icon: FaPlus,
-      link: '/parent/add-child',
-      variant: 'outline-primary'
-    }
+      link: "/parent/add-child",
+      variant: "outline-primary",
+    },
   ];
 
   return (
@@ -71,7 +95,7 @@ function ParentHome() {
           <Navbar.Brand as={Link} to="/parent/home" className="fw-bold">
             Daycare <span className="brand-highlight">Connect</span>
           </Navbar.Brand>
-          
+
           <Navbar.Toggle aria-controls="parent-navbar" />
           <Navbar.Collapse id="parent-navbar">
             <Nav className="ms-auto align-items-center">
@@ -90,9 +114,9 @@ function ParentHome() {
               <Nav.Link className="nav-item">
                 <FaBell className="me-1" /> Notifications
               </Nav.Link>
-              <Button 
-                variant="outline-danger" 
-                size="sm" 
+              <Button
+                variant="outline-danger"
+                size="sm"
                 onClick={handleLogout}
                 className="ms-2"
               >
@@ -110,7 +134,8 @@ function ParentHome() {
             <div className="welcome-section">
               <h1 className="welcome-title">Welcome back, {user.name}!</h1>
               <p className="welcome-subtitle">
-                Manage your daycare connections and keep track of your child's care
+                Manage your daycare connections and keep track of your child's
+                care
               </p>
             </div>
           </Col>
@@ -125,12 +150,13 @@ function ParentHome() {
                   <div>
                     <strong>Complete Your Profile</strong>
                     <p className="mb-0">
-                      Add your personal information and child details to get the most out of Daycare Connect
+                      Add your personal information and child details to get the
+                      most out of Daycare Connect
                     </p>
                   </div>
-                  <Button 
-                    as={Link} 
-                    to="/parent/profile" 
+                  <Button
+                    as={Link}
+                    to="/parent/profile"
                     variant="warning"
                     className="ms-3"
                   >
@@ -152,18 +178,24 @@ function ParentHome() {
         <Row>
           {quickActions.map((action, index) => (
             <Col lg={3} md={6} className="mb-4" key={index}>
-              <Card className={`quick-action-card h-100 ${action.urgent ? 'urgent' : ''}`}>
+              <Card
+                className={`quick-action-card h-100 ${
+                  action.urgent ? "urgent" : ""
+                }`}
+              >
                 <Card.Body className="text-center">
                   <div className="action-icon mb-3">
                     <action.icon size={32} />
                   </div>
-                  <Card.Title className="action-title">{action.title}</Card.Title>
+                  <Card.Title className="action-title">
+                    {action.title}
+                  </Card.Title>
                   <Card.Text className="action-description">
                     {action.description}
                   </Card.Text>
-                  <Button 
-                    as={Link} 
-                    to={action.link} 
+                  <Button
+                    as={Link}
+                    to={action.link}
                     variant={action.variant}
                     className="action-btn"
                   >
@@ -185,7 +217,8 @@ function ParentHome() {
                   <FaCalendarAlt size={48} className="text-muted mb-3" />
                   <h5>No Recent Activity</h5>
                   <p className="text-muted">
-                    Complete your profile and start searching for daycares to see your activity here
+                    Complete your profile and start searching for daycares to
+                    see your activity here
                   </p>
                   <Button as={Link} to="/parent/profile" variant="primary">
                     Complete Profile
