@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react";
 import {
   Container,
@@ -17,7 +18,8 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import "../styles/ParentAuth.css";
-import ParentNavbar from '../components/ParentNavbar'; // Add this line
+import ParentNavbar from "../components/ParentNavbar"; // Add this line
+import axios from "axios";
 
 function ParentRegister() {
   const navigate = useNavigate();
@@ -83,20 +85,26 @@ function ParentRegister() {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        // Here you would typically send the data to your backend
-        console.log("Registration data:", formData);
-
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const response = await axios.post(
+          "http://localhost:8000/api/user-auth/parents/register/",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
 
         setShowAlert(true);
 
         // Redirect to parent home after successful registration
         setTimeout(() => {
-          navigate("/parent/home");
+          navigate("/parent/login");
         }, 2000);
       } catch (error) {
-        console.error("Registration error:", error);
+        if (error.response && error.response.data) {
+          setErrors(error.response.data);
+        } else {
+          setErrors({ general: "Registration failed. Please try again." });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -139,8 +147,30 @@ function ParentRegister() {
                     Registration successful! Welcome to Daycare Connect.
                   </Alert>
                 )}
+                {errors.non_field_errors && (
+                  <Alert variant="danger" className="mb-4">
+                    {Array.isArray(errors.non_field_errors)
+                      ? errors.non_field_errors[0]
+                      : errors.non_field_errors}
+                  </Alert>
+                )}
+                {errors.detail && (
+                  <Alert variant="danger" className="mb-4">
+                    {Array.isArray(errors.detail)
+                      ? errors.detail[0]
+                      : errors.detail}
+                  </Alert>
+                )}
+                {errors.general && (
+                  <Alert variant="danger" className="mb-4">
+                    {errors.general}
+                  </Alert>
+                )}
 
-                <Form onSubmit={handleSubmit} className="form-with-extra-margin">
+                <Form
+                  onSubmit={handleSubmit}
+                  className="form-with-extra-margin"
+                >
                   <Form.Group className="mb-3">
                     <Form.Label>
                       <FaEnvelope className="me-2" />
@@ -185,7 +215,9 @@ function ParentRegister() {
                       </Button>
                     </div>
                     <Form.Control.Feedback type="invalid">
-                      {errors.password}
+                      {Array.isArray(errors.password)
+                        ? errors.password[0]
+                        : errors.password}
                     </Form.Control.Feedback>
                   </Form.Group>
 
@@ -254,6 +286,12 @@ function ParentRegister() {
           </Col>
         </Row>
       </Container>
+      <div className="auth-footer text-center py-3">
+        <p className="mb-0 text-muted">
+          &copy; {new Date().getFullYear()} Daycare Connect. All rights
+          reserved.
+        </p>
+      </div>
     </div>
   );
 }
