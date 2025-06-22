@@ -30,28 +30,50 @@ function ParentHome() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Mock user data - in real app this would come from authentication context
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    profileComplete: false,
-  };
+  // TODO: Replace with real user data from authentication context or API
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    profileComplete: true,
+  });
+
+  React.useEffect(() => {
+    // Example: Fetch user data from localStorage or API
+    const storedName = localStorage.getItem("user_name");
+    const storedEmail = localStorage.getItem("user_email");
+    const profileComplete = localStorage.getItem("profile_complete") === "true";
+    setUser({
+      name: storedName || "Parent",
+      email: storedEmail || "",
+      profileComplete,
+    });
+  }, []);
 
   const handleLogout = async () => {
     try {
       const refresh = localStorage.getItem("refresh");
-      if (refresh) {
+      const access = localStorage.getItem("access");
+      if (refresh && access) {
         await axios.post(
           "http://localhost:8000/api/user-auth/parents/logout/",
-          { refresh }
+          { refresh },
+          {
+            headers: {
+              Authorization: `Bearer ${access}`, // <-- Correct interpolation
+            },
+          }
         );
       }
-      // Remove tokens from storage
+      // Remove tokens and user info from storage
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("profile_complete");
     } catch (error) {
-      // Optionally handle error (e.g., show a message)
+      console.error("Logout failed:", error);
     } finally {
+      // Redirect to login page
       navigate("/parent/login");
     }
   };
