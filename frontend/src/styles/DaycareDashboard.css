@@ -36,3 +36,12 @@
   background: #fff;
   border: none;
 }
+
+.daycare-dashboard-wrapper {
+  background: linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%);
+  min-height: 100vh;
+}
+
+.daycare-highlight {
+  color: white !important;
+}
