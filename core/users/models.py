@@ -73,7 +73,12 @@ class DaycareCenter(models.Model):
     images = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     license = models.CharField(max_length=100, default='UNKNOWN')  # <-- must exist and be named 'license'
-    image = models.ImageField(upload_to='daycare_docs/')
+    image = models.ImageField(
+        upload_to='media/daycare_docs/',
+        default='media/daycare_docs/default.jpg',
+        null=False,
+        blank=True
+    )
 
     def __str__(self):
         return self.name
