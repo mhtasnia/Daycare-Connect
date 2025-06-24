@@ -24,12 +24,18 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import axios from "axios";
+import { useEffect } from "react";
 import "../styles/ParentHome.css";
 
 function ParentHome() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-
+  useEffect(() => {
+      const accessToken = localStorage.getItem("access");
+      if (!accessToken) {
+        navigate("/daycare/login", { replace: true });
+      }
+    }, []);
   // TODO: Replace with real user data from authentication context or API
   const [user, setUser] = useState({
     name: "",

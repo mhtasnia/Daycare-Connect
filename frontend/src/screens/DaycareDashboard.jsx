@@ -29,6 +29,9 @@ import {
 } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend } from "chart.js";
 import "../styles/ParentHome.css"; // Reuse for layout, override colors below
+import axios from "axios";
+import { useEffect } from "react";
+
 
 ChartJS.register(
   CategoryScale,
@@ -41,6 +44,7 @@ ChartJS.register(
   Legend
 );
 
+
 function DaycareDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState({
@@ -48,11 +52,44 @@ function DaycareDashboard() {
     email: "info@happykids.com",
     profileComplete: true,
   });
+  //Users cant go Back and access the dashboard after logout 
+  useEffect(() => {
+    const accessToken = localStorage.getItem("access");
+    if (!accessToken) {
+      navigate("/daycare/login", { replace: true });
+    }
+  }, []);
+
 
   // Example logout handler
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/daycare/login");
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const refresh = localStorage.getItem("refresh");
+      const access = localStorage.getItem("access");
+      console.log("Tokens:", { refresh, access }); // Add this line
+
+      if (refresh && access) {
+        const res = await axios.post(
+          "http://localhost:8000/api/user-auth/daycares/logout/",
+          { refresh },
+          {
+            headers: {
+              Authorization: `Bearer ${access}`,
+            },
+          }
+        );
+        console.log("Logout response:", res.data);
+      } else {
+        console.warn("Tokens missing");
+      }
+    } catch (error) {
+      console.error("Logout error:", error.response?.data || error.message);
+    } finally {
+      // Always clear storage and navigate
+      localStorage.clear();
+      navigate("/daycare/login");
+    }
   };
 
   // Feature list (customize as needed)
@@ -148,7 +185,13 @@ function DaycareDashboard() {
         borderWidth: 1,
       },
     ],
+    
   };
+  
+
+
+  
+
 
   return (
     <div className="daycare-dashboard-wrapper">

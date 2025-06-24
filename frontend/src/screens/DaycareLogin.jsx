@@ -4,6 +4,7 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
+import { Link, useNavigate } from "react-router-dom";
 
 function DaycareLogin() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -11,7 +12,7 @@ function DaycareLogin() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const [alertVariant, setAlertVariant] = useState("success");
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -39,6 +40,16 @@ function DaycareLogin() {
         setShowAlert(true);
         setAlertVariant("success");
         setAlertMsg("Login successful!");
+        // Save tokens to localStorage
+        localStorage.setItem('access', res.data.access);
+        localStorage.setItem('refresh', res.data.refresh);
+        console.log("Tokens saved:", {
+          access: localStorage.getItem('access'),
+          refresh: localStorage.getItem('refresh')
+        });
+        setTimeout(() => {
+          navigate("/daycare/dashboard");
+        }, 2000);
         // Save tokens or redirect as needed
       } catch (error) {
         setShowAlert(true);
