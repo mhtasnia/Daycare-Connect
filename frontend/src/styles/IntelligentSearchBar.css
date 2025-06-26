@@ -1,0 +1,18 @@
+.intelligent-search-bar {
+  margin-bottom: 2rem;
+}
+
+.search-results {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results .list-group-item {
+  border: none;
+  padding: 1rem;
+}
+
+.search-results .list-group-item h5 {
+  margin-bottom: 0.5rem;
+  color: #007bff;
+}

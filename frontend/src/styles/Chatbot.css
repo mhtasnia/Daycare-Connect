@@ -1,0 +1,93 @@
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.chatbot-window {
+  width: 350px;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.chatbot-window .card-header {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  font-size: 1.1em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatbot-window .card-header .btn-link {
+  color: white;
+  text-decoration: none;
+}
+
+.chatbot-messages {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #f8f9fa;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+.message.user {
+  background-color: #e0efff;
+  align-self: flex-end;
+  margin-left: auto;
+  text-align: right;
+}
+
+.message.bot {
+  background-color: #ffffff;
+  align-self: flex-start;
+  margin-right: auto;
+  border: 1px solid #e9ecef;
+}
+
+.chatbot-window .card-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 10px 15px;
+  background-color: #f1f1f1;
+}
+
+.chatbot-toggler {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.8em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chatbot-toggler:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.chatbot-container.open .chatbot-toggler {
+  display: none; /* Hide the toggler when chat window is open */
+}

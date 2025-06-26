@@ -3,6 +3,8 @@ import { FaBullhorn, FaChartBar, FaEnvelopeOpenText, FaCheckCircle, FaUserPlus, 
 import { Link } from "react-router-dom";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
+import Chatbot from "../components/Chatbot";
+import IntelligentSearchBar from "../components/IntelligentSearchBar";
 
 function DaycareLanding() {
   return (
@@ -18,6 +20,7 @@ function DaycareLanding() {
           <p className="lead mb-4">
             Reach more parents. Manage your listings. Get discovered.
           </p>
+          <IntelligentSearchBar />
           <div className="d-flex justify-content-center gap-3 mb-4">
             <Button as={Link} to="/daycare/register" className="btn-parent-primary" size="lg">
               Get Started
@@ -154,6 +157,7 @@ function DaycareLanding() {
         </Container>
       </section>
       <Footer />
+      <Chatbot />
     </div>
   );
 }
