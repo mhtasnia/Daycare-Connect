@@ -55,6 +55,15 @@ function ParentHome() {
     });
   }, []);
 
+  useEffect(() => {
+      const accessToken = localStorage.getItem("access");
+      if (!accessToken) {
+        navigate("/parent/login", { replace: true });
+      }
+    }, []);
+
+  // Handle logout
+  // This function will clear the local storage and redirect to the login page
  const handleLogout = async () => {
   console.log("Logout button clicked");
   try {
@@ -84,6 +93,7 @@ function ParentHome() {
     navigate("/parent/login");
   }
 };
+
 
 
   const quickActions = [

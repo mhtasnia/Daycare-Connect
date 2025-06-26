@@ -52,6 +52,7 @@ function DaycareDashboard() {
     email: "info@happykids.com",
     profileComplete: true,
   });
+
   //Users cant go Back and access the dashboard after logout 
   useEffect(() => {
     const accessToken = localStorage.getItem("access");
@@ -61,7 +62,8 @@ function DaycareDashboard() {
   }, []);
 
 
-  // Example logout handler
+  //logou handler
+  // This function handles the logout process, clears local storage, and redirects to the login page
   const handleLogout = async () => {
     console.log("Logout button clicked");
     try {
