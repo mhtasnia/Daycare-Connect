@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -9,6 +9,7 @@ import {
   Alert,
   Nav,
   Navbar,
+  Spinner,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -22,79 +23,96 @@ import {
   FaHome,
   FaEdit,
   FaPlus,
+  FaCheckCircle,
 } from "react-icons/fa";
 import axios from "axios";
-import { useEffect } from "react";
 import "../styles/ParentHome.css";
 
 function ParentHome() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("dashboard");
-  useEffect(() => {
-      const accessToken = localStorage.getItem("access");
-      if (!accessToken) {
-        navigate("/daycare/login", { replace: true });
-      }
-    }, []);
-  // TODO: Replace with real user data from authentication context or API
   const [user, setUser] = useState({
     name: "",
     email: "",
-    profileComplete: true,
+    profileComplete: false,
   });
-
-  React.useEffect(() => {
-    // Example: Fetch user data from localStorage or API
-    const storedName = localStorage.getItem("user_name");
-    const storedEmail = localStorage.getItem("user_email");
-    const profileComplete = localStorage.getItem("profile_complete") === "true";
-    setUser({
-      name: storedName || "Parent",
-      email: storedEmail || "",
-      profileComplete,
-    });
-  }, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const accessToken = localStorage.getItem("access");
+    if (!accessToken) {
+      navigate("/parent/login", { replace: true });
+      return;
+    }
+    
+    fetchUserProfile();
+  }, [navigate]);
+
+  const fetchUserProfile = async () => {
+    try {
       const accessToken = localStorage.getItem("access");
-      if (!accessToken) {
-        navigate("/parent/login", { replace: true });
-      }
-    }, []);
-
-  // Handle logout
-  // This function will clear the local storage and redirect to the login page
- const handleLogout = async () => {
-  console.log("Logout button clicked");
-  try {
-    const refresh = localStorage.getItem("refresh");
-    const access = localStorage.getItem("access");
-    console.log("Tokens:", { refresh, access }); // Add this line
-
-    if (refresh && access) {
-      const response = await axios.post(
-        "http://localhost:8000/api/user-auth/parents/logout/",
-        { refresh },
+      const response = await axios.get(
+        "http://localhost:8000/api/user-auth/parents/profile/",
         {
           headers: {
-            Authorization: `Bearer ${access}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
-      console.log("Logout response:", response.data);
-    } else {
-      console.warn("Tokens missing");
+
+      const profileData = response.data;
+      setUser({
+        name: profileData.full_name || "Parent",
+        email: profileData.email,
+        profileComplete: !!(
+          profileData.full_name &&
+          profileData.phone &&
+          profileData.address
+        ),
+      });
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
+      if (error.response?.status === 401) {
+        // Token expired, redirect to login
+        localStorage.clear();
+        navigate("/parent/login", { replace: true });
+      } else {
+        setError("Failed to load profile information");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Logout error:", error.response?.data || error.message);
-  } finally {
-    // Always clear storage and navigate
-    localStorage.clear();
-    navigate("/parent/login");
-  }
-};
+  };
 
+  // Handle logout
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const refresh = localStorage.getItem("refresh");
+      const access = localStorage.getItem("access");
 
+      if (refresh && access) {
+        const response = await axios.post(
+          "http://localhost:8000/api/user-auth/parents/logout/",
+          { refresh },
+          {
+            headers: {
+              Authorization: `Bearer ${access}`,
+            },
+          }
+        );
+        console.log("Logout response:", response.data);
+      } else {
+        console.warn("Tokens missing");
+      }
+    } catch (error) {
+      console.error("Logout error:", error.response?.data || error.message);
+    } finally {
+      // Always clear storage and navigate
+      localStorage.clear();
+      navigate("/parent/login");
+    }
+  };
 
   const quickActions = [
     {
@@ -127,6 +145,21 @@ function ParentHome() {
       variant: "outline-primary",
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="parent-home-wrapper">
+        <Container className="py-5">
+          <Row className="justify-content-center">
+            <Col md={6} className="text-center">
+              <Spinner animation="border" variant="primary" />
+              <p className="mt-3">Loading your dashboard...</p>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="parent-home-wrapper">
@@ -165,21 +198,35 @@ function ParentHome() {
             >
               <FaSignOutAlt className="me-1" /> Logout
             </Button>
-
           </Navbar.Collapse>
         </Container>
       </Navbar>
 
       <Container className="py-4">
+        {error && (
+          <Row className="mb-4">
+            <Col>
+              <Alert variant="danger">{error}</Alert>
+            </Col>
+          </Row>
+        )}
+
         {/* Welcome Section */}
         <Row className="mb-4">
           <Col>
             <div className="welcome-section">
-              <h1 className="welcome-title">Welcome back, {user.name}!</h1>
+              <h1 className="welcome-title">
+                Welcome back, {user.name || "Parent"}! 👋
+              </h1>
               <p className="welcome-subtitle">
                 Manage your daycare connections and keep track of your child's
                 care
               </p>
+              {user.email && (
+                <p className="welcome-email">
+                  <small className="text-muted">Logged in as: {user.email}</small>
+                </p>
+              )}
             </div>
           </Col>
         </Row>
@@ -205,6 +252,25 @@ function ParentHome() {
                   >
                     <FaEdit className="me-1" /> Complete Now
                   </Button>
+                </div>
+              </Alert>
+            </Col>
+          </Row>
+        )}
+
+        {/* Profile Complete Success Alert */}
+        {user.profileComplete && (
+          <Row className="mb-4">
+            <Col>
+              <Alert variant="success" className="profile-alert">
+                <div className="d-flex align-items-center">
+                  <FaCheckCircle className="me-2" />
+                  <div>
+                    <strong>Profile Complete!</strong>
+                    <p className="mb-0">
+                      Your profile is complete. You can now access all features.
+                    </p>
+                  </div>
                 </div>
               </Alert>
             </Col>
@@ -260,11 +326,16 @@ function ParentHome() {
                   <FaCalendarAlt size={48} className="text-muted mb-3" />
                   <h5>No Recent Activity</h5>
                   <p className="text-muted">
-                    Complete your profile and start searching for daycares to
-                    see your activity here
+                    {user.profileComplete
+                      ? "Start searching for daycares to see your activity here"
+                      : "Complete your profile and start searching for daycares to see your activity here"}
                   </p>
-                  <Button as={Link} to="/parent/profile" variant="primary">
-                    Complete Profile
+                  <Button 
+                    as={Link} 
+                    to={user.profileComplete ? "/parent/search" : "/parent/profile"} 
+                    variant="primary"
+                  >
+                    {user.profileComplete ? "Search Daycares" : "Complete Profile"}
                   </Button>
                 </div>
               </Card.Body>

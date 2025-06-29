@@ -7,7 +7,9 @@ from .serializers import (
     ParentRegisterSerializer, 
     DaycareCenterRegisterSerializer,
     EmailOTPSerializer,
-    OTPVerificationSerializer
+    OTPVerificationSerializer,
+    ParentProfileSerializer,
+    UpdateParentProfileSerializer
 )
 from django.contrib.auth import authenticate
 from rest_framework.throttling import UserRateThrottle
@@ -15,7 +17,7 @@ from rest_framework.decorators import throttle_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsParent, IsDaycare
-from .models import DaycareCenter, EmailOTP
+from .models import DaycareCenter, EmailOTP, Parent
 
 class OTPRateThrottle(UserRateThrottle):
     rate = '5/hour'  # Allow 5 OTP requests per hour per IP
@@ -129,6 +131,48 @@ def parent_logout(request):
         return Response({"detail": "Logout successful."}, status=status.HTTP_205_RESET_CONTENT)
     except Exception:
         return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsParent])
+def parent_profile(request):
+    """Get parent profile information"""
+    try:
+        parent = request.user.parent_profile
+        serializer = ParentProfileSerializer(parent)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Parent.DoesNotExist:
+        return Response({
+            'detail': 'Parent profile not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated, IsParent])
+def update_parent_profile(request):
+    """Update parent profile information"""
+    try:
+        parent = request.user.parent_profile
+        serializer = UpdateParentProfileSerializer(
+            parent, 
+            data=request.data, 
+            partial=request.method == 'PATCH'
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Return updated profile data
+            updated_serializer = ParentProfileSerializer(parent)
+            return Response({
+                'detail': 'Profile updated successfully.',
+                'profile': updated_serializer.data
+            }, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except Parent.DoesNotExist:
+        return Response({
+            'detail': 'Parent profile not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsParent])

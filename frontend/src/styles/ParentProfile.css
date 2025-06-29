@@ -68,47 +68,48 @@
   overflow: hidden;
 }
 
-/* Profile Tabs */
-.profile-tabs {
+.profile-card .card-header {
   background: rgba(255, 255, 255, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0;
-}
-
-.profile-tabs .nav-link {
-  color: #666 !important;
+  padding: 1.5rem;
   font-weight: 600;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 1rem 1.5rem;
-  transition: all 0.3s ease;
-  background: transparent !important;
+  color: #23395d;
 }
 
-.profile-tabs .nav-link:hover {
-  color: #f48fb1 !important;
-  background: rgba(244, 143, 177, 0.1) !important;
+/* Account Information */
+.account-info {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.profile-tabs .nav-link.active {
-  color: #f48fb1 !important;
-  background: rgba(244, 143, 177, 0.15) !important;
-  border-bottom: 3px solid #f48fb1 !important;
+.info-item {
+  margin-bottom: 1rem;
 }
 
-/* Tab Content */
-.tab-content-wrapper {
-  padding: 2rem;
+.info-label {
+  font-weight: 600;
+  color: #23395d;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
 }
 
-.tab-section {
-  max-width: 100%;
+.info-value {
+  color: #555;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
 }
 
+/* Section Titles */
 .section-title {
   color: #23395d;
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid rgba(244, 143, 177, 0.3);
@@ -141,34 +142,16 @@
   box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25) !important;
 }
 
+.form-control:disabled,
+.form-select:disabled {
+  background: rgba(255, 255, 255, 0.5) !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}
+
 .form-control.is-invalid,
 .form-select.is-invalid {
   border-color: #dc3545 !important;
-}
-
-/* Child and Emergency Contact Cards */
-.child-card,
-.emergency-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px;
-  transition: all 0.3s ease;
-}
-
-.child-card:hover,
-.emergency-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.child-card .card-header,
-.emergency-card .card-header {
-  background: rgba(244, 143, 177, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 15px 15px 0 0 !important;
-  font-weight: 600;
-  color: #23395d;
 }
 
 /* Submit Button */
@@ -181,12 +164,14 @@
   font-size: 1.1rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(244, 143, 177, 0.3);
+  color: white;
 }
 
-.btn-profile-save:hover {
+.btn-profile-save:hover:not(:disabled) {
   background: linear-gradient(45deg, #ff6b9d, #f48fb1);
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(244, 143, 177, 0.4);
+  color: white;
 }
 
 .btn-profile-save:disabled {
@@ -211,22 +196,6 @@
   transform: translateY(-2px);
 }
 
-.btn-outline-danger {
-  border: 2px solid #dc3545;
-  color: #dc3545;
-  border-radius: 25px;
-  font-weight: 600;
-  background: transparent;
-  transition: all 0.3s ease;
-}
-
-.btn-outline-danger:hover {
-  background: #dc3545;
-  border-color: #dc3545;
-  color: white;
-  transform: translateY(-2px);
-}
-
 .btn-outline-secondary {
   border: 2px solid #6c757d;
   color: #6c757d;
@@ -243,6 +212,29 @@
   transform: translateY(-2px);
 }
 
+.btn-outline-danger {
+  border: 2px solid #dc3545;
+  color: #dc3545;
+  border-radius: 25px;
+  font-weight: 600;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Badges */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .page-title {
@@ -253,17 +245,16 @@
     font-size: 1rem;
   }
   
-  .tab-content-wrapper {
+  .profile-card .card-header {
     padding: 1rem;
   }
   
-  .profile-tabs .nav-link {
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
+  .profile-card .card-body {
+    padding: 1.5rem !important;
   }
   
   .section-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   .d-flex.justify-content-between {
@@ -275,45 +266,26 @@
     margin-top: 1rem;
     align-self: center;
   }
+
+  .account-info {
+    padding: 1rem;
+  }
 }
 
 @media (max-width: 576px) {
-  .profile-tabs {
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-  
-  .profile-tabs .nav-item {
-    display: inline-block;
-    float: none;
-  }
-  
-  .profile-tabs .nav-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8rem;
-  }
-  
-  .child-card .card-header,
-  .emergency-card .card-header {
+  .profile-card .card-header {
     flex-direction: column;
     text-align: center;
   }
   
-  .child-card .card-header .btn,
-  .emergency-card .card-header .btn {
-    margin-top: 0.5rem;
+  .profile-card .card-header .btn {
+    margin-top: 1rem;
   }
-}
 
-/* Form Check Styles */
-.form-check-input:checked {
-  background-color: #f48fb1;
-  border-color: #f48fb1;
-}
-
-.form-check-input:focus {
-  border-color: #f48fb1;
-  box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25);
+  .btn-profile-save {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
 }
 
 /* Alert Styles */
@@ -321,4 +293,10 @@
   border-radius: 15px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 1rem;
+  height: 1rem;
 }

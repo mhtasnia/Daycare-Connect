@@ -188,6 +188,34 @@ class BaseRegisterSerializer(serializers.ModelSerializer):
 class ParentRegisterSerializer(BaseRegisterSerializer):
     pass  # Inherits all functionality from BaseRegisterSerializer
 
+class ParentProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source='user.email', read_only=True)
+    user_type = serializers.CharField(source='user.user_type', read_only=True)
+    is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
+    joined_at = serializers.DateTimeField(source='user.joined_at', read_only=True)
+
+    class Meta:
+        model = Parent
+        fields = [
+            'email', 'user_type', 'is_email_verified', 'joined_at',
+            'full_name', 'profession', 'address', 'emergency_contact', 'phone'
+        ]
+
+class UpdateParentProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Parent
+        fields = ['full_name', 'profession', 'address', 'emergency_contact', 'phone']
+
+    def validate_phone(self, value):
+        if value and not value.startswith(('01', '+8801')):
+            raise serializers.ValidationError("Please enter a valid Bangladesh phone number.")
+        return value
+
+    def validate_emergency_contact(self, value):
+        if value and not value.startswith(('01', '+8801')):
+            raise serializers.ValidationError("Please enter a valid Bangladesh phone number.")
+        return value
+
 class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True, min_length=8)
