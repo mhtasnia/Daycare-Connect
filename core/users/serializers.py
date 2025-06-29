@@ -120,7 +120,22 @@ class BaseRegisterSerializer(serializers.ModelSerializer):
         email = data['email']
         otp_code = data['otp_code']
         
-        # Verify OTP first
+        # Check if there's a recently verified OTP for this email
+        # Look for OTPs that were used in the last 5 minutes (for registration flow)
+        recent_verified_otp = EmailOTP.objects.filter(
+            email=email,
+            purpose='registration',
+            is_used=True,
+            otp_code=otp_code,
+            created_at__gte=timezone.now() - timedelta(minutes=5)
+        ).first()
+        
+        if recent_verified_otp:
+            print(f"Found recently verified OTP for registration: {recent_verified_otp.otp_code}")
+            data['verified_otp'] = recent_verified_otp
+            return data
+        
+        # If no recently verified OTP, try to verify a fresh one
         try:
             otp = EmailOTP.objects.filter(
                 email=email,
@@ -191,7 +206,21 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=email).exists():
             raise serializers.ValidationError({"email": "A user with this email already exists."})
         
-        # Verify OTP
+        # Check if there's a recently verified OTP for this email
+        recent_verified_otp = EmailOTP.objects.filter(
+            email=email,
+            purpose='registration',
+            is_used=True,
+            otp_code=otp_code,
+            created_at__gte=timezone.now() - timedelta(minutes=5)
+        ).first()
+        
+        if recent_verified_otp:
+            print(f"Found recently verified OTP for daycare registration: {recent_verified_otp.otp_code}")
+            data['verified_otp'] = recent_verified_otp
+            return data
+        
+        # If no recently verified OTP, try to verify a fresh one
         try:
             otp = EmailOTP.objects.filter(
                 email=email,
