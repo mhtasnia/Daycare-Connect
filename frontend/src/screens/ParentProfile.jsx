@@ -11,6 +11,8 @@ import {
   Tab,
   Navbar,
   Spinner,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -29,10 +31,8 @@ import {
   FaSignOutAlt,
   FaSave,
   FaEdit,
-  FaBriefcase,
-  FaUserShield,
-  FaPlus,
-  FaTimes,
+  FaCheckCircle,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import axios from "axios";
 import "../styles/ParentProfile.css";
@@ -40,23 +40,14 @@ import "../styles/ParentProfile.css";
 function ParentProfile() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
-
-  const [profileData, setProfileData] = useState({
-    email: "",
-    user_type: "",
-    is_email_verified: false,
-    joined_at: "",
-    full_name: "",
-    profession: "",
-    address: "",
-    emergency_contact: "",
-    phone: "",
-  });
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   const [formData, setFormData] = useState({
     // Personal Information
@@ -120,6 +111,7 @@ function ParentProfile() {
 
   const [errors, setErrors] = useState({});
 
+  // Load profile data on component mount
   useEffect(() => {
     const accessToken = localStorage.getItem("access");
     if (!accessToken) {
@@ -127,10 +119,10 @@ function ParentProfile() {
       return;
     }
     
-    fetchProfile();
+    fetchProfileData();
   }, [navigate]);
 
-  const fetchProfile = async () => {
+  const fetchProfileData = async () => {
     try {
       const accessToken = localStorage.getItem("access");
       const response = await axios.get(
@@ -142,38 +134,43 @@ function ParentProfile() {
         }
       );
 
-      const data = response.data;
-      setProfileData(data);
+      const profileData = response.data;
       
-      // Initialize form data with existing profile data
-      setFormData(prev => ({
-        ...prev,
-        firstName: data.full_name?.split(' ')[0] || "",
-        lastName: data.full_name?.split(' ').slice(1).join(' ') || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        occupation: data.profession || "",
-        presentAddress: data.address || "",
-        emergencyContacts: [
-          {
-            ...prev.emergencyContacts[0],
-            phone: data.emergency_contact || "",
-          }
-        ]
+      // Map backend data to form structure
+      setFormData(prevData => ({
+        ...prevData,
+        email: profileData.email || "",
+        phone: profileData.phone || "",
+        // Split full_name into firstName and lastName
+        firstName: profileData.full_name ? profileData.full_name.split(' ')[0] : "",
+        lastName: profileData.full_name ? profileData.full_name.split(' ').slice(1).join(' ') : "",
+        occupation: profileData.profession || "",
+        presentAddress: profileData.address || "",
+        alternatePhone: profileData.emergency_contact || "",
       }));
+
     } catch (error) {
       console.error("Failed to fetch profile:", error);
       if (error.response?.status === 401) {
         localStorage.clear();
         navigate("/parent/login", { replace: true });
       } else {
-        setAlertType("danger");
-        setAlertMessage("Failed to load profile information");
-        setShowAlert(true);
+        showNotification("Failed to load profile data", "danger");
       }
     } finally {
-      setIsLoading(false);
+      setIsPageLoading(false);
     }
+  };
+
+  const showNotification = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
   };
 
   const handleChange = (e, section = null, index = null) => {
@@ -296,7 +293,7 @@ function ParentProfile() {
       newErrors.phone = "Phone number is required";
     }
 
-    // Bangladesh phone validation
+    // Phone validation
     if (formData.phone && !formData.phone.match(/^(\+8801|01)[0-9]{9}$/)) {
       newErrors.phone = "Please enter a valid Bangladesh phone number";
     }
@@ -305,74 +302,96 @@ function ParentProfile() {
       newErrors.alternatePhone = "Please enter a valid Bangladesh phone number";
     }
 
-    // Emergency contact validation
-    formData.emergencyContacts.forEach((contact, index) => {
-      if (contact.phone && !contact.phone.match(/^(\+8801|01)[0-9]{9}$/)) {
-        newErrors[`emergencyContact_${index}_phone`] = "Please enter a valid Bangladesh phone number";
-      }
-    });
-
-    // Child age validation
-    formData.children.forEach((child, index) => {
-      if (child.age && (child.age < 0 || child.age > 12)) {
-        newErrors[`child_${index}_age`] = "Age must be between 0 and 12 years";
-      }
-    });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setIsSaving(true);
-      try {
-        // Prepare data for backend (simplified for now)
-        const updateData = {
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          profession: formData.occupation,
-          address: formData.presentAddress,
-          emergency_contact: formData.emergencyContacts[0]?.phone || "",
-          phone: formData.phone,
-        };
+    
+    if (!validateForm()) {
+      showNotification("Please fix the errors in the form", "danger");
+      return;
+    }
 
-        const accessToken = localStorage.getItem("access");
-        const response = await axios.put(
-          "http://localhost:8000/api/user-auth/parents/profile/update/",
-          updateData,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+    setIsLoading(true);
+    setShowAlert(false);
 
-        setAlertType("success");
-        setAlertMessage("Profile updated successfully!");
-        setShowAlert(true);
+    try {
+      const accessToken = localStorage.getItem("access");
+      
+      // Prepare data for backend
+      const updateData = {
+        full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+        profession: formData.occupation,
+        address: formData.presentAddress,
+        emergency_contact: formData.alternatePhone,
+        phone: formData.phone,
+      };
 
-        // Update profile data with the response
-        if (response.data.profile) {
-          setProfileData(response.data.profile);
+      const response = await axios.put(
+        "http://localhost:8000/api/user-auth/parents/profile/update/",
+        updateData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
         }
+      );
 
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 3000);
-      } catch (error) {
-        console.error("Profile update error:", error);
-        setAlertType("danger");
-        setAlertMessage("Failed to update profile. Please try again.");
-        setShowAlert(true);
-      } finally {
-        setIsSaving(false);
+      // Show success notification
+      showNotification("Profile updated successfully! 🎉", "success");
+      
+      // Show success alert
+      setAlertType("success");
+      setAlertMessage("Your profile has been updated successfully!");
+      setShowAlert(true);
+
+      // Auto-hide alert after 5 seconds
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 5000);
+
+    } catch (error) {
+      console.error("Profile update error:", error);
+      
+      let errorMessage = "Failed to update profile. Please try again.";
+      
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        navigate("/parent/login", { replace: true });
+        return;
+      } else if (error.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.detail) {
+          errorMessage = errorData.detail;
+        } else if (errorData.phone) {
+          errorMessage = `Phone: ${errorData.phone[0]}`;
+        } else if (errorData.emergency_contact) {
+          errorMessage = `Emergency Contact: ${errorData.emergency_contact[0]}`;
+        }
       }
+
+      // Show error notification
+      showNotification(errorMessage, "danger");
+      
+      // Show error alert
+      setAlertType("danger");
+      setAlertMessage(errorMessage);
+      setShowAlert(true);
+
+      // Auto-hide alert after 8 seconds for errors
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 8000);
+
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
+  if (isPageLoading) {
     return (
       <div className="parent-profile-wrapper">
         <Container className="py-5">
@@ -389,6 +408,33 @@ function ParentProfile() {
 
   return (
     <div className="parent-profile-wrapper">
+      {/* Toast Notifications */}
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast 
+          show={showToast} 
+          onClose={() => setShowToast(false)}
+          bg={toastType === "success" ? "success" : "danger"}
+          delay={5000}
+          autohide
+        >
+          <Toast.Header>
+            <div className="me-auto d-flex align-items-center">
+              {toastType === "success" ? (
+                <FaCheckCircle className="me-2" />
+              ) : (
+                <FaExclamationTriangle className="me-2" />
+              )}
+              <strong>
+                {toastType === "success" ? "Success" : "Error"}
+              </strong>
+            </div>
+          </Toast.Header>
+          <Toast.Body className="text-white">
+            {toastMessage}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       {/* Navigation Header */}
       <Navbar bg="white" expand="lg" className="parent-navbar shadow-sm">
         <Container>
@@ -438,7 +484,7 @@ function ParentProfile() {
               <div>
                 <h1 className="page-title">
                   <FaEdit className="me-2" />
-                  Complete Profile
+                  Update Profile
                 </h1>
                 <p className="page-subtitle">
                   Complete your profile to get the best daycare recommendations
@@ -460,8 +506,19 @@ function ParentProfile() {
         {showAlert && (
           <Row className="mb-4">
             <Col>
-              <Alert variant={alertType} dismissible onClose={() => setShowAlert(false)}>
-                {alertMessage}
+              <Alert 
+                variant={alertType}
+                onClose={() => setShowAlert(false)}
+                dismissible
+              >
+                <div className="d-flex align-items-center">
+                  {alertType === "success" ? (
+                    <FaCheckCircle className="me-2" />
+                  ) : (
+                    <FaExclamationTriangle className="me-2" />
+                  )}
+                  {alertMessage}
+                </div>
               </Alert>
             </Col>
           </Row>
@@ -589,7 +646,7 @@ function ParentProfile() {
                                 onChange={handleChange}
                                 isInvalid={!!errors.email}
                                 placeholder="Enter your email"
-                                disabled
+                                disabled // Email should not be editable
                               />
                               <Form.Control.Feedback type="invalid">
                                 {errors.email}
@@ -663,10 +720,7 @@ function ParentProfile() {
                           </Col>
                           <Col md={6}>
                             <Form.Group className="mb-3">
-                              <Form.Label>
-                                <FaBriefcase className="me-2" />
-                                Occupation
-                              </Form.Label>
+                              <Form.Label>Occupation</Form.Label>
                               <Form.Control
                                 type="text"
                                 name="occupation"
@@ -782,7 +836,7 @@ function ParentProfile() {
                             size="sm"
                             onClick={addChild}
                           >
-                            <FaPlus className="me-1" /> Add Another Child
+                            <FaChild className="me-1" /> Add Another Child
                           </Button>
                         </div>
 
@@ -796,7 +850,6 @@ function ParentProfile() {
                                   size="sm"
                                   onClick={() => removeChild(index)}
                                 >
-                                  <FaTimes className="me-1" />
                                   Remove
                                 </Button>
                               )}
@@ -846,11 +899,7 @@ function ParentProfile() {
                                       placeholder="Age in years"
                                       min="0"
                                       max="12"
-                                      isInvalid={!!errors[`child_${index}_age`]}
                                     />
-                                    <Form.Control.Feedback type="invalid">
-                                      {errors[`child_${index}_age`]}
-                                    </Form.Control.Feedback>
                                   </Form.Group>
                                 </Col>
                                 <Col md={4}>
@@ -986,7 +1035,7 @@ function ParentProfile() {
                             size="sm"
                             onClick={addEmergencyContact}
                           >
-                            <FaPlus className="me-1" /> Add Contact
+                            <FaUserFriends className="me-1" /> Add Contact
                           </Button>
                         </div>
 
@@ -1002,7 +1051,6 @@ function ParentProfile() {
                                   size="sm"
                                   onClick={() => removeEmergencyContact(index)}
                                 >
-                                  <FaTimes className="me-1" />
                                   Remove
                                 </Button>
                               )}
@@ -1074,11 +1122,7 @@ function ParentProfile() {
                                         )
                                       }
                                       placeholder="01XXXXXXXXX"
-                                      isInvalid={!!errors[`emergencyContact_${index}_phone`]}
                                     />
-                                    <Form.Control.Feedback type="invalid">
-                                      {errors[`emergencyContact_${index}_phone`]}
-                                    </Form.Control.Feedback>
                                   </Form.Group>
                                 </Col>
                                 <Col md={6}>
@@ -1274,11 +1318,15 @@ function ParentProfile() {
                       type="submit"
                       className="btn-profile-save"
                       size="lg"
-                      disabled={isSaving}
+                      disabled={isLoading}
                     >
-                      {isSaving ? (
+                      {isLoading ? (
                         <>
-                          <Spinner animation="border" size="sm" className="me-2" />
+                          <Spinner
+                            animation="border"
+                            size="sm"
+                            className="me-2"
+                          />
                           Updating Profile...
                         </>
                       ) : (
