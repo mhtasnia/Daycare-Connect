@@ -61,16 +61,29 @@ class OTPVerificationSerializer(serializers.Serializer):
         otp_code = data['otp_code']
         purpose = data['purpose']
         
+        # Debug: Print what we're looking for
+        print(f"Looking for OTP: email={email}, purpose={purpose}, code={otp_code}")
+        
+        # Get all OTPs for this email and purpose (for debugging)
+        all_otps = EmailOTP.objects.filter(email=email, purpose=purpose).order_by('-created_at')
+        print(f"Found {all_otps.count()} OTPs for this email/purpose")
+        
+        for otp in all_otps[:3]:  # Show last 3 OTPs
+            print(f"OTP: code={otp.otp_code}, used={otp.is_used}, attempts={otp.attempts}, expires={otp.expires_at}, created={otp.created_at}")
+        
         try:
             otp = EmailOTP.objects.filter(
                 email=email,
                 purpose=purpose,
                 is_used=False
             ).latest('created_at')
+            print(f"Selected OTP: code={otp.otp_code}, expires={otp.expires_at}, now={timezone.now()}")
         except EmailOTP.DoesNotExist:
+            print("No valid OTP found")
             raise serializers.ValidationError("No valid OTP found for this email.")
         
         if not otp.is_valid():
+            print(f"OTP not valid: attempts={otp.attempts}, max={otp.max_attempts}, expired={timezone.now() > otp.expires_at}")
             if otp.attempts >= otp.max_attempts:
                 raise serializers.ValidationError("Maximum OTP attempts exceeded. Please request a new code.")
             elif timezone.now() > otp.expires_at:
@@ -80,11 +93,13 @@ class OTPVerificationSerializer(serializers.Serializer):
         
         if not otp.verify(otp_code):
             remaining_attempts = otp.max_attempts - otp.attempts
+            print(f"OTP verification failed: provided={otp_code}, expected={otp.otp_code}, remaining={remaining_attempts}")
             if remaining_attempts > 0:
                 raise serializers.ValidationError(f"Invalid OTP. {remaining_attempts} attempts remaining.")
             else:
                 raise serializers.ValidationError("Maximum OTP attempts exceeded. Please request a new code.")
         
+        print("OTP verification successful!")
         data['otp_instance'] = otp
         return data
 

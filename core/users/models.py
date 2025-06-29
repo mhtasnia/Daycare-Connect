@@ -76,27 +76,45 @@ class EmailOTP(models.Model):
         return ''.join(random.choices(string.digits, k=6))
 
     def is_valid(self):
-        return (
-            not self.is_used and 
-            self.attempts < self.max_attempts and 
-            timezone.now() < self.expires_at
-        )
+        now = timezone.now()
+        is_not_expired = now < self.expires_at
+        is_not_used = not self.is_used
+        has_attempts_left = self.attempts < self.max_attempts
+        
+        print(f"OTP validity check: not_expired={is_not_expired}, not_used={is_not_used}, has_attempts={has_attempts_left}")
+        print(f"Current time: {now}, Expires at: {self.expires_at}")
+        
+        return is_not_used and has_attempts_left and is_not_expired
 
     def verify(self, provided_otp):
+        print(f"Verifying OTP: provided='{provided_otp}', stored='{self.otp_code}'")
+        
+        # Increment attempts first
         self.attempts += 1
         self.save()
         
+        # Check if still valid after incrementing attempts
         if not self.is_valid():
+            print("OTP no longer valid after incrementing attempts")
             return False
-            
-        if self.otp_code == provided_otp:
+        
+        # Compare OTP codes (strip whitespace and ensure string comparison)
+        provided_clean = str(provided_otp).strip()
+        stored_clean = str(self.otp_code).strip()
+        
+        print(f"Comparing: '{provided_clean}' == '{stored_clean}'")
+        
+        if provided_clean == stored_clean:
             self.is_used = True
             self.save()
+            print("OTP verification successful!")
             return True
+        
+        print("OTP codes don't match")
         return False
 
     def __str__(self):
-        return f"OTP for {self.email} - {self.purpose}"
+        return f"OTP for {self.email} - {self.purpose} - {self.otp_code}"
 
 class Parent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_profile')
