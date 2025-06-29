@@ -16,9 +16,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsParent, IsDaycare
 from .models import DaycareCenter, EmailOTP
-import logging
-
-logger = logging.getLogger(__name__)
 
 class OTPRateThrottle(UserRateThrottle):
     rate = '5/hour'  # Allow 5 OTP requests per hour per IP
@@ -38,7 +35,6 @@ def send_otp(request):
                 'expires_in_minutes': 10
             }, status=status.HTTP_200_OK)
         except Exception as e:
-            logger.error(f"Failed to send OTP: {str(e)}")
             return Response({
                 'detail': 'Failed to send OTP. Please try again later.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -70,7 +66,6 @@ def parent_register(request):
                 'user_type': user.user_type
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f"Parent registration failed: {str(e)}")
             return Response({
                 'detail': 'Registration failed. Please try again.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -155,7 +150,6 @@ def daycare_register_request(request):
                 'daycare_name': instance.name
             }, status=status.HTTP_201_CREATED)
         except Exception as e:
-            logger.error(f"Daycare registration failed: {str(e)}")
             return Response({
                 'detail': 'Registration failed. Please try again.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
