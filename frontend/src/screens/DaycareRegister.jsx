@@ -1,11 +1,13 @@
 import { useState, useRef } from "react";
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
-import { FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone, FaBuilding, FaCheckCircle, FaImage } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone, FaBuilding, FaCheckCircle, FaImage, FaArrowLeft } from "react-icons/fa";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
+import OTPVerification from "../components/OTPVerification";
 import axios from "axios";
 
 function DaycareRegister() {
+  const [currentStep, setCurrentStep] = useState(1); // 1: Form, 2: OTP Verification
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,8 +21,10 @@ function DaycareRegister() {
   const [errors, setErrors] = useState({});
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
+  const [alertType, setAlertType] = useState("success");
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [verifiedOTP, setVerifiedOTP] = useState("");
   const fileInputRef = useRef();
 
   // Handle input changes
@@ -51,6 +55,10 @@ function DaycareRegister() {
       }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+      // Clear errors when user starts typing
+      if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
     }
   };
 
@@ -69,20 +77,64 @@ function DaycareRegister() {
     return newErrors;
   };
 
-  // Handle form submit
-  const handleSubmit = async (e) => {
+  // Handle sending OTP
+  const handleSendOTP = async (e) => {
     e.preventDefault();
     setShowAlert(false);
     setAlertMsg("");
+    
     const errs = validateForm();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
     setIsLoading(true);
+
+    try {
+      await axios.post('http://localhost:8000/api/user-auth/send-otp/', {
+        email: formData.email,
+        purpose: 'registration'
+      });
+
+      setAlertType("info");
+      setAlertMsg("Verification code sent to your email!");
+      setShowAlert(true);
+      setCurrentStep(2);
+
+    } catch (error) {
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        if (errorData.email) {
+          setErrors({ email: errorData.email[0] });
+        } else if (errorData.non_field_errors) {
+          setAlertMsg(errorData.non_field_errors[0]);
+        } else {
+          setAlertMsg("Failed to send verification code. Please try again.");
+        }
+      } else {
+        setAlertMsg("Network error. Please try again.");
+      }
+      setAlertType("danger");
+      setShowAlert(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle OTP verification success
+  const handleOTPVerification = (otpCode) => {
+    setVerifiedOTP(otpCode);
+    handleFinalRegistration(otpCode);
+  };
+
+  // Handle final registration
+  const handleFinalRegistration = async (otpCode) => {
+    setIsLoading(true);
+
     try {
       const data = new FormData();
       data.append("email", formData.email);
       data.append("password", formData.password);
+      data.append("otp_code", otpCode);
       data.append("name", formData.name);
       data.append("phone", formData.phone);
       data.append("address", formData.address);
@@ -91,13 +143,16 @@ function DaycareRegister() {
       data.append("user_type", "daycare");
 
       await axios.post(
-        "http://localhost:8000/api/user-auth/daycares/register/", // <-- TRAILING SLASH
+        "http://localhost:8000/api/user-auth/daycares/register/",
         data,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
+      setAlertType("success");
+      setAlertMsg("Registration request submitted successfully! Please await admin verification.");
       setShowAlert(true);
-      setAlertMsg("Registration request submitted. Await admin verification.");
+      
+      // Reset form
       setFormData({
         email: "",
         password: "",
@@ -110,6 +165,12 @@ function DaycareRegister() {
       });
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
+      
+      // Go back to step 1 after success
+      setTimeout(() => {
+        setCurrentStep(1);
+      }, 3000);
+
     } catch (err) {
       if (err.response && err.response.data) {
         setErrors(err.response.data);
@@ -117,9 +178,26 @@ function DaycareRegister() {
       } else {
         setAlertMsg("An error occurred. Please try again.");
       }
+      setAlertType("danger");
       setShowAlert(true);
+      
+      // Go back to step 1 on error
+      setCurrentStep(1);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
+  };
+
+  const handleResendOTP = () => {
+    setAlertType("info");
+    setAlertMsg("New verification code sent!");
+    setShowAlert(true);
+  };
+
+  const goBackToStep1 = () => {
+    setCurrentStep(1);
+    setShowAlert(false);
+    setErrors({});
   };
 
   return (
@@ -131,131 +209,181 @@ function DaycareRegister() {
             <Card className="shadow-lg">
               <Card.Body>
                 <h2 className="mb-4 text-center">Register Your Daycare</h2>
+                
                 {showAlert && (
-                  <Alert variant={alertMsg.startsWith("Registration request") ? "success" : "danger"}>
+                  <Alert variant={alertType}>
                     {alertMsg}
                   </Alert>
                 )}
-                <Form onSubmit={handleSubmit} encType="multipart/form-data">
-                  <Form.Group className="mb-3" controlId="email">
-                    <Form.Label><FaEnvelope className="me-2" />Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      isInvalid={!!errors.email}
-                      placeholder="Enter email"
+
+                {currentStep === 1 ? (
+                  // Step 1: Registration Form
+                  <Form onSubmit={handleSendOTP} encType="multipart/form-data">
+                    <Form.Group className="mb-3" controlId="email">
+                      <Form.Label><FaEnvelope className="me-2" />Email</Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        isInvalid={!!errors.email}
+                        placeholder="Enter email"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {errors.email}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="password">
+                      <Form.Label><FaLock className="me-2" />Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        isInvalid={!!errors.password}
+                        placeholder="Enter password"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="confirmPassword">
+                      <Form.Label>Confirm Password</Form.Label>
+                      <Form.Control
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        isInvalid={!!errors.confirmPassword}
+                        placeholder="Confirm password"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="name">
+                      <Form.Label><FaBuilding className="me-2" />Daycare Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        isInvalid={!!errors.name}
+                        placeholder="Enter daycare name"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="phone">
+                      <Form.Label><FaPhone className="me-2" />Phone</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        isInvalid={!!errors.phone}
+                        placeholder="Enter phone number"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="address">
+                      <Form.Label><FaMapMarkerAlt className="me-2" />Address</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        isInvalid={!!errors.address}
+                        placeholder="Enter address"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.address}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="license">
+                      <Form.Label><FaCheckCircle className="me-2" />License/Registration No.</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="license"
+                        value={formData.license}
+                        onChange={handleChange}
+                        isInvalid={!!errors.license}
+                        placeholder="Enter license or registration number"
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.license}</Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="image">
+                      <Form.Label>
+                        <FaImage className="me-2" />
+                        Logo or License Document (JPG, PNG, PDF, max 3MB)
+                      </Form.Label>
+                      <Form.Control
+                        type="file"
+                        name="image"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={handleChange}
+                        isInvalid={!!errors.image}
+                        ref={fileInputRef}
+                        disabled={isLoading}
+                      />
+                      <Form.Control.Feedback type="invalid">{errors.image}</Form.Control.Feedback>
+                      {imagePreview && (
+                        <div className="mt-3 text-center">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            style={{ maxWidth: "180px", maxHeight: "120px", borderRadius: "0.5rem", border: "1px solid #eee" }}
+                          />
+                        </div>
+                      )}
+                    </Form.Group>
+
+                    <Button
+                      type="submit"
+                      className="btn-parent-primary w-100 mt-2"
+                      size="lg"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Spinner animation="border" size="sm" className="me-2" />
+                          Sending Verification Code...
+                        </>
+                      ) : (
+                        "Send Verification Code"
+                      )}
+                    </Button>
+                  </Form>
+                ) : (
+                  // Step 2: OTP Verification
+                  <div>
+                    <OTPVerification
+                      email={formData.email}
+                      purpose="registration"
+                      onVerificationSuccess={handleOTPVerification}
+                      onResendOTP={handleResendOTP}
+                      isLoading={isLoading}
                     />
-                    <Form.Control.Feedback type="invalid">
-                      {errors.email}
-                    </Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="password">
-                    <Form.Label><FaLock className="me-2" />Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      isInvalid={!!errors.password}
-                      placeholder="Enter password"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="confirmPassword">
-                    <Form.Label>Confirm Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      isInvalid={!!errors.confirmPassword}
-                      placeholder="Confirm password"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="name">
-                    <Form.Label><FaBuilding className="me-2" />Daycare Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      isInvalid={!!errors.name}
-                      placeholder="Enter daycare name"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="phone">
-                    <Form.Label><FaPhone className="me-2" />Phone</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      isInvalid={!!errors.phone}
-                      placeholder="Enter phone number"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="address">
-                    <Form.Label><FaMapMarkerAlt className="me-2" />Address</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      isInvalid={!!errors.address}
-                      placeholder="Enter address"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.address}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="license">
-                    <Form.Label><FaCheckCircle className="me-2" />License/Registration No.</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="license"
-                      value={formData.license}
-                      onChange={handleChange}
-                      isInvalid={!!errors.license}
-                      placeholder="Enter license or registration number"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.license}</Form.Control.Feedback>
-                  </Form.Group>
-                  <Form.Group className="mb-3" controlId="image">
-                    <Form.Label>
-                      <FaImage className="me-2" />
-                      Logo or License Document (JPG, PNG, PDF, max 3MB)
-                    </Form.Label>
-                    <Form.Control
-                      type="file"
-                      name="image"
-                      accept=".jpg,.jpeg,.png,.pdf"
-                      onChange={handleChange}
-                      isInvalid={!!errors.image}
-                      ref={fileInputRef}
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.image}</Form.Control.Feedback>
-                    {imagePreview && (
-                      <div className="mt-3 text-center">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          style={{ maxWidth: "180px", maxHeight: "120px", borderRadius: "0.5rem", border: "1px solid #eee" }}
-                        />
-                      </div>
-                    )}
-                  </Form.Group>
-                  <Button
-                    type="submit"
-                    className="btn-parent-primary w-100 mt-2"
-                    size="lg"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? <Spinner animation="border" size="sm" /> : "Register"}
-                  </Button>
-                </Form>
+                    
+                    <div className="text-center mt-4">
+                      <Button
+                        variant="outline-secondary"
+                        onClick={goBackToStep1}
+                        disabled={isLoading}
+                      >
+                        <FaArrowLeft className="me-2" />
+                        Change Information
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -265,4 +393,5 @@ function DaycareRegister() {
     </div>
   );
 }
+
 export default DaycareRegister;
