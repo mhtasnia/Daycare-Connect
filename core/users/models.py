@@ -89,22 +89,18 @@ class EmailOTP(models.Model):
     def verify(self, provided_otp):
         print(f"Verifying OTP: provided='{provided_otp}', stored='{self.otp_code}'")
         
-        # Increment attempts first
-        self.attempts += 1
-        self.save()
-        
-        # Check if still valid after incrementing attempts
-        if not self.is_valid():
-            print("OTP no longer valid after incrementing attempts")
-            return False
-        
-        # Compare OTP codes (strip whitespace and ensure string comparison)
+        # Compare OTP codes first (strip whitespace and ensure string comparison)
         provided_clean = str(provided_otp).strip()
         stored_clean = str(self.otp_code).strip()
         
         print(f"Comparing: '{provided_clean}' == '{stored_clean}'")
         
+        # Increment attempts
+        self.attempts += 1
+        self.save()
+        
         if provided_clean == stored_clean:
+            # Mark as used only if the code matches
             self.is_used = True
             self.save()
             print("OTP verification successful!")

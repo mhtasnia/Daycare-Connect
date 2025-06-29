@@ -82,15 +82,20 @@ class OTPVerificationSerializer(serializers.Serializer):
             print("No valid OTP found")
             raise serializers.ValidationError("No valid OTP found for this email.")
         
-        if not otp.is_valid():
-            print(f"OTP not valid: attempts={otp.attempts}, max={otp.max_attempts}, expired={timezone.now() > otp.expires_at}")
-            if otp.attempts >= otp.max_attempts:
-                raise serializers.ValidationError("Maximum OTP attempts exceeded. Please request a new code.")
-            elif timezone.now() > otp.expires_at:
-                raise serializers.ValidationError("OTP has expired. Please request a new code.")
-            else:
-                raise serializers.ValidationError("Invalid OTP.")
+        # Check if OTP is still valid (not expired, not used, has attempts left)
+        if timezone.now() > otp.expires_at:
+            print("OTP has expired")
+            raise serializers.ValidationError("OTP has expired. Please request a new code.")
         
+        if otp.is_used:
+            print("OTP already used")
+            raise serializers.ValidationError("This OTP has already been used. Please request a new code.")
+        
+        if otp.attempts >= otp.max_attempts:
+            print("Max attempts exceeded")
+            raise serializers.ValidationError("Maximum OTP attempts exceeded. Please request a new code.")
+        
+        # Verify the OTP code
         if not otp.verify(otp_code):
             remaining_attempts = otp.max_attempts - otp.attempts
             print(f"OTP verification failed: provided={otp_code}, expected={otp.otp_code}, remaining={remaining_attempts}")
@@ -115,20 +120,39 @@ class BaseRegisterSerializer(serializers.ModelSerializer):
         email = data['email']
         otp_code = data['otp_code']
         
-        # Verify OTP
-        otp_serializer = OTPVerificationSerializer(data={
-            'email': email,
-            'otp_code': otp_code,
-            'purpose': 'registration'
-        })
+        # Verify OTP first
+        try:
+            otp = EmailOTP.objects.filter(
+                email=email,
+                purpose='registration',
+                is_used=False
+            ).latest('created_at')
+        except EmailOTP.DoesNotExist:
+            raise serializers.ValidationError({"otp_code": "No valid OTP found for this email."})
         
-        if not otp_serializer.is_valid():
-            raise serializers.ValidationError(otp_serializer.errors)
+        # Check if OTP is expired
+        if timezone.now() > otp.expires_at:
+            raise serializers.ValidationError({"otp_code": "OTP has expired. Please request a new code."})
         
+        # Check attempts
+        if otp.attempts >= otp.max_attempts:
+            raise serializers.ValidationError({"otp_code": "Maximum OTP attempts exceeded. Please request a new code."})
+        
+        # Verify the code
+        if not otp.verify(otp_code):
+            remaining_attempts = otp.max_attempts - otp.attempts
+            if remaining_attempts > 0:
+                raise serializers.ValidationError({"otp_code": f"Invalid OTP. {remaining_attempts} attempts remaining."})
+            else:
+                raise serializers.ValidationError({"otp_code": "Maximum OTP attempts exceeded. Please request a new code."})
+        
+        # Store the verified OTP instance for later use
+        data['verified_otp'] = otp
         return data
 
     def create(self, validated_data):
         otp_code = validated_data.pop('otp_code')
+        verified_otp = validated_data.pop('verified_otp')
         
         user = User(
             email=validated_data['email'],
@@ -165,24 +189,43 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
         
         # Check if user already exists
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+            raise serializers.ValidationError({"email": "A user with this email already exists."})
         
         # Verify OTP
-        otp_serializer = OTPVerificationSerializer(data={
-            'email': email,
-            'otp_code': otp_code,
-            'purpose': 'registration'
-        })
+        try:
+            otp = EmailOTP.objects.filter(
+                email=email,
+                purpose='registration',
+                is_used=False
+            ).latest('created_at')
+        except EmailOTP.DoesNotExist:
+            raise serializers.ValidationError({"otp_code": "No valid OTP found for this email."})
         
-        if not otp_serializer.is_valid():
-            raise serializers.ValidationError(otp_serializer.errors)
+        # Check if OTP is expired
+        if timezone.now() > otp.expires_at:
+            raise serializers.ValidationError({"otp_code": "OTP has expired. Please request a new code."})
         
+        # Check attempts
+        if otp.attempts >= otp.max_attempts:
+            raise serializers.ValidationError({"otp_code": "Maximum OTP attempts exceeded. Please request a new code."})
+        
+        # Verify the code
+        if not otp.verify(otp_code):
+            remaining_attempts = otp.max_attempts - otp.attempts
+            if remaining_attempts > 0:
+                raise serializers.ValidationError({"otp_code": f"Invalid OTP. {remaining_attempts} attempts remaining."})
+            else:
+                raise serializers.ValidationError({"otp_code": "Maximum OTP attempts exceeded. Please request a new code."})
+        
+        # Store the verified OTP instance
+        data['verified_otp'] = otp
         return data
 
     def create(self, validated_data):
         email = validated_data.pop('email')
         password = validated_data.pop('password')
         otp_code = validated_data.pop('otp_code')
+        verified_otp = validated_data.pop('verified_otp')
         user_type = validated_data.pop('user_type', 'daycare')
         
         user = User.objects.create_user(
