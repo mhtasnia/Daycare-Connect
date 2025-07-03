@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Container, Row, Col, Card, Form, Button, Alert } from "react-bootstrap";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { Container, Row, Col, Card, Form, Button, Alert, InputGroup } from "react-bootstrap";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
@@ -12,6 +12,7 @@ function DaycareLogin() {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMsg, setAlertMsg] = useState("");
   const [alertVariant, setAlertVariant] = useState("success");
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -88,15 +89,25 @@ function DaycareLogin() {
                   </Form.Group>
                   <Form.Group className="mb-3" controlId="password">
                     <Form.Label><FaLock className="me-2" />Password</Form.Label>
-                    <Form.Control
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      isInvalid={!!errors.password}
-                      placeholder="Enter password"
-                    />
-                    <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+                    <InputGroup>
+                      <Form.Control
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        isInvalid={!!errors.password}
+                        placeholder="Enter password"
+                      />
+                      <Button
+                        variant="outline-secondary"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        tabIndex={-1}
+                        style={{ border: "none" }}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </Button>
+                      <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+                    </InputGroup>
                   </Form.Group>
                   <Button
                     type="submit"
@@ -105,6 +116,12 @@ function DaycareLogin() {
                   >
                     Log In
                   </Button>
+                  <div className="text-center mt-3">
+                    <span>New to Daycare Connect? </span>
+                    <Link to="/daycare/register" className="fw-bold" style={{ color: "#90caf9" }}>
+                      Register to get verified
+                    </Link>
+                  </div>
                 </Form>
               </Card.Body>
             </Card>

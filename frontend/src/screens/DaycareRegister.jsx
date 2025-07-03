@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from "react-bootstrap";
-import { FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone, FaBuilding, FaCheckCircle, FaImage, FaArrowLeft } from "react-icons/fa";
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, InputGroup } from "react-bootstrap";
+import { FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone, FaBuilding, FaCheckCircle, FaImage, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import DaycareNavbar from "../components/DaycareNavbar";
 import Footer from "../components/Footer";
 import OTPVerification from "../components/OTPVerification";
@@ -15,7 +16,7 @@ function DaycareRegister() {
     name: "",
     phone: "",
     address: "",
-    license: "",
+    nid_number: "", // changed from license
     image: null,
   });
   const [errors, setErrors] = useState({});
@@ -25,6 +26,8 @@ function DaycareRegister() {
   const [isLoading, setIsLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [verifiedOTP, setVerifiedOTP] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const fileInputRef = useRef();
 
   // Handle input changes
@@ -72,7 +75,7 @@ function DaycareRegister() {
     if (!formData.name) newErrors.name = "Daycare name is required";
     if (!formData.phone) newErrors.phone = "Phone is required";
     if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.license) newErrors.license = "License/Registration number is required";
+    if (!formData.nid_number) newErrors.nid_number = "NID number is required"; // updated validation
     if (!formData.image) newErrors.image = "Logo or license document is required";
     return newErrors;
   };
@@ -138,7 +141,7 @@ function DaycareRegister() {
       data.append("name", formData.name);
       data.append("phone", formData.phone);
       data.append("address", formData.address);
-      data.append("license", formData.license);
+      data.append("nid_number", formData.nid_number); // updated field
       if (formData.image) data.append("image", formData.image);
       data.append("user_type", "daycare");
 
@@ -160,7 +163,7 @@ function DaycareRegister() {
         name: "",
         phone: "",
         address: "",
-        license: "",
+        nid_number: "", // updated field
         image: null,
       });
       setImagePreview(null);
@@ -237,30 +240,50 @@ function DaycareRegister() {
 
                     <Form.Group className="mb-3" controlId="password">
                       <Form.Label><FaLock className="me-2" />Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        isInvalid={!!errors.password}
-                        placeholder="Enter password"
-                        disabled={isLoading}
-                      />
-                      <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+                      <InputGroup>
+                        <Form.Control
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          isInvalid={!!errors.password}
+                          placeholder="Enter password"
+                          disabled={isLoading}
+                        />
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          tabIndex={-1}
+                          style={{ border: "none", background: "transparent" }} // removed border
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </Button>
+                        <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+                      </InputGroup>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="confirmPassword">
                       <Form.Label>Confirm Password</Form.Label>
-                      <Form.Control
-                        type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        isInvalid={!!errors.confirmPassword}
-                        placeholder="Confirm password"
-                        disabled={isLoading}
-                      />
-                      <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
+                      <InputGroup>
+                        <Form.Control
+                          type={showConfirmPassword ? "text" : "password"}
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          isInvalid={!!errors.confirmPassword}
+                          placeholder="Confirm password"
+                          disabled={isLoading}
+                        />
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => setShowConfirmPassword((prev) => !prev)}
+                          tabIndex={-1}
+                          style={{ border: "none", background: "transparent" }} // removed border
+                        >
+                          {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                        </Button>
+                        <Form.Control.Feedback type="invalid">{errors.confirmPassword}</Form.Control.Feedback>
+                      </InputGroup>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="name">
@@ -305,24 +328,24 @@ function DaycareRegister() {
                       <Form.Control.Feedback type="invalid">{errors.address}</Form.Control.Feedback>
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="license">
-                      <Form.Label><FaCheckCircle className="me-2" />License/Registration No.</Form.Label>
+                    <Form.Group className="mb-3" controlId="nid_number">
+                      <Form.Label><FaCheckCircle className="me-2" />NID Number</Form.Label>
                       <Form.Control
                         type="text"
-                        name="license"
-                        value={formData.license}
+                        name="nid_number"
+                        value={formData.nid_number}
                         onChange={handleChange}
-                        isInvalid={!!errors.license}
-                        placeholder="Enter license or registration number"
+                        isInvalid={!!errors.nid_number}
+                        placeholder="Enter NID number"
                         disabled={isLoading}
                       />
-                      <Form.Control.Feedback type="invalid">{errors.license}</Form.Control.Feedback>
+                      <Form.Control.Feedback type="invalid">{errors.nid_number}</Form.Control.Feedback>
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="image">
                       <Form.Label>
                         <FaImage className="me-2" />
-                        Logo or License Document (JPG, PNG, PDF, max 3MB)
+                        NID Photo (JPG, PNG, PDF, max 3MB)
                       </Form.Label>
                       <Form.Control
                         type="file"
@@ -384,6 +407,13 @@ function DaycareRegister() {
                     </div>
                   </div>
                 )}
+
+                <div className="text-center mt-3">
+                  <span>Already registered? </span>
+                  <Link to="/daycare/login" className="fw-bold" style={{ color: "#90caf9" }}>
+                    Login
+                  </Link>
+                </div>
               </Card.Body>
             </Card>
           </Col>

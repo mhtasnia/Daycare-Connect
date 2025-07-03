@@ -224,7 +224,7 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DaycareCenter
-        fields = ['email', 'password', 'otp_code', 'user_type', 'name', 'phone', 'address', 'license', 'image']
+        fields = ['email', 'password', 'otp_code', 'user_type', 'name', 'phone', 'address', 'nid_number', 'image']
 
     def validate(self, data):
         email = data['email']
