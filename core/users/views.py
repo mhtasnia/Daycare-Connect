@@ -9,7 +9,9 @@ from .serializers import (
     EmailOTPSerializer,
     OTPVerificationSerializer,
     ParentProfileSerializer,
-    UpdateParentProfileSerializer
+    UpdateParentProfileSerializer,
+    DaycareProfileSerializer,
+    UpdateDaycareProfileSerializer,
 )
 from django.contrib.auth import authenticate
 from rest_framework.throttling import UserRateThrottle
@@ -246,3 +248,20 @@ def daycare_logout(request):
         return Response({"detail": "Logout successful."}, status=status.HTTP_205_RESET_CONTENT)
     except Exception:
         return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def daycare_profile(request):
+    daycare = request.user.daycare_profile
+    serializer = DaycareProfileSerializer(daycare)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_daycare_profile(request):
+    daycare = request.user.daycare_profile
+    serializer = UpdateDaycareProfileSerializer(daycare, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"detail": "Profile updated successfully."})
+    return Response(serializer.errors, status=400)

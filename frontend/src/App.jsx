@@ -12,6 +12,7 @@ import DaycareRegister from "./screens/DaycareRegister";
 import DaycareLogin from "./screens/DaycareLogin";
 import ScrollToTop from "./components/ScrollToTop";
 import DaycareDashboard from "./screens/DaycareDashboard";
+import DaycareProfile from "./screens/DaycareProfile";
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
           <Route path="/daycare/register" element={<DaycareRegister />} />
           <Route path="/daycare/login" element={<DaycareLogin />} />
           <Route path="/daycare/dashboard" element={<DaycareDashboard />} />
+          <Route path="/daycare/profile" element={<DaycareProfile />} />
         </Routes>
       </Router>
     </div>

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import User, Parent, DaycareCenter, EmailOTP
+from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage
 from .email_service import EmailService
 
 User = get_user_model()
@@ -216,6 +216,11 @@ class UpdateParentProfileSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Please enter a valid Bangladesh phone number.")
         return value
 
+class DaycareImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DaycareImage
+        fields = ['id', 'image']
+
 class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(write_only=True)
     password = serializers.CharField(write_only=True, min_length=8)
@@ -299,3 +304,30 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
         EmailService.send_welcome_email(user.email, user.user_type)
         
         return daycare
+
+class DaycareProfileSerializer(serializers.ModelSerializer):
+    images = DaycareImageSerializer(many=True, read_only=True)
+    class Meta:
+        model = DaycareCenter
+        fields = ['name', 'phone', 'address', 'description', 'images']
+
+class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
+
+    class Meta:
+        model = DaycareCenter
+        fields = ['name', 'phone', 'address', 'description', 'images']
+
+    def update(self, instance, validated_data):
+        images = validated_data.pop('images', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if images:
+            # Remove old images if you want, or keep them
+            DaycareImage.objects.filter(daycare=instance).delete()
+            for img in images:
+                DaycareImage.objects.create(daycare=instance, image=img)
+        return instance

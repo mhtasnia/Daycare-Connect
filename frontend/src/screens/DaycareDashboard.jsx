@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Container,
   Row,
@@ -9,7 +11,6 @@ import {
   Nav,
   Navbar,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaCalendarAlt,
@@ -29,8 +30,6 @@ import {
 } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend } from "chart.js";
 import "../styles/ParentHome.css"; // Reuse for layout, override colors below
-import axios from "axios";
-import { useEffect } from "react";
 
 
 ChartJS.register(
@@ -46,12 +45,33 @@ ChartJS.register(
 
 
 function DaycareDashboard() {
-  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
   const [user, setUser] = useState({
     name: "Happy Kids Daycare",
     email: "info@happykids.com",
     profileComplete: true,
   });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const accessToken = localStorage.getItem("access");
+      if (!accessToken) {
+        navigate("/daycare/login", { replace: true });
+        return;
+      }
+      try {
+       
+        const res = await axios.get("http://localhost:8000/api/user-auth/daycare/profile/", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        setProfile(res.data);
+      } catch (err) {
+        // handle error
+      }
+    };
+    fetchProfile();
+  }, [navigate]);
 
   //Users cant go Back and access the dashboard after logout 
   useEffect(() => {
@@ -254,7 +274,7 @@ function DaycareDashboard() {
               }}
             >
               <h1 className="welcome-title" style={{ color: "#23395d" }}>
-                Welcome, {user.name}!
+                Welcome{profile && profile.name ? `, ${profile.name}` : ""}!
               </h1>
               <p className="welcome-subtitle" style={{ color: "#23395d" }}>
                 Manage your daycare, bookings, and connect with parents.

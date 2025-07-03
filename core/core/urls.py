@@ -23,8 +23,7 @@ from rest_framework_simplejwt.views import (
 )
 from django.urls import include
 from django.http import JsonResponse
-from django.conf import settings
-from django.conf.urls.static import static
+
 
 def test_logout(request):
     return JsonResponse({'status': 'ok'})
@@ -36,6 +35,3 @@ urlpatterns = [
     path('api/user-auth/', include('users.urls')),
     path('parents/logout/', test_logout),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

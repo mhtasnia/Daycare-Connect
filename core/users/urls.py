@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     parent_register, parent_login, parent_logout, 
     daycare_register_request, daycare_login, daycare_logout,
-    send_otp, verify_otp, parent_profile, update_parent_profile
+    send_otp, verify_otp, parent_profile, update_parent_profile,
+    daycare_profile, update_daycare_profile
 )
 
 urlpatterns = [
@@ -21,4 +22,6 @@ urlpatterns = [
     path('daycares/register/', daycare_register_request, name='daycare-register'),
     path('daycares/login/', daycare_login, name='daycare-login'),
     path('daycares/logout/', daycare_logout, name='daycare-logout'),
+    path('daycare/profile/', daycare_profile, name='daycare-profile'),
+    path('daycare/profile/update/', update_daycare_profile, name='update-daycare-profile'),
 ]

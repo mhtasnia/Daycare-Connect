@@ -138,7 +138,6 @@ class DaycareCenter(models.Model):
     is_verified = models.BooleanField(default=False)
     rating = models.FloatField(default=0.0)
     services = models.TextField()
-    images = models.JSONField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     nid_number = models.CharField(max_length=100, default='UNKNOWN')  # changed from license
     image = models.ImageField(
@@ -147,6 +146,11 @@ class DaycareCenter(models.Model):
         null=False,
         blank=True
     )
+    description = models.TextField(blank=True, default="")  # <-- Add this line
 
     def __str__(self):
         return self.name
+
+class DaycareImage(models.Model):
+    daycare = models.ForeignKey(DaycareCenter, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='media/daycare_docs/')
