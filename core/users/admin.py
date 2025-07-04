@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
 class ParentAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'user', 'full_name', 'profession', 'address',
-        'emergency_contact', 'phone', 'joined_at'
+         'phone', 'joined_at'
     )
     search_fields = (
         'user__email', 'full_name', 'profession', 'address',
@@ -54,7 +54,7 @@ class DaycareCenterAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.filter(user__user_type='daycare')  # <-- FIXED HERE
+        return qs.filter(user__user_type='daycare')  
 
     def user_email(self, obj):
         return obj.user.email
