@@ -350,5 +350,6 @@ JAZZMIN_SETTINGS = {
     
 }
 
+# Media files configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'  # or os.path.join(BASE_DIR, 'media') for older Django
+MEDIA_ROOT = BASE_DIR / 'media'

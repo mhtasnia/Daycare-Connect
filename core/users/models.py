@@ -141,8 +141,8 @@ class DaycareCenter(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     nid_number = models.CharField(max_length=100, default='UNKNOWN')  # changed from license
     image = models.ImageField(
-        upload_to='media/daycare_docs/',
-        default='media/daycare_docs/default.jpg',
+        upload_to='daycare_docs/',
+        default='daycare_docs/default.jpg',
         null=False,
         blank=True
     )
@@ -153,4 +153,4 @@ class DaycareCenter(models.Model):
 
 class DaycareImage(models.Model):
     daycare = models.ForeignKey(DaycareCenter, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='media/daycare_docs/')
+    image = models.ImageField(upload_to='daycare_images/')
