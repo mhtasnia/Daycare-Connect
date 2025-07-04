@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 import {
   Container,
   Row,
@@ -7,391 +9,437 @@ import {
   Form,
   Button,
   Alert,
+  Spinner,
   Nav,
   Tab,
-  Navbar,
-  Spinner,
-  Toast,
-  ToastContainer,
+  Badge,
+  Image,
+  Modal,
 } from "react-bootstrap";
-import { Link, useNavigate } from "react-router-dom";
 import {
   FaUser,
-  FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
-  FaChild,
-  FaUserFriends,
-  FaIdCard,
-  FaArrowLeft,
-  FaHome,
-  FaCalendarAlt,
-  FaSearch,
-  FaBell,
-  FaSignOutAlt,
-  FaSave,
   FaEdit,
+  FaSave,
+  FaArrowLeft,
   FaCheckCircle,
-  FaExclamationTriangle,
+  FaEnvelope,
+  FaCalendarAlt,
+  FaChild,
+  FaPlus,
+  FaTimes,
+  FaUserShield,
+  FaCamera,
+  FaTrash,
+  FaBirthdayCake,
+  FaHeart,
 } from "react-icons/fa";
-import axios from "axios";
 import "../styles/ParentProfile.css";
 
 function ParentProfile() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [alert, setAlert] = useState({ show: false, type: "success", msg: "" });
   const [activeTab, setActiveTab] = useState("personal");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(true);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("success");
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [toastType, setToastType] = useState("success");
+  const [showChildModal, setShowChildModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [editingChild, setEditingChild] = useState(null);
+  const [editingContact, setEditingContact] = useState(null);
 
-  const [formData, setFormData] = useState({
-    // Personal Information
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    gender: "",
-    nationality: "",
-    nidNumber: "",
-    occupation: "",
-    workPlace: "",
-
-    // Contact Information
+  // Profile data state
+  const [profileData, setProfileData] = useState({
     email: "",
+    user_type: "",
+    is_email_verified: false,
+    joined_at: "",
+    full_name: "",
+    profession: "",
     phone: "",
-    alternatePhone: "",
-
-    // Address Information
-    presentAddress: "",
-    permanentAddress: "",
-    city: "",
-    district: "",
-    postalCode: "",
-
-    // Child Information
-    children: [
-      {
-        name: "",
-        dateOfBirth: "",
-        age: "",
-        gender: "",
-        bloodGroup: "",
-        allergies: "",
-        medicalConditions: "",
-        specialNeeds: "",
-        favoriteActivities: "",
-        dietaryRestrictions: "",
-      },
-    ],
-
-    // Emergency Contact
-    emergencyContacts: [
-      {
-        name: "",
-        relationship: "",
-        phone: "",
-        alternatePhone: "",
-        address: "",
-        isAuthorizedPickup: false,
-      },
-    ],
-
-    // Additional Information
-    familySize: "",
-    monthlyIncome: "",
-    preferredDaycareType: "",
-    maxDistance: "",
-    budgetRange: "",
-    additionalRequirements: "",
+    profile_image: null,
+    profile_image_url: "",
+    children: [],
+    address: null,
+    emergency_contacts: [],
   });
 
-  const [errors, setErrors] = useState({});
+  // Form data state
+  const [formData, setFormData] = useState({
+    full_name: "",
+    profession: "",
+    phone: "",
+    profile_image: null,
+    street_address: "",
+    city: "",
+    state_division: "",
+    postal_code: "",
+    country: "Bangladesh",
+  });
 
-  // Load profile data on component mount
+  // Child form data
+  const [childFormData, setChildFormData] = useState({
+    full_name: "",
+    date_of_birth: "",
+    gender: "",
+    special_needs: "",
+    photo: null,
+  });
+
+  // Emergency contact form data
+  const [contactFormData, setContactFormData] = useState({
+    full_name: "",
+    relationship: "",
+    phone_primary: "",
+    phone_secondary: "",
+    email: "",
+    address: "",
+    photo: null,
+    is_authorized_pickup: false,
+    notes: "",
+  });
+
   useEffect(() => {
-    const accessToken = localStorage.getItem("access");
-    if (!accessToken) {
-      navigate("/parent/login", { replace: true });
-      return;
-    }
-    
-    fetchProfileData();
+    fetchProfile();
   }, [navigate]);
 
-  const fetchProfileData = async () => {
+  const fetchProfile = async () => {
     try {
       const accessToken = localStorage.getItem("access");
+      if (!accessToken) {
+        navigate("/parent/login", { replace: true });
+        return;
+      }
+
       const response = await axios.get(
         "http://localhost:8000/api/user-auth/parents/profile/",
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
 
-      const profileData = response.data;
-      
-      // Map backend data to form structure
-      setFormData(prevData => ({
-        ...prevData,
-        email: profileData.email || "",
-        phone: profileData.phone || "",
-        // Split full_name into firstName and lastName
-        firstName: profileData.full_name ? profileData.full_name.split(' ')[0] : "",
-        lastName: profileData.full_name ? profileData.full_name.split(' ').slice(1).join(' ') : "",
-        occupation: profileData.profession || "",
-        presentAddress: profileData.address || "",
-        alternatePhone: profileData.emergency_contact || "",
-      }));
+      const data = response.data;
+      setProfileData(data);
 
+      // Set form data
+      setFormData({
+        full_name: data.full_name || "",
+        profession: data.profession || "",
+        phone: data.phone || "",
+        profile_image: null,
+        street_address: data.address?.street_address || "",
+        city: data.address?.city || "",
+        state_division: data.address?.state_division || "",
+        postal_code: data.address?.postal_code || "",
+        country: data.address?.country || "Bangladesh",
+      });
     } catch (error) {
-      console.error("Failed to fetch profile:", error);
-      if (error.response?.status === 401) {
-        localStorage.clear();
-        navigate("/parent/login", { replace: true });
-      } else {
-        showNotification("Failed to load profile data", "danger");
-      }
-    } finally {
-      setIsPageLoading(false);
-    }
-  };
-
-  const showNotification = (message, type = "success") => {
-    setToastMessage(message);
-    setToastType(type);
-    setShowToast(true);
-    
-    // Auto-hide toast after 5 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 5000);
-  };
-
-  const handleChange = (e, section = null, index = null) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === "checkbox" ? checked : value;
-
-    if (section && index !== null) {
-      setFormData((prev) => ({
-        ...prev,
-        [section]: prev[section].map((item, i) =>
-          i === index ? { ...item, [name]: fieldValue } : item
-        ),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: fieldValue,
-      }));
-    }
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-  };
-
-  const addChild = () => {
-    setFormData((prev) => ({
-      ...prev,
-      children: [
-        ...prev.children,
-        {
-          name: "",
-          dateOfBirth: "",
-          age: "",
-          gender: "",
-          bloodGroup: "",
-          allergies: "",
-          medicalConditions: "",
-          specialNeeds: "",
-          favoriteActivities: "",
-          dietaryRestrictions: "",
-        },
-      ],
-    }));
-  };
-
-  const removeChild = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      children: prev.children.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addEmergencyContact = () => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContacts: [
-        ...prev.emergencyContacts,
-        {
-          name: "",
-          relationship: "",
-          phone: "",
-          alternatePhone: "",
-          address: "",
-          isAuthorizedPickup: false,
-        },
-      ],
-    }));
-  };
-
-  const removeEmergencyContact = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      emergencyContacts: prev.emergencyContacts.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleLogout = async () => {
-    try {
-      const refresh = localStorage.getItem("refresh");
-      const access = localStorage.getItem("access");
-
-      if (refresh && access) {
-        await axios.post(
-          "http://localhost:8000/api/user-auth/parents/logout/",
-          { refresh },
-          {
-            headers: {
-              Authorization: `Bearer ${access}`,
-            },
-          }
-        );
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      localStorage.clear();
-      navigate("/parent/login");
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Basic validation
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
-
-    // Phone validation
-    if (formData.phone && !formData.phone.match(/^(\+8801|01)[0-9]{9}$/)) {
-      newErrors.phone = "Please enter a valid Bangladesh phone number";
-    }
-
-    if (formData.alternatePhone && !formData.alternatePhone.match(/^(\+8801|01)[0-9]{9}$/)) {
-      newErrors.alternatePhone = "Please enter a valid Bangladesh phone number";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      showNotification("Please fix the errors in the form", "danger");
-      return;
-    }
-
-    setIsLoading(true);
-    setShowAlert(false);
-
-    try {
-      const accessToken = localStorage.getItem("access");
-      
-      // Prepare data for backend
-      const updateData = {
-        full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        profession: formData.occupation,
-        address: formData.presentAddress,
-        emergency_contact: formData.alternatePhone,
-        phone: formData.phone,
-      };
-
-      const response = await axios.put(
-        "http://localhost:8000/api/user-auth/parents/profile/update/",
-        updateData,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      // Show success notification
-      showNotification("Profile updated successfully! 🎉", "success");
-      
-      // Show success alert
-      setAlertType("success");
-      setAlertMessage("Your profile has been updated successfully!");
-      setShowAlert(true);
-
-      // Auto-hide alert after 5 seconds
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 5000);
-
-    } catch (error) {
-      console.error("Profile update error:", error);
-      
-      let errorMessage = "Failed to update profile. Please try again.";
-      
-      if (error.response?.status === 401) {
-        localStorage.clear();
-        navigate("/parent/login", { replace: true });
-        return;
-      } else if (error.response?.data) {
-        const errorData = error.response.data;
-        if (errorData.detail) {
-          errorMessage = errorData.detail;
-        } else if (errorData.phone) {
-          errorMessage = `Phone: ${errorData.phone[0]}`;
-        } else if (errorData.emergency_contact) {
-          errorMessage = `Emergency Contact: ${errorData.emergency_contact[0]}`;
-        }
-      }
-
-      // Show error notification
-      showNotification(errorMessage, "danger");
-      
-      // Show error alert
-      setAlertType("danger");
-      setAlertMessage(errorMessage);
-      setShowAlert(true);
-
-      // Auto-hide alert after 8 seconds for errors
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 8000);
-
+      setAlert({
+        show: true,
+        type: "danger",
+        msg: "Failed to load profile.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isPageLoading) {
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profile_image") {
+      setFormData((prev) => ({ ...prev, profile_image: files[0] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setAlert({ show: false, type: "success", msg: "" });
+
+    try {
+      const accessToken = localStorage.getItem("access");
+      const data = new FormData();
+
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] !== null && formData[key] !== "") {
+          data.append(key, formData[key]);
+        }
+      });
+
+      const response = await axios.put(
+        "http://localhost:8000/api/user-auth/parents/profile/update/",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setAlert({
+        show: true,
+        type: "success",
+        msg: "Profile updated successfully!",
+      });
+
+      // Refresh profile data
+      await fetchProfile();
+    } catch (error) {
+      setAlert({
+        show: true,
+        type: "danger",
+        msg: "Failed to update profile.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Child management functions
+  const handleChildSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const accessToken = localStorage.getItem("access");
+      const data = new FormData();
+
+      Object.keys(childFormData).forEach((key) => {
+        if (childFormData[key] !== null && childFormData[key] !== "") {
+          data.append(key, childFormData[key]);
+        }
+      });
+
+      const url = editingChild
+        ? `http://localhost:8000/api/user-auth/parents/children/${editingChild.id}/`
+        : "http://localhost:8000/api/user-auth/parents/children/";
+
+      const method = editingChild ? "put" : "post";
+
+      await axios[method](url, data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setAlert({
+        show: true,
+        type: "success",
+        msg: `Child ${editingChild ? "updated" : "added"} successfully!`,
+      });
+
+      setShowChildModal(false);
+      setEditingChild(null);
+      setChildFormData({
+        full_name: "",
+        date_of_birth: "",
+        gender: "",
+        special_needs: "",
+        photo: null,
+      });
+
+      await fetchProfile();
+    } catch (error) {
+      setAlert({
+        show: true,
+        type: "danger",
+        msg: `Failed to ${editingChild ? "update" : "add"} child.`,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Emergency contact management functions
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const accessToken = localStorage.getItem("access");
+      const data = new FormData();
+
+      Object.keys(contactFormData).forEach((key) => {
+        if (contactFormData[key] !== null && contactFormData[key] !== "") {
+          data.append(key, contactFormData[key]);
+        }
+      });
+
+      const url = editingContact
+        ? `http://localhost:8000/api/user-auth/parents/emergency-contacts/${editingContact.id}/`
+        : "http://localhost:8000/api/user-auth/parents/emergency-contacts/";
+
+      const method = editingContact ? "put" : "post";
+
+      await axios[method](url, data, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setAlert({
+        show: true,
+        type: "success",
+        msg: `Emergency contact ${
+          editingContact ? "updated" : "added"
+        } successfully!`,
+      });
+
+      setShowContactModal(false);
+      setEditingContact(null);
+      setContactFormData({
+        full_name: "",
+        relationship: "",
+        phone_primary: "",
+        phone_secondary: "",
+        email: "",
+        address: "",
+        photo: null,
+        is_authorized_pickup: false,
+        notes: "",
+      });
+
+      await fetchProfile();
+    } catch (error) {
+      setAlert({
+        show: true,
+        type: "danger",
+        msg: `Failed to ${
+          editingContact ? "update" : "add"
+        } emergency contact.`,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteChild = async (childId) => {
+    if (window.confirm("Are you sure you want to delete this child?")) {
+      try {
+        const accessToken = localStorage.getItem("access");
+        await axios.delete(
+          `http://localhost:8000/api/user-auth/parents/children/${childId}/`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        setAlert({
+          show: true,
+          type: "success",
+          msg: "Child deleted successfully!",
+        });
+
+        await fetchProfile();
+      } catch (error) {
+        setAlert({
+          show: true,
+          type: "danger",
+          msg: "Failed to delete child.",
+        });
+      }
+    }
+  };
+
+  const handleDeleteContact = async (contactId) => {
+    if (
+      window.confirm("Are you sure you want to delete this emergency contact?")
+    ) {
+      try {
+        const accessToken = localStorage.getItem("access");
+        await axios.delete(
+          `http://localhost:8000/api/user-auth/parents/emergency-contacts/${contactId}/`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        setAlert({
+          show: true,
+          type: "success",
+          msg: "Emergency contact deleted successfully!",
+        });
+
+        await fetchProfile();
+      } catch (error) {
+        setAlert({
+          show: true,
+          type: "danger",
+          msg: "Failed to delete emergency contact.",
+        });
+      }
+    }
+  };
+
+  const openChildModal = (child = null) => {
+    if (child) {
+      setEditingChild(child);
+      setChildFormData({
+        full_name: child.full_name,
+        date_of_birth: child.date_of_birth,
+        gender: child.gender,
+        special_needs: child.special_needs || "",
+        photo: null,
+      });
+    } else {
+      setEditingChild(null);
+      setChildFormData({
+        full_name: "",
+        date_of_birth: "",
+        gender: "",
+        special_needs: "",
+        photo: null,
+      });
+    }
+    setShowChildModal(true);
+  };
+
+  const openContactModal = (contact = null) => {
+    if (contact) {
+      setEditingContact(contact);
+      setContactFormData({
+        full_name: contact.full_name,
+        relationship: contact.relationship,
+        phone_primary: contact.phone_primary,
+        phone_secondary: contact.phone_secondary || "",
+        email: contact.email || "",
+        address: contact.address || "",
+        photo: null,
+        is_authorized_pickup: contact.is_authorized_pickup,
+        notes: contact.notes || "",
+      });
+    } else {
+      setEditingContact(null);
+      setContactFormData({
+        full_name: "",
+        relationship: "",
+        phone_primary: "",
+        phone_secondary: "",
+        email: "",
+        address: "",
+        photo: null,
+        is_authorized_pickup: false,
+        notes: "",
+      });
+    }
+    setShowContactModal(true);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  if (isLoading) {
     return (
       <div className="parent-profile-wrapper">
         <Container className="py-5">
@@ -408,86 +456,19 @@ function ParentProfile() {
 
   return (
     <div className="parent-profile-wrapper">
-      {/* Toast Notifications */}
-      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
-        <Toast 
-          show={showToast} 
-          onClose={() => setShowToast(false)}
-          bg={toastType === "success" ? "success" : "danger"}
-          delay={5000}
-          autohide
-        >
-          <Toast.Header>
-            <div className="me-auto d-flex align-items-center">
-              {toastType === "success" ? (
-                <FaCheckCircle className="me-2" />
-              ) : (
-                <FaExclamationTriangle className="me-2" />
-              )}
-              <strong>
-                {toastType === "success" ? "Success" : "Error"}
-              </strong>
-            </div>
-          </Toast.Header>
-          <Toast.Body className="text-white">
-            {toastMessage}
-          </Toast.Body>
-        </Toast>
-      </ToastContainer>
-
-      {/* Navigation Header */}
-      <Navbar bg="white" expand="lg" className="parent-navbar shadow-sm">
-        <Container>
-          <Navbar.Brand as={Link} to="/parent/home" className="fw-bold">
-            Daycare <span className="brand-highlight">Connect</span>
-          </Navbar.Brand>
-
-          <Navbar.Toggle aria-controls="parent-navbar" />
-          <Navbar.Collapse id="parent-navbar">
-            <Nav className="ms-auto align-items-center">
-              <Nav.Link as={Link} to="/parent/home" className="nav-item">
-                <FaHome className="me-1" /> Dashboard
-              </Nav.Link>
-              <Nav.Link
-                as={Link}
-                to="/parent/profile"
-                className="nav-item active"
-              >
-                <FaUser className="me-1" /> Profile
-              </Nav.Link>
-              <Nav.Link as={Link} to="/parent/search" className="nav-item">
-                <FaSearch className="me-1" /> Search
-              </Nav.Link>
-              <Nav.Link as={Link} to="/parent/bookings" className="nav-item">
-                <FaCalendarAlt className="me-1" /> Bookings
-              </Nav.Link>
-              <Nav.Link className="nav-item">
-                <FaBell className="me-1" /> Notifications
-              </Nav.Link>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={handleLogout}
-                className="ms-2"
-              >
-                <FaSignOutAlt className="me-1" /> Logout
-              </Button>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-
       <Container className="py-4">
+        {/* Header */}
         <Row className="mb-4">
           <Col>
             <div className="d-flex justify-content-between align-items-center">
               <div>
                 <h1 className="page-title">
-                  <FaEdit className="me-2" />
-                  Update Profile
+                  <FaUser className="me-2" />
+                  My Profile
                 </h1>
                 <p className="page-subtitle">
-                  Complete your profile to get the best daycare recommendations
+                  Manage your personal information, children, and emergency
+                  contacts
                 </p>
               </div>
               <Button
@@ -503,845 +484,858 @@ function ParentProfile() {
           </Col>
         </Row>
 
-        {showAlert && (
+        {/* Alert */}
+        {alert.show && (
           <Row className="mb-4">
             <Col>
-              <Alert 
-                variant={alertType}
-                onClose={() => setShowAlert(false)}
+              <Alert
+                variant={alert.type}
+                onClose={() => setAlert({ ...alert, show: false })}
                 dismissible
               >
                 <div className="d-flex align-items-center">
-                  {alertType === "success" ? (
+                  {alert.type === "success" ? (
                     <FaCheckCircle className="me-2" />
                   ) : (
-                    <FaExclamationTriangle className="me-2" />
+                    <FaEdit className="me-2" />
                   )}
-                  {alertMessage}
+                  {alert.msg}
                 </div>
               </Alert>
             </Col>
           </Row>
         )}
 
-        <Card className="profile-card">
-          <Card.Body className="p-0">
-            <Tab.Container activeKey={activeTab} onSelect={setActiveTab}>
-              <Nav variant="tabs" className="profile-tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="personal">
-                    <FaUser className="me-2" />
-                    Personal Info
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="address">
-                    <FaMapMarkerAlt className="me-2" />
-                    Address Info
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="children">
-                    <FaChild className="me-2" />
-                    Child Info
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="emergency">
-                    <FaUserFriends className="me-2" />
-                    Emergency Contact
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="additional">
-                    <FaIdCard className="me-2" />
-                    Additional Info
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
+        <Row>
+          {/* Profile Info Card */}
+          <Col lg={4} className="mb-4">
+            <Card className="profile-info-card h-100">
+              <Card.Body className="text-center">
+                <div className="profile-avatar mb-3">
+                  {profileData.profile_image_url ? (
+                    <Image
+                      src={profileData.profile_image_url}
+                      roundedCircle
+                      width={120}
+                      height={120}
+                      style={{ objectFit: "cover", border: "4px solid #f48fb1" }}
+                    />
+                  ) : (
+                    <div
+                      className="avatar-placeholder d-flex align-items-center justify-content-center"
+                      style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: "50%",
+                        background: "linear-gradient(45deg, #f48fb1, #ce93d8)",
+                        margin: "0 auto",
+                      }}
+                    >
+                      <FaUser size={40} color="white" />
+                    </div>
+                  )}
+                </div>
 
-              <div className="tab-content-wrapper">
-                <Form onSubmit={handleSubmit}>
+                <h4 style={{ color: "#23395d" }}>
+                  {profileData.full_name || "Parent Name"}
+                </h4>
+
+                <div className="verification-badges mb-3">
+                  <Badge
+                    bg={profileData.is_email_verified ? "success" : "danger"}
+                  >
+                    {profileData.is_email_verified
+                      ? "✓ Email Verified"
+                      : "✗ Email Not Verified"}
+                  </Badge>
+                </div>
+
+                <div className="profile-details text-start">
+                  <p style={{ color: "#23395d" }}>
+                    <FaEnvelope className="me-2" />
+                    {profileData.email}
+                  </p>
+                  <p style={{ color: "#23395d" }}>
+                    <FaCalendarAlt className="me-2" />
+                    Joined {formatDate(profileData.joined_at)}
+                  </p>
+                  <p style={{ color: "#23395d" }}>
+                    <FaChild className="me-2" />
+                    {profileData.children?.length || 0} Children
+                  </p>
+                  <p style={{ color: "#23395d" }}>
+                    <FaUserShield className="me-2" />
+                    {profileData.emergency_contacts?.length || 0} Emergency
+                    Contacts
+                  </p>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* Main Profile Card */}
+          <Col lg={8}>
+            <Card className="profile-card">
+              <Tab.Container
+                activeKey={activeTab}
+                onSelect={(k) => setActiveTab(k)}
+              >
+                <Card.Header className="profile-tabs">
+                  <Nav variant="tabs">
+                    <Nav.Item>
+                      <Nav.Link eventKey="personal">
+                        <FaUser className="me-2" />
+                        Personal Info
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="children">
+                        <FaChild className="me-2" />
+                        Children ({profileData.children?.length || 0})
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="emergency">
+                        <FaUserShield className="me-2" />
+                        Emergency Contacts (
+                        {profileData.emergency_contacts?.length || 0})
+                      </Nav.Link>
+                    </Nav.Item>
+                  </Nav>
+                </Card.Header>
+
+                <Card.Body className="tab-content-wrapper">
                   <Tab.Content>
                     {/* Personal Information Tab */}
                     <Tab.Pane eventKey="personal">
-                      <div className="tab-section">
-                        <h4 className="section-title">Personal Information</h4>
+                      <Form onSubmit={handleSaveProfile}>
+                        <div className="tab-section">
+                          <h5 className="section-title">
+                            <FaUser className="me-2" />
+                            Personal Information
+                          </h5>
+                          <Row>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>
+                                  <FaUser className="me-2" />
+                                  Full Name
+                                </Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="full_name"
+                                  value={formData.full_name}
+                                  onChange={handleChange}
+                                  placeholder="Enter your full name"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Profession</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="profession"
+                                  value={formData.profession}
+                                  onChange={handleChange}
+                                  placeholder="Enter your profession"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>
+                                  <FaPhone className="me-2" />
+                                  Phone Number
+                                </Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="phone"
+                                  value={formData.phone}
+                                  onChange={handleChange}
+                                  placeholder="Enter your phone number"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>
+                                  <FaCamera className="me-2" />
+                                  Profile Picture
+                                </Form.Label>
+                                <Form.Control
+                                  type="file"
+                                  name="profile_image"
+                                  accept="image/*"
+                                  onChange={handleChange}
+                                />
+                              </Form.Group>
+                            </Col>
+                          </Row>
+                        </div>
 
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>First Name *</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                isInvalid={!!errors.firstName}
-                                placeholder="Enter your first name"
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.firstName}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Last Name *</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                isInvalid={!!errors.lastName}
-                                placeholder="Enter your last name"
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.lastName}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                        </Row>
+                        <div className="tab-section">
+                          <h5 className="section-title">
+                            <FaMapMarkerAlt className="me-2" />
+                            Address Information
+                          </h5>
+                          <Row>
+                            <Col md={12}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Street Address</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="street_address"
+                                  value={formData.street_address}
+                                  onChange={handleChange}
+                                  placeholder="Enter your street address"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>City</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="city"
+                                  value={formData.city}
+                                  onChange={handleChange}
+                                  placeholder="Enter your city"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>State/Division</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="state_division"
+                                  value={formData.state_division}
+                                  onChange={handleChange}
+                                  placeholder="Enter your state/division"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Postal Code</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="postal_code"
+                                  value={formData.postal_code}
+                                  onChange={handleChange}
+                                  placeholder="Enter postal code"
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Country</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  name="country"
+                                  value={formData.country}
+                                  onChange={handleChange}
+                                  placeholder="Enter country"
+                                />
+                              </Form.Group>
+                            </Col>
+                          </Row>
+                        </div>
 
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Date of Birth</Form.Label>
-                              <Form.Control
-                                type="date"
-                                name="dateOfBirth"
-                                value={formData.dateOfBirth}
-                                onChange={handleChange}
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Gender</Form.Label>
-                              <Form.Select
-                                name="gender"
-                                value={formData.gender}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>
-                                <FaEnvelope className="me-2" />
-                                Email Address *
-                              </Form.Label>
-                              <Form.Control
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                isInvalid={!!errors.email}
-                                placeholder="Enter your email"
-                                disabled // Email should not be editable
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.email}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>
-                                <FaPhone className="me-2" />
-                                Phone Number *
-                              </Form.Label>
-                              <Form.Control
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                isInvalid={!!errors.phone}
-                                placeholder="01XXXXXXXXX"
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.phone}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Alternate Phone</Form.Label>
-                              <Form.Control
-                                type="tel"
-                                name="alternatePhone"
-                                value={formData.alternatePhone}
-                                onChange={handleChange}
-                                isInvalid={!!errors.alternatePhone}
-                                placeholder="01XXXXXXXXX (Optional)"
-                              />
-                              <Form.Control.Feedback type="invalid">
-                                {errors.alternatePhone}
-                              </Form.Control.Feedback>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Nationality</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="nationality"
-                                value={formData.nationality}
-                                onChange={handleChange}
-                                placeholder="e.g., Bangladeshi"
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>NID Number</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="nidNumber"
-                                value={formData.nidNumber}
-                                onChange={handleChange}
-                                placeholder="National ID Number"
-                              />
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Occupation</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="occupation"
-                                value={formData.occupation}
-                                onChange={handleChange}
-                                placeholder="Your profession"
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3">
-                          <Form.Label>Workplace</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="workPlace"
-                            value={formData.workPlace}
-                            onChange={handleChange}
-                            placeholder="Company/Organization name"
-                          />
-                        </Form.Group>
-                      </div>
+                        <div className="text-center">
+                          <Button
+                            type="submit"
+                            className="btn-profile-save"
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <>
+                                <Spinner
+                                  animation="border"
+                                  size="sm"
+                                  className="me-2"
+                                />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <FaSave className="me-2" />
+                                Save Profile
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </Form>
                     </Tab.Pane>
 
-                    {/* Address Information Tab */}
-                    <Tab.Pane eventKey="address">
-                      <div className="tab-section">
-                        <h4 className="section-title">Address Information</h4>
-
-                        <Form.Group className="mb-3">
-                          <Form.Label>Present Address *</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            name="presentAddress"
-                            value={formData.presentAddress}
-                            onChange={handleChange}
-                            placeholder="Enter your current address"
-                          />
-                        </Form.Group>
-
-                        <Form.Group className="mb-3">
-                          <Form.Label>Permanent Address</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            name="permanentAddress"
-                            value={formData.permanentAddress}
-                            onChange={handleChange}
-                            placeholder="Enter your permanent address"
-                          />
-                        </Form.Group>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>City *</Form.Label>
-                              <Form.Select
-                                name="city"
-                                value={formData.city}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select your city</option>
-                                <option value="Dhaka">Dhaka</option>
-                                <option value="Chittagong">Chittagong</option>
-                                <option value="Sylhet">Sylhet</option>
-                                <option value="Rajshahi">Rajshahi</option>
-                                <option value="Khulna">Khulna</option>
-                                <option value="Barisal">Barisal</option>
-                                <option value="Rangpur">Rangpur</option>
-                                <option value="Mymensingh">Mymensingh</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>District</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="district"
-                                value={formData.district}
-                                onChange={handleChange}
-                                placeholder="Enter your district"
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Postal Code</Form.Label>
-                              <Form.Control
-                                type="text"
-                                name="postalCode"
-                                value={formData.postalCode}
-                                onChange={handleChange}
-                                placeholder="Enter postal code"
-                              />
-                            </Form.Group>
-                          </Col>
-                        </Row>
-                      </div>
-                    </Tab.Pane>
-
-                    {/* Children Information Tab */}
+                    {/* Children Tab */}
                     <Tab.Pane eventKey="children">
-                      <div className="tab-section">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                          <h4 className="section-title">Child Information</h4>
+                      <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h5 className="section-title">
+                          <FaChild className="me-2" />
+                          My Children
+                        </h5>
+                        <Button
+                          variant="primary"
+                          onClick={() => openChildModal()}
+                        >
+                          <FaPlus className="me-2" />
+                          Add Child
+                        </Button>
+                      </div>
+
+                      <Row>
+                        {profileData.children?.map((child) => (
+                          <Col md={6} key={child.id} className="mb-3">
+                            <Card className="child-card">
+                              <Card.Header className="d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center">
+                                  {child.photo_url ? (
+                                    <Image
+                                      src={child.photo_url}
+                                      roundedCircle
+                                      width={40}
+                                      height={40}
+                                      className="me-2"
+                                      style={{ objectFit: "cover" }}
+                                    />
+                                  ) : (
+                                    <div
+                                      className="child-avatar me-2"
+                                      style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: "50%",
+                                        background: "#f48fb1",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}
+                                    >
+                                      <FaChild color="white" />
+                                    </div>
+                                  )}
+                                  <strong>{child.full_name}</strong>
+                                </div>
+                                <div>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    className="me-2"
+                                    onClick={() => openChildModal(child)}
+                                  >
+                                    <FaEdit />
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => handleDeleteChild(child.id)}
+                                  >
+                                    <FaTrash />
+                                  </Button>
+                                </div>
+                              </Card.Header>
+                              <Card.Body>
+                                <p>
+                                  <FaBirthdayCake className="me-2" />
+                                  <strong>Age:</strong> {child.age} years old
+                                </p>
+                                <p>
+                                  <strong>Gender:</strong>{" "}
+                                  {child.gender.charAt(0).toUpperCase() +
+                                    child.gender.slice(1)}
+                                </p>
+                                <p>
+                                  <strong>Date of Birth:</strong>{" "}
+                                  {formatDate(child.date_of_birth)}
+                                </p>
+                                {child.special_needs && (
+                                  <p>
+                                    <FaHeart className="me-2" />
+                                    <strong>Special Needs:</strong>{" "}
+                                    {child.special_needs}
+                                  </p>
+                                )}
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
+
+                      {(!profileData.children ||
+                        profileData.children.length === 0) && (
+                        <div className="text-center py-5">
+                          <FaChild size={48} className="text-muted mb-3" />
+                          <h5>No Children Added</h5>
+                          <p className="text-muted">
+                            Add your children's information to get started with
+                            daycare bookings.
+                          </p>
                           <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={addChild}
+                            variant="primary"
+                            onClick={() => openChildModal()}
                           >
-                            <FaChild className="me-1" /> Add Another Child
+                            <FaPlus className="me-2" />
+                            Add Your First Child
                           </Button>
                         </div>
-
-                        {formData.children.map((child, index) => (
-                          <Card key={index} className="child-card mb-4">
-                            <Card.Header className="d-flex justify-content-between align-items-center">
-                              <h6 className="mb-0">Child {index + 1}</h6>
-                              {formData.children.length > 1 && (
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  onClick={() => removeChild(index)}
-                                >
-                                  Remove
-                                </Button>
-                              )}
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Child's Name *</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="name"
-                                      value={child.name}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Enter child's name"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Date of Birth</Form.Label>
-                                    <Form.Control
-                                      type="date"
-                                      name="dateOfBirth"
-                                      value={child.dateOfBirth}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Row>
-                                <Col md={4}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Age</Form.Label>
-                                    <Form.Control
-                                      type="number"
-                                      name="age"
-                                      value={child.age}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Age in years"
-                                      min="0"
-                                      max="12"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={4}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Gender</Form.Label>
-                                    <Form.Select
-                                      name="gender"
-                                      value={child.gender}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                    >
-                                      <option value="">Select gender</option>
-                                      <option value="Male">Male</option>
-                                      <option value="Female">Female</option>
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                                <Col md={4}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Blood Group</Form.Label>
-                                    <Form.Select
-                                      name="bloodGroup"
-                                      value={child.bloodGroup}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                    >
-                                      <option value="">
-                                        Select blood group
-                                      </option>
-                                      <option value="A+">A+</option>
-                                      <option value="A-">A-</option>
-                                      <option value="B+">B+</option>
-                                      <option value="B-">B-</option>
-                                      <option value="AB+">AB+</option>
-                                      <option value="AB-">AB-</option>
-                                      <option value="O+">O+</option>
-                                      <option value="O-">O-</option>
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Row>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Allergies</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="allergies"
-                                      value={child.allergies}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Any known allergies"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Medical Conditions</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="medicalConditions"
-                                      value={child.medicalConditions}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Any medical conditions"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Row>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Special Needs</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="specialNeeds"
-                                      value={child.specialNeeds}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Any special needs or requirements"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Favorite Activities</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="favoriteActivities"
-                                      value={child.favoriteActivities}
-                                      onChange={(e) =>
-                                        handleChange(e, "children", index)
-                                      }
-                                      placeholder="Child's favorite activities"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Form.Group className="mb-3">
-                                <Form.Label>Dietary Restrictions</Form.Label>
-                                <Form.Control
-                                  as="textarea"
-                                  rows={2}
-                                  name="dietaryRestrictions"
-                                  value={child.dietaryRestrictions}
-                                  onChange={(e) =>
-                                    handleChange(e, "children", index)
-                                  }
-                                  placeholder="Any dietary restrictions or preferences"
-                                />
-                              </Form.Group>
-                            </Card.Body>
-                          </Card>
-                        ))}
-                      </div>
+                      )}
                     </Tab.Pane>
 
-                    {/* Emergency Contact Tab */}
+                    {/* Emergency Contacts Tab */}
                     <Tab.Pane eventKey="emergency">
-                      <div className="tab-section">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                          <h4 className="section-title">Emergency Contact</h4>
+                      <div className="d-flex justify-content-between align-items-center mb-4">
+                        <h5 className="section-title">
+                          <FaUserShield className="me-2" />
+                          Emergency Contacts
+                        </h5>
+                        <Button
+                          variant="primary"
+                          onClick={() => openContactModal()}
+                        >
+                          <FaPlus className="me-2" />
+                          Add Contact
+                        </Button>
+                      </div>
+
+                      <Row>
+                        {profileData.emergency_contacts?.map((contact) => (
+                          <Col md={6} key={contact.id} className="mb-3">
+                            <Card className="emergency-card">
+                              <Card.Header className="d-flex justify-content-between align-items-center">
+                                <div className="d-flex align-items-center">
+                                  {contact.photo_url ? (
+                                    <Image
+                                      src={contact.photo_url}
+                                      roundedCircle
+                                      width={40}
+                                      height={40}
+                                      className="me-2"
+                                      style={{ objectFit: "cover" }}
+                                    />
+                                  ) : (
+                                    <div
+                                      className="contact-avatar me-2"
+                                      style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: "50%",
+                                        background: "#90caf9",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}
+                                    >
+                                      <FaUserShield color="white" />
+                                    </div>
+                                  )}
+                                  <div>
+                                    <strong>{contact.full_name}</strong>
+                                    <br />
+                                    <small className="text-muted">
+                                      {contact.relationship.charAt(0).toUpperCase() +
+                                        contact.relationship.slice(1)}
+                                    </small>
+                                  </div>
+                                </div>
+                                <div>
+                                  <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    className="me-2"
+                                    onClick={() => openContactModal(contact)}
+                                  >
+                                    <FaEdit />
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleDeleteContact(contact.id)
+                                    }
+                                  >
+                                    <FaTrash />
+                                  </Button>
+                                </div>
+                              </Card.Header>
+                              <Card.Body>
+                                <p>
+                                  <FaPhone className="me-2" />
+                                  <strong>Primary:</strong>{" "}
+                                  {contact.phone_primary}
+                                </p>
+                                {contact.phone_secondary && (
+                                  <p>
+                                    <FaPhone className="me-2" />
+                                    <strong>Secondary:</strong>{" "}
+                                    {contact.phone_secondary}
+                                  </p>
+                                )}
+                                {contact.email && (
+                                  <p>
+                                    <FaEnvelope className="me-2" />
+                                    {contact.email}
+                                  </p>
+                                )}
+                                {contact.is_authorized_pickup && (
+                                  <Badge bg="success" className="mb-2">
+                                    ✓ Authorized for Pickup
+                                  </Badge>
+                                )}
+                                {contact.notes && (
+                                  <p>
+                                    <small className="text-muted">
+                                      {contact.notes}
+                                    </small>
+                                  </p>
+                                )}
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        ))}
+                      </Row>
+
+                      {(!profileData.emergency_contacts ||
+                        profileData.emergency_contacts.length === 0) && (
+                        <div className="text-center py-5">
+                          <FaUserShield size={48} className="text-muted mb-3" />
+                          <h5>No Emergency Contacts</h5>
+                          <p className="text-muted">
+                            Add emergency contacts for your children's safety and
+                            security.
+                          </p>
                           <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={addEmergencyContact}
+                            variant="primary"
+                            onClick={() => openContactModal()}
                           >
-                            <FaUserFriends className="me-1" /> Add Contact
+                            <FaPlus className="me-2" />
+                            Add Emergency Contact
                           </Button>
                         </div>
-
-                        {formData.emergencyContacts.map((contact, index) => (
-                          <Card key={index} className="emergency-card mb-4">
-                            <Card.Header className="d-flex justify-content-between align-items-center">
-                              <h6 className="mb-0">
-                                Emergency Contact {index + 1}
-                              </h6>
-                              {formData.emergencyContacts.length > 1 && (
-                                <Button
-                                  variant="outline-danger"
-                                  size="sm"
-                                  onClick={() => removeEmergencyContact(index)}
-                                >
-                                  Remove
-                                </Button>
-                              )}
-                            </Card.Header>
-                            <Card.Body>
-                              <Row>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Contact Name *</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      name="name"
-                                      value={contact.name}
-                                      onChange={(e) =>
-                                        handleChange(
-                                          e,
-                                          "emergencyContacts",
-                                          index
-                                        )
-                                      }
-                                      placeholder="Enter contact name"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Relationship *</Form.Label>
-                                    <Form.Select
-                                      name="relationship"
-                                      value={contact.relationship}
-                                      onChange={(e) =>
-                                        handleChange(
-                                          e,
-                                          "emergencyContacts",
-                                          index
-                                        )
-                                      }
-                                    >
-                                      <option value="">
-                                        Select relationship
-                                      </option>
-                                      <option value="Spouse">Spouse</option>
-                                      <option value="Parent">Parent</option>
-                                      <option value="Sibling">Sibling</option>
-                                      <option value="Grandparent">
-                                        Grandparent
-                                      </option>
-                                      <option value="Friend">Friend</option>
-                                      <option value="Relative">Relative</option>
-                                      <option value="Other">Other</option>
-                                    </Form.Select>
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Row>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Phone Number *</Form.Label>
-                                    <Form.Control
-                                      type="tel"
-                                      name="phone"
-                                      value={contact.phone}
-                                      onChange={(e) =>
-                                        handleChange(
-                                          e,
-                                          "emergencyContacts",
-                                          index
-                                        )
-                                      }
-                                      placeholder="01XXXXXXXXX"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                                <Col md={6}>
-                                  <Form.Group className="mb-3">
-                                    <Form.Label>Alternate Phone</Form.Label>
-                                    <Form.Control
-                                      type="tel"
-                                      name="alternatePhone"
-                                      value={contact.alternatePhone}
-                                      onChange={(e) =>
-                                        handleChange(
-                                          e,
-                                          "emergencyContacts",
-                                          index
-                                        )
-                                      }
-                                      placeholder="01XXXXXXXXX (Optional)"
-                                    />
-                                  </Form.Group>
-                                </Col>
-                              </Row>
-
-                              <Form.Group className="mb-3">
-                                <Form.Label>Address</Form.Label>
-                                <Form.Control
-                                  as="textarea"
-                                  rows={2}
-                                  name="address"
-                                  value={contact.address}
-                                  onChange={(e) =>
-                                    handleChange(e, "emergencyContacts", index)
-                                  }
-                                  placeholder="Enter contact address"
-                                />
-                              </Form.Group>
-
-                              <Form.Group className="mb-3">
-                                <Form.Check
-                                  type="checkbox"
-                                  name="isAuthorizedPickup"
-                                  checked={contact.isAuthorizedPickup}
-                                  onChange={(e) =>
-                                    handleChange(e, "emergencyContacts", index)
-                                  }
-                                  label="Authorized to pick up child"
-                                />
-                              </Form.Group>
-                            </Card.Body>
-                          </Card>
-                        ))}
-                      </div>
-                    </Tab.Pane>
-
-                    {/* Additional Information Tab */}
-                    <Tab.Pane eventKey="additional">
-                      <div className="tab-section">
-                        <h4 className="section-title">
-                          Additional Information
-                        </h4>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Family Size</Form.Label>
-                              <Form.Select
-                                name="familySize"
-                                value={formData.familySize}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select family size</option>
-                                <option value="2">2 members</option>
-                                <option value="3">3 members</option>
-                                <option value="4">4 members</option>
-                                <option value="5">5 members</option>
-                                <option value="6+">6+ members</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Monthly Income Range</Form.Label>
-                              <Form.Select
-                                name="monthlyIncome"
-                                value={formData.monthlyIncome}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select income range</option>
-                                <option value="Below 30,000">
-                                  Below ৳30,000
-                                </option>
-                                <option value="30,000-50,000">
-                                  ৳30,000 - ৳50,000
-                                </option>
-                                <option value="50,000-80,000">
-                                  ৳50,000 - ৳80,000
-                                </option>
-                                <option value="80,000-120,000">
-                                  ৳80,000 - ৳1,20,000
-                                </option>
-                                <option value="Above 120,000">
-                                  Above ৳1,20,000
-                                </option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Preferred Daycare Type</Form.Label>
-                              <Form.Select
-                                name="preferredDaycareType"
-                                value={formData.preferredDaycareType}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select preference</option>
-                                <option value="Home-based">Home-based</option>
-                                <option value="Center-based">
-                                  Center-based
-                                </option>
-                                <option value="Montessori">Montessori</option>
-                                <option value="Play-based">Play-based</option>
-                                <option value="Academic-focused">
-                                  Academic-focused
-                                </option>
-                                <option value="No preference">
-                                  No preference
-                                </option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                          <Col md={6}>
-                            <Form.Group className="mb-3">
-                              <Form.Label>Maximum Distance (km)</Form.Label>
-                              <Form.Select
-                                name="maxDistance"
-                                value={formData.maxDistance}
-                                onChange={handleChange}
-                              >
-                                <option value="">Select distance</option>
-                                <option value="1">Within 1 km</option>
-                                <option value="2">Within 2 km</option>
-                                <option value="5">Within 5 km</option>
-                                <option value="10">Within 10 km</option>
-                                <option value="15">Within 15 km</option>
-                                <option value="No limit">No limit</option>
-                              </Form.Select>
-                            </Form.Group>
-                          </Col>
-                        </Row>
-
-                        <Form.Group className="mb-3">
-                          <Form.Label>Budget Range (Monthly)</Form.Label>
-                          <Form.Select
-                            name="budgetRange"
-                            value={formData.budgetRange}
-                            onChange={handleChange}
-                          >
-                            <option value="">Select budget range</option>
-                            <option value="Below 5,000">Below ৳5,000</option>
-                            <option value="5,000-10,000">
-                              ৳5,000 - ৳10,000
-                            </option>
-                            <option value="10,000-15,000">
-                              ৳10,000 - ৳15,000
-                            </option>
-                            <option value="15,000-25,000">
-                              ৳15,000 - ৳25,000
-                            </option>
-                            <option value="Above 25,000">Above ৳25,000</option>
-                          </Form.Select>
-                        </Form.Group>
-
-                        <Form.Group className="mb-4">
-                          <Form.Label>Additional Requirements</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={4}
-                            name="additionalRequirements"
-                            value={formData.additionalRequirements}
-                            onChange={handleChange}
-                            placeholder="Any specific requirements or preferences for your child's daycare..."
-                          />
-                        </Form.Group>
-                      </div>
+                      )}
                     </Tab.Pane>
                   </Tab.Content>
+                </Card.Body>
+              </Tab.Container>
+            </Card>
+          </Col>
+        </Row>
 
-                  {/* Submit Button */}
-                  <div className="text-center py-4">
-                    <Button
-                      type="submit"
-                      className="btn-profile-save"
-                      size="lg"
-                      disabled={isLoading}
+        {/* Child Modal */}
+        <Modal
+          show={showChildModal}
+          onHide={() => setShowChildModal(false)}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {editingChild ? "Edit Child" : "Add Child"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleChildSubmit}>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Full Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={childFormData.full_name}
+                      onChange={(e) =>
+                        setChildFormData({
+                          ...childFormData,
+                          full_name: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Birth</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={childFormData.date_of_birth}
+                      onChange={(e) =>
+                        setChildFormData({
+                          ...childFormData,
+                          date_of_birth: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Gender</Form.Label>
+                    <Form.Select
+                      value={childFormData.gender}
+                      onChange={(e) =>
+                        setChildFormData({
+                          ...childFormData,
+                          gender: e.target.value,
+                        })
+                      }
+                      required
                     >
-                      {isLoading ? (
-                        <>
-                          <Spinner
-                            animation="border"
-                            size="sm"
-                            className="me-2"
-                          />
-                          Updating Profile...
-                        </>
-                      ) : (
-                        <>
-                          <FaSave className="me-2" />
-                          Save Profile
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </Form>
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Photo</Form.Label>
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setChildFormData({
+                          ...childFormData,
+                          photo: e.target.files[0],
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Special Needs/Medical Conditions</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={childFormData.special_needs}
+                      onChange={(e) =>
+                        setChildFormData({
+                          ...childFormData,
+                          special_needs: e.target.value,
+                        })
+                      }
+                      placeholder="Any allergies, medical conditions, or special needs..."
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <div className="text-end">
+                <Button
+                  variant="secondary"
+                  className="me-2"
+                  onClick={() => setShowChildModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave className="me-2" />
+                      {editingChild ? "Update" : "Add"} Child
+                    </>
+                  )}
+                </Button>
               </div>
-            </Tab.Container>
-          </Card.Body>
-        </Card>
+            </Form>
+          </Modal.Body>
+        </Modal>
+
+        {/* Emergency Contact Modal */}
+        <Modal
+          show={showContactModal}
+          onHide={() => setShowContactModal(false)}
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {editingContact ? "Edit Emergency Contact" : "Add Emergency Contact"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleContactSubmit}>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Full Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={contactFormData.full_name}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          full_name: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Relationship</Form.Label>
+                    <Form.Select
+                      value={contactFormData.relationship}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          relationship: e.target.value,
+                        })
+                      }
+                      required
+                    >
+                      <option value="">Select Relationship</option>
+                      <option value="spouse">Spouse</option>
+                      <option value="parent">Parent</option>
+                      <option value="sibling">Sibling</option>
+                      <option value="grandparent">Grandparent</option>
+                      <option value="friend">Friend</option>
+                      <option value="neighbor">Neighbor</option>
+                      <option value="other">Other</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Primary Phone</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={contactFormData.phone_primary}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          phone_primary: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Secondary Phone</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={contactFormData.phone_secondary}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          phone_secondary: e.target.value,
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={contactFormData.email}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          email: e.target.value,
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Photo</Form.Label>
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          photo: e.target.files[0],
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Address</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      value={contactFormData.address}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          address: e.target.value,
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Check
+                      type="checkbox"
+                      label="Authorized to pick up children"
+                      checked={contactFormData.is_authorized_pickup}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          is_authorized_pickup: e.target.checked,
+                        })
+                      }
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={12}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Notes</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      value={contactFormData.notes}
+                      onChange={(e) =>
+                        setContactFormData({
+                          ...contactFormData,
+                          notes: e.target.value,
+                        })
+                      }
+                      placeholder="Additional notes about this contact..."
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <div className="text-end">
+                <Button
+                  variant="secondary"
+                  className="me-2"
+                  onClick={() => setShowContactModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave className="me-2" />
+                      {editingContact ? "Update" : "Add"} Contact
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
       </Container>
     </div>
   );

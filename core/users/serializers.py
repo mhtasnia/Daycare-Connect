@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage
+from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage, Child, Address, EmergencyContact
 from .email_service import EmailService
 
 User = get_user_model()
@@ -188,33 +188,122 @@ class BaseRegisterSerializer(serializers.ModelSerializer):
 class ParentRegisterSerializer(BaseRegisterSerializer):
     pass  # Inherits all functionality from BaseRegisterSerializer
 
+# Child Serializer
+class ChildSerializer(serializers.ModelSerializer):
+    age = serializers.ReadOnlyField()
+    photo_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Child
+        fields = ['id', 'full_name', 'date_of_birth', 'gender', 'special_needs', 'photo', 'photo_url', 'age', 'created_at']
+    
+    def get_photo_url(self, obj):
+        if obj.photo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.photo.url)
+            return obj.photo.url
+        return None
+
+# Address Serializer
+class AddressSerializer(serializers.ModelSerializer):
+    full_address = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = Address
+        fields = ['street_address', 'city', 'state_division', 'postal_code', 'country', 'full_address']
+
+# Emergency Contact Serializer
+class EmergencyContactSerializer(serializers.ModelSerializer):
+    photo_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = EmergencyContact
+        fields = [
+            'id', 'full_name', 'relationship', 'phone_primary', 'phone_secondary', 
+            'email', 'address', 'photo', 'photo_url', 'is_authorized_pickup', 'notes', 'created_at'
+        ]
+    
+    def get_photo_url(self, obj):
+        if obj.photo:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.photo.url)
+            return obj.photo.url
+        return None
+
+# Enhanced Parent Profile Serializer
 class ParentProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email', read_only=True)
     user_type = serializers.CharField(source='user.user_type', read_only=True)
     is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
     joined_at = serializers.DateTimeField(source='user.joined_at', read_only=True)
+    profile_image_url = serializers.SerializerMethodField()
+    children = ChildSerializer(many=True, read_only=True)
+    address = AddressSerializer(read_only=True)
+    emergency_contacts = EmergencyContactSerializer(many=True, read_only=True)
 
     class Meta:
         model = Parent
         fields = [
             'email', 'user_type', 'is_email_verified', 'joined_at',
-            'full_name', 'profession', 'address', 'emergency_contact', 'phone'
+            'full_name', 'profession', 'phone', 'profile_image', 'profile_image_url',
+            'children', 'address', 'emergency_contacts'
         ]
+    
+    def get_profile_image_url(self, obj):
+        if obj.profile_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.profile_image.url)
+            return obj.profile_image.url
+        return None
 
+# Update Parent Profile Serializer
 class UpdateParentProfileSerializer(serializers.ModelSerializer):
+    # Address fields
+    street_address = serializers.CharField(required=False, allow_blank=True)
+    city = serializers.CharField(required=False, allow_blank=True)
+    state_division = serializers.CharField(required=False, allow_blank=True)
+    postal_code = serializers.CharField(required=False, allow_blank=True)
+    country = serializers.CharField(required=False, allow_blank=True)
+    
     class Meta:
         model = Parent
-        fields = ['full_name', 'profession', 'address', 'emergency_contact', 'phone']
+        fields = [
+            'full_name', 'profession', 'phone', 'profile_image',
+            'street_address', 'city', 'state_division', 'postal_code', 'country'
+        ]
 
     def validate_phone(self, value):
         if value and not value.startswith(('01', '+8801')):
             raise serializers.ValidationError("Please enter a valid Bangladesh phone number.")
         return value
 
-    def validate_emergency_contact(self, value):
-        if value and not value.startswith(('01', '+8801')):
-            raise serializers.ValidationError("Please enter a valid Bangladesh phone number.")
-        return value
+    def update(self, instance, validated_data):
+        # Extract address fields
+        address_fields = {
+            'street_address': validated_data.pop('street_address', None),
+            'city': validated_data.pop('city', None),
+            'state_division': validated_data.pop('state_division', None),
+            'postal_code': validated_data.pop('postal_code', None),
+            'country': validated_data.pop('country', None),
+        }
+        
+        # Update parent fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update or create address
+        address_data = {k: v for k, v in address_fields.items() if v is not None}
+        if address_data:
+            address, created = Address.objects.get_or_create(parent=instance)
+            for attr, value in address_data.items():
+                setattr(address, attr, value)
+            address.save()
+        
+        return instance
 
 class DaycareImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()

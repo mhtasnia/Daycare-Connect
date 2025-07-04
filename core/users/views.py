@@ -12,6 +12,8 @@ from .serializers import (
     UpdateParentProfileSerializer,
     DaycareProfileSerializer,
     UpdateDaycareProfileSerializer,
+    ChildSerializer,
+    EmergencyContactSerializer,
 )
 from django.contrib.auth import authenticate
 from rest_framework.throttling import UserRateThrottle
@@ -19,7 +21,7 @@ from rest_framework.decorators import throttle_classes
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsParent, IsDaycare
-from .models import DaycareCenter, EmailOTP, Parent
+from .models import DaycareCenter, EmailOTP, Parent, Child, EmergencyContact
 
 class OTPRateThrottle(UserRateThrottle):
     rate = '5/hour'  # Allow 5 OTP requests per hour per IP
@@ -140,7 +142,7 @@ def parent_profile(request):
     """Get parent profile information"""
     try:
         parent = request.user.parent_profile
-        serializer = ParentProfileSerializer(parent)
+        serializer = ParentProfileSerializer(parent, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Parent.DoesNotExist:
         return Response({
@@ -163,7 +165,7 @@ def update_parent_profile(request):
             serializer.save()
             
             # Return updated profile data
-            updated_serializer = ParentProfileSerializer(parent)
+            updated_serializer = ParentProfileSerializer(parent, context={'request': request})
             return Response({
                 'detail': 'Profile updated successfully.',
                 'profile': updated_serializer.data
@@ -175,6 +177,104 @@ def update_parent_profile(request):
         return Response({
             'detail': 'Parent profile not found.'
         }, status=status.HTTP_404_NOT_FOUND)
+
+# Child Management Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated, IsParent])
+def manage_children(request):
+    """Get all children or add a new child"""
+    parent = request.user.parent_profile
+    
+    if request.method == 'GET':
+        children = parent.children.all()
+        serializer = ChildSerializer(children, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    elif request.method == 'POST':
+        serializer = ChildSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(parent=parent)
+            return Response({
+                'detail': 'Child added successfully.',
+                'child': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated, IsParent])
+def manage_child(request, child_id):
+    """Get, update, or delete a specific child"""
+    try:
+        child = Child.objects.get(id=child_id, parent=request.user.parent_profile)
+    except Child.DoesNotExist:
+        return Response({'detail': 'Child not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = ChildSerializer(child, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    elif request.method == 'PUT':
+        serializer = ChildSerializer(child, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'detail': 'Child updated successfully.',
+                'child': serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        child.delete()
+        return Response({'detail': 'Child deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+# Emergency Contact Management Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated, IsParent])
+def manage_emergency_contacts(request):
+    """Get all emergency contacts or add a new one"""
+    parent = request.user.parent_profile
+    
+    if request.method == 'GET':
+        contacts = parent.emergency_contacts.all()
+        serializer = EmergencyContactSerializer(contacts, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    elif request.method == 'POST':
+        serializer = EmergencyContactSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(parent=parent)
+            return Response({
+                'detail': 'Emergency contact added successfully.',
+                'contact': serializer.data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated, IsParent])
+def manage_emergency_contact(request, contact_id):
+    """Get, update, or delete a specific emergency contact"""
+    try:
+        contact = EmergencyContact.objects.get(id=contact_id, parent=request.user.parent_profile)
+    except EmergencyContact.DoesNotExist:
+        return Response({'detail': 'Emergency contact not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'GET':
+        serializer = EmergencyContactSerializer(contact, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    elif request.method == 'PUT':
+        serializer = EmergencyContactSerializer(contact, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'detail': 'Emergency contact updated successfully.',
+                'contact': serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        contact.delete()
+        return Response({'detail': 'Emergency contact deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsParent])

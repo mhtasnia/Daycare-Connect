@@ -116,9 +116,8 @@ class Parent(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='parent_profile')
     full_name = models.CharField(max_length=100, blank=True)
     profession = models.CharField(max_length=100, blank=True)
-    address = models.TextField(blank=True)
-    emergency_contact = models.CharField(max_length=20, blank=True)
     phone = models.CharField(max_length=20, blank=True)
+    profile_image = models.ImageField(upload_to='parent_images/', blank=True, null=True)
     joined_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -127,7 +126,79 @@ class Parent(models.Model):
         ordering = ['full_name']
         
     def __str__(self):
+        return self.full_name or self.user.email
+
+class Address(models.Model):
+    parent = models.OneToOneField(Parent, on_delete=models.CASCADE, related_name='address')
+    street_address = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state_division = models.CharField(max_length=100, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, default='Bangladesh')
+    
+    def __str__(self):
+        return f"{self.street_address}, {self.city}"
+    
+    @property
+    def full_address(self):
+        parts = [self.street_address, self.city, self.state_division, self.postal_code, self.country]
+        return ', '.join([part for part in parts if part])
+
+class Child(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+    ]
+    
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='children')
+    full_name = models.CharField(max_length=100)
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    special_needs = models.TextField(blank=True, help_text="Any special needs, allergies, or medical conditions")
+    photo = models.ImageField(upload_to='child_photos/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['date_of_birth']
+    
+    def __str__(self):
         return self.full_name
+    
+    @property
+    def age(self):
+        from datetime import date
+        today = date.today()
+        return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+
+class EmergencyContact(models.Model):
+    RELATIONSHIP_CHOICES = [
+        ('spouse', 'Spouse'),
+        ('parent', 'Parent'),
+        ('sibling', 'Sibling'),
+        ('grandparent', 'Grandparent'),
+        ('friend', 'Friend'),
+        ('neighbor', 'Neighbor'),
+        ('other', 'Other'),
+    ]
+    
+    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='emergency_contacts')
+    full_name = models.CharField(max_length=100)
+    relationship = models.CharField(max_length=20, choices=RELATIONSHIP_CHOICES)
+    phone_primary = models.CharField(max_length=20)
+    phone_secondary = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    address = models.TextField(blank=True)
+    photo = models.ImageField(upload_to='emergency_contact_photos/', blank=True, null=True)
+    is_authorized_pickup = models.BooleanField(default=False, help_text="Can this person pick up your child?")
+    notes = models.TextField(blank=True, help_text="Additional notes about this contact")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['full_name']
+    
+    def __str__(self):
+        return f"{self.full_name} ({self.relationship})"
 
 class DaycareCenter(models.Model):
     user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='daycare_profile')
