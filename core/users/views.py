@@ -252,16 +252,32 @@ def daycare_logout(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def daycare_profile(request):
-    daycare = request.user.daycare_profile
-    serializer = DaycareProfileSerializer(daycare)
-    return Response(serializer.data)
+    try:
+        daycare = request.user.daycare_profile
+        serializer = DaycareProfileSerializer(daycare, context={'request': request})
+        return Response(serializer.data)
+    except DaycareCenter.DoesNotExist:
+        return Response({
+            'detail': 'Daycare profile not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_daycare_profile(request):
-    daycare = request.user.daycare_profile
-    serializer = UpdateDaycareProfileSerializer(daycare, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"detail": "Profile updated successfully."})
-    return Response(serializer.errors, status=400)
+    try:
+        daycare = request.user.daycare_profile
+        serializer = UpdateDaycareProfileSerializer(daycare, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # Return updated profile data
+            updated_serializer = DaycareProfileSerializer(daycare, context={'request': request})
+            return Response({
+                'detail': 'Profile updated successfully.',
+                'profile': updated_serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except DaycareCenter.DoesNotExist:
+        return Response({
+            'detail': 'Daycare profile not found.'
+        }, status=status.HTTP_404_NOT_FOUND)

@@ -217,9 +217,19 @@ class UpdateParentProfileSerializer(serializers.ModelSerializer):
         return value
 
 class DaycareImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = DaycareImage
-        fields = ['id', 'image']
+        fields = ['id', 'image', 'image_url']
+    
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(write_only=True)
@@ -306,10 +316,29 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
         return daycare
 
 class DaycareProfileSerializer(serializers.ModelSerializer):
-    images = DaycareImageSerializer(many=True, read_only=True)
+    images = DaycareImageSerializer(many=True, read_only=True, context={'request': None})
+    email = serializers.EmailField(source='user.email', read_only=True)
+    user_type = serializers.CharField(source='user.user_type', read_only=True)
+    is_verified = serializers.BooleanField(source='user.is_verified', read_only=True)
+    is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
+    joined_at = serializers.DateTimeField(source='user.created_at', read_only=True)
+    main_image_url = serializers.SerializerMethodField()
+    
     class Meta:
         model = DaycareCenter
-        fields = ['name', 'phone', 'address', 'description', 'images']
+        fields = [
+            'email', 'user_type', 'is_verified', 'is_email_verified', 'joined_at',
+            'name', 'phone', 'address', 'description', 'nid_number', 'rating',
+            'services', 'area', 'image', 'main_image_url', 'images'
+        ]
+    
+    def get_main_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
 
 class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -318,13 +347,14 @@ class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DaycareCenter
-        fields = ['name', 'phone', 'address', 'description', 'images']
+        fields = ['name', 'phone', 'address', 'description', 'services', 'area', 'images']
 
     def update(self, instance, validated_data):
         images = validated_data.pop('images', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+        
         if images:
             # Remove old images if you want, or keep them
             DaycareImage.objects.filter(daycare=instance).delete()
