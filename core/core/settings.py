@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "auth_app",
     "api_app",
     "users",
+    "booking",
     "corsheaders",
 ]
 
