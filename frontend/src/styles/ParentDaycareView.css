@@ -1,5 +1,5 @@
-/* Daycare Profile Styles */
-.daycare-profile-wrapper {
+/* Parent Daycare View Styles */
+.parent-daycare-view-wrapper {
   background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
   min-height: 100vh;
   color: #333;

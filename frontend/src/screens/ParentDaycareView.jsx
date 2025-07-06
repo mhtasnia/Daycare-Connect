@@ -39,9 +39,9 @@ import {
   FaThumbsDown,
   FaFlag,
 } from "react-icons/fa";
-import "../styles/DaycareProfile.css";
+import "../styles/ParentDaycareView.css";
 
-function DaycareProfile() {
+function ParentDaycareView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [daycare, setDaycare] = useState(null);
@@ -212,7 +212,7 @@ function DaycareProfile() {
 
   if (isLoading) {
     return (
-      <div className="daycare-profile-wrapper">
+      <div className="parent-daycare-view-wrapper">
         <Container className="py-5">
           <Row className="justify-content-center">
             <Col md={6} className="text-center">
@@ -227,7 +227,7 @@ function DaycareProfile() {
 
   if (!daycare) {
     return (
-      <div className="daycare-profile-wrapper">
+      <div className="parent-daycare-view-wrapper">
         <Container className="py-5">
           <Alert variant="danger">
             <h4>Daycare Not Found</h4>
@@ -242,7 +242,7 @@ function DaycareProfile() {
   }
 
   return (
-    <div className="daycare-profile-wrapper">
+    <div className="parent-daycare-view-wrapper">
       {/* Navigation Header */}
       <Navbar bg="white" expand="lg" className="parent-navbar shadow-sm">
         <Container>
@@ -683,4 +683,4 @@ function DaycareProfile() {
   );
 }
 
-export default DaycareProfile;
+export default ParentDaycareView;
