@@ -1,220 +1,223 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Container,
   Row,
   Col,
   Card,
-  Form,
   Button,
-  Alert,
-  Spinner,
   Badge,
   Image,
+  Spinner,
+  Alert,
+  Carousel,
+  Nav,
+  Navbar,
+  Modal,
+  Form,
 } from "react-bootstrap";
-import { 
-  FaUser, 
-  FaPhone, 
-  FaMapMarkerAlt, 
-  FaImage, 
-  FaEdit, 
-  FaSave, 
-  FaArrowLeft, 
-  FaCheckCircle,
-  FaEnvelope,
-  FaCalendarAlt,
+import {
+  FaArrowLeft,
   FaStar,
-  FaBuilding,
-  FaIdCard,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaEnvelope,
+  FaClock,
+  FaUsers,
+  FaChild,
+  FaDollarSign,
+  FaCheckCircle,
+  FaCalendarAlt,
+  FaHome,
+  FaUser,
+  FaSearch,
+  FaBell,
+  FaSignOutAlt,
   FaImages,
-  FaTimes
+  FaQuoteLeft,
+  FaThumbsUp,
+  FaThumbsDown,
+  FaFlag,
 } from "react-icons/fa";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import "../styles/DaycareProfile.css";
 
 function DaycareProfile() {
-  const location = useLocation();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [editMode, setEditMode] = useState(false);
+  const [daycare, setDaycare] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [alert, setAlert] = useState({ show: false, type: "success", msg: "" });
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedChild, setSelectedChild] = useState("");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingType, setBookingType] = useState("full-time");
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    description: "",
-    services: "",
-    area: "",
-    images: [],
-    imagePreviews: [],
-  });
+  // Mock data - will be replaced with API call
+  const mockDaycare = {
+    id: 1,
+    name: "Little Stars Daycare",
+    area: "Dhanmondi",
+    address: "House 15, Road 7, Dhanmondi, Dhaka",
+    phone: "01712345678",
+    email: "info@littlestars.com",
+    rating: 4.8,
+    reviewCount: 24,
+    isVerified: true,
+    services: [
+      "Full-time care",
+      "Part-time care", 
+      "Meals included",
+      "Educational activities",
+      "Outdoor play",
+      "Art & crafts",
+      "Music classes",
+      "Nap time"
+    ],
+    ageGroups: ["6 months - 2 years", "2-4 years"],
+    capacity: 30,
+    currentOccupancy: 22,
+    monthlyFee: 8000,
+    dailyFee: 300,
+    hourlyFee: 50,
+    images: [
+      "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "https://images.pexels.com/photos/8613092/pexels-photo-8613092.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "https://images.pexels.com/photos/8613093/pexels-photo-8613093.jpeg?auto=compress&cs=tinysrgb&w=800",
+      "https://images.pexels.com/photos/8613094/pexels-photo-8613094.jpeg?auto=compress&cs=tinysrgb&w=800",
+    ],
+    description: "Little Stars Daycare provides a nurturing and safe environment for children aged 6 months to 4 years. Our experienced caregivers focus on early childhood development through play-based learning, creative activities, and structured routines. We offer nutritious meals, educational programs, and a loving atmosphere where your child can grow and thrive.",
+    operatingHours: "7:00 AM - 6:00 PM",
+    operatingDays: "Monday - Friday",
+    facilities: [
+      "Air-conditioned rooms",
+      "Secure playground",
+      "CCTV monitoring",
+      "Medical first aid",
+      "Nutritious meals",
+      "Educational toys",
+      "Reading corner",
+      "Art supplies"
+    ],
+    staff: [
+      {
+        name: "Ms. Fatima Rahman",
+        role: "Head Teacher",
+        experience: "8 years",
+        qualification: "B.Ed in Early Childhood"
+      },
+      {
+        name: "Ms. Nasreen Ahmed",
+        role: "Assistant Teacher", 
+        experience: "5 years",
+        qualification: "Diploma in Child Care"
+      }
+    ],
+    reviews: [
+      {
+        id: 1,
+        parentName: "Rashida Begum",
+        rating: 5,
+        date: "2024-01-15",
+        comment: "Excellent care for my daughter. The teachers are very loving and professional. Highly recommended!",
+        helpful: 12,
+        childAge: "2 years"
+      },
+      {
+        id: 2,
+        parentName: "Ahmed Hassan",
+        rating: 4,
+        date: "2024-01-10", 
+        comment: "Good daycare with nice facilities. My son enjoys going there every day. The only issue is sometimes they're a bit crowded.",
+        helpful: 8,
+        childAge: "3 years"
+      },
+      {
+        id: 3,
+        parentName: "Salma Khatun",
+        rating: 5,
+        date: "2024-01-05",
+        comment: "Amazing staff and clean environment. They take great care of the children and provide regular updates to parents.",
+        helpful: 15,
+        childAge: "18 months"
+      }
+    ],
+    policies: {
+      dropOffTime: "7:00 AM - 9:00 AM",
+      pickUpTime: "4:00 PM - 6:00 PM", 
+      sickPolicy: "Children with fever or contagious illness should stay home",
+      mealPolicy: "Nutritious breakfast, lunch and snacks provided",
+      emergencyContact: "01712345678"
+    }
+  };
 
-  const [profileData, setProfileData] = useState({
-    email: "",
-    user_type: "",
-    is_verified: false,
-    is_email_verified: false,
-    joined_at: "",
-    rating: 0,
-    nid_number: "",
-    main_image_url: "",
-    images: []
-  });
+  // Mock children data - would come from parent profile
+  const mockChildren = [
+    { id: 1, name: "Aisha Rahman", age: 2, gender: "female" },
+    { id: 2, name: "Omar Hassan", age: 3, gender: "male" }
+  ];
 
   useEffect(() => {
-    fetchProfile();
-  }, [navigate]);
-
-  const fetchProfile = async () => {
-    try {
-      const accessToken = localStorage.getItem("access");
-      if (!accessToken) {
-        navigate("/daycare/login", { replace: true });
-        return;
-      }
-      
-      const res = await axios.get("http://localhost:8000/api/user-auth/daycare/profile/", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      
-      const data = res.data;
-      setProfileData({
-        email: data.email || "",
-        user_type: data.user_type || "",
-        is_verified: data.is_verified || false,
-        is_email_verified: data.is_email_verified || false,
-        joined_at: data.joined_at || "",
-        rating: data.rating || 0,
-        nid_number: data.nid_number || "",
-        main_image_url: data.main_image_url || "",
-        images: data.images || []
-      });
-      
-      setFormData({
-        name: data.name || "",
-        phone: data.phone || "",
-        address: data.address || "",
-        description: data.description || "",
-        services: data.services || "",
-        area: data.area || "",
-        images: [],
-        imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
-      });
-    } catch (err) {
-      setAlert({ show: true, type: "danger", msg: "Failed to load profile." });
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
+      setDaycare(mockDaycare);
       setIsLoading(false);
-    }
-  };
-
-  // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle description (rich text)
-  const handleDescriptionChange = (value) => {
-    setFormData((prev) => ({ ...prev, description: value }));
-  };
-
-  // Handle image uploads
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData((prev) => ({
-      ...prev,
-      images: files,
-      imagePreviews: files.map((file) => URL.createObjectURL(file)),
-    }));
-  };
-
-  // Remove image preview
-  const removeImagePreview = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      imagePreviews: prev.imagePreviews.filter((_, i) => i !== index),
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Save profile
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setAlert({ show: false, type: "success", msg: "" });
-    
-    try {
-      const accessToken = localStorage.getItem("access");
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("phone", formData.phone);
-      data.append("address", formData.address);
-      data.append("description", formData.description);
-      data.append("services", formData.services);
-      data.append("area", formData.area);
-      
-      // Only append images if there are any
-      if (formData.images && formData.images.length > 0) {
-        formData.images.forEach((img) => data.append("images", img));
-      }
-      
-      const response = await axios.put(
-        "http://localhost:8000/api/user-auth/daycare/profile/update/", 
-        data, 
-        {
-          headers: { 
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'multipart/form-data'
-          },
-        }
-      );
-      
-      setAlert({ show: true, type: "success", msg: "Profile updated successfully!" });
-      setEditMode(false);
-      
-      // Refresh profile data
-      await fetchProfile();
-      
-    } catch (err) {
-      setAlert({ show: true, type: "danger", msg: "Failed to update profile." });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+    }, 1000);
+  }, [id]);
 
   const renderStars = (rating) => {
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <FaStar 
-          key={i} 
-          className={i <= rating ? "text-warning" : "text-muted"} 
-        />
-      );
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={i} className="text-warning" />);
     }
+
+    if (hasHalfStar) {
+      stars.push(<FaStar key="half" className="text-warning" style={{ opacity: 0.5 }} />);
+    }
+
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<FaStar key={`empty-${i}`} className="text-muted" />);
+    }
+
     return stars;
+  };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.clear();
+      navigate("/parent/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  const handleBooking = () => {
+    if (!selectedChild || !bookingDate) {
+      alert("Please select a child and booking date");
+      return;
+    }
+    
+    // Navigate to booking confirmation page
+    navigate(`/parent/book/${id}`, {
+      state: {
+        daycare,
+        selectedChild,
+        bookingDate,
+        bookingType
+      }
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="daycare-profile-wrapper" style={{ background: "linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%)", minHeight: "100vh" }}>
+      <div className="daycare-profile-wrapper">
         <Container className="py-5">
           <Row className="justify-content-center">
             <Col md={6} className="text-center">
               <Spinner animation="border" variant="primary" />
-              <p className="mt-3">Loading your profile...</p>
+              <p className="mt-3">Loading daycare profile...</p>
             </Col>
           </Row>
         </Container>
@@ -222,468 +225,460 @@ function DaycareProfile() {
     );
   }
 
+  if (!daycare) {
+    return (
+      <div className="daycare-profile-wrapper">
+        <Container className="py-5">
+          <Alert variant="danger">
+            <h4>Daycare Not Found</h4>
+            <p>The daycare you're looking for doesn't exist or has been removed.</p>
+            <Button as={Link} to="/parent/search" variant="primary">
+              Back to Search
+            </Button>
+          </Alert>
+        </Container>
+      </div>
+    );
+  }
+
   return (
-    <div className="daycare-profile-wrapper" style={{ background: "linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%)", minHeight: "100vh" }}>
+    <div className="daycare-profile-wrapper">
+      {/* Navigation Header */}
+      <Navbar bg="white" expand="lg" className="parent-navbar shadow-sm">
+        <Container>
+          <Navbar.Brand as={Link} to="/parent/home" className="fw-bold">
+            Daycare <span className="brand-highlight">Connect</span>
+          </Navbar.Brand>
+
+          <Navbar.Toggle aria-controls="parent-navbar" />
+          <Navbar.Collapse id="parent-navbar">
+            <Nav className="ms-auto align-items-center">
+              <Nav.Link as={Link} to="/parent/home" className="nav-item">
+                <FaHome className="me-1" /> Dashboard
+              </Nav.Link>
+              <Nav.Link as={Link} to="/parent/profile" className="nav-item">
+                <FaUser className="me-1" /> Profile
+              </Nav.Link>
+              <Nav.Link as={Link} to="/parent/search" className="nav-item">
+                <FaSearch className="me-1" /> Search
+              </Nav.Link>
+              <Nav.Link as={Link} to="/parent/bookings" className="nav-item">
+                <FaCalendarAlt className="me-1" /> Bookings
+              </Nav.Link>
+              <Nav.Link className="nav-item">
+                <FaBell className="me-1" /> Notifications
+              </Nav.Link>
+            </Nav>
+            
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={handleLogout}
+              className="ms-2"
+            >
+              <FaSignOutAlt className="me-1" /> Logout
+            </Button>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+
       <Container className="py-4">
-        {/* Header */}
-        <Row className="mb-4">
+        {/* Back Button */}
+        <Row className="mb-3">
           <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h1 className="page-title" style={{ color: "#23395d" }}>
-                  <FaBuilding className="me-2" />
-                  Daycare Profile
-                </h1>
-                <p className="page-subtitle" style={{ color: "#23395d" }}>
-                  Manage your daycare information and showcase your services
-                </p>
-              </div>
-              <Button
-                as={Link}
-                to="/daycare/dashboard"
-                variant="outline-secondary"
-                className="back-btn"
-                style={{ color: "#23395d", borderColor: "#90caf9" }}
-              >
-                <FaArrowLeft className="me-2" />
-                Back to Dashboard
-              </Button>
-            </div>
+            <Button
+              variant="outline-secondary"
+              onClick={() => navigate(-1)}
+              className="back-btn"
+            >
+              <FaArrowLeft className="me-2" />
+              Back to Search
+            </Button>
           </Col>
         </Row>
 
-        {/* Alert */}
-        {alert.show && (
-          <Row className="mb-4">
-            <Col>
-              <Alert variant={alert.type} onClose={() => setAlert({ ...alert, show: false })} dismissible>
-                <div className="d-flex align-items-center">
-                  {alert.type === "success" ? (
-                    <FaCheckCircle className="me-2" />
-                  ) : (
-                    <FaEdit className="me-2" />
-                  )}
-                  {alert.msg}
-                </div>
-              </Alert>
-            </Col>
-          </Row>
-        )}
+        {/* Daycare Header */}
+        <Row className="mb-4">
+          <Col>
+            <Card className="daycare-header-card">
+              <Card.Body>
+                <Row>
+                  <Col lg={8}>
+                    <div className="daycare-title-section">
+                      <div className="d-flex align-items-center mb-2">
+                        <h1 className="daycare-title">{daycare.name}</h1>
+                        {daycare.isVerified && (
+                          <Badge bg="success" className="verified-badge ms-3">
+                            <FaCheckCircle className="me-1" />
+                            Verified
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="daycare-rating mb-3">
+                        <div className="stars">
+                          {renderStars(daycare.rating)}
+                        </div>
+                        <span className="rating-text ms-2">
+                          {daycare.rating} ({daycare.reviewCount} reviews)
+                        </span>
+                      </div>
+
+                      <div className="daycare-location mb-3">
+                        <FaMapMarkerAlt className="me-2" />
+                        <span>{daycare.address}</span>
+                      </div>
+
+                      <div className="daycare-contact">
+                        <div className="contact-item">
+                          <FaPhone className="me-2" />
+                          <a href={`tel:${daycare.phone}`}>{daycare.phone}</a>
+                        </div>
+                        <div className="contact-item">
+                          <FaEnvelope className="me-2" />
+                          <a href={`mailto:${daycare.email}`}>{daycare.email}</a>
+                        </div>
+                      </div>
+                    </div>
+                  </Col>
+                  <Col lg={4} className="text-end">
+                    <div className="booking-summary">
+                      <div className="availability-info">
+                        <h5>Availability</h5>
+                        <div className="capacity-bar">
+                          <div 
+                            className="capacity-fill" 
+                            style={{ width: `${(daycare.currentOccupancy / daycare.capacity) * 100}%` }}
+                          ></div>
+                        </div>
+                        <p>{daycare.capacity - daycare.currentOccupancy} of {daycare.capacity} slots available</p>
+                      </div>
+                      
+                      <div className="pricing-info">
+                        <h5>Pricing</h5>
+                        <div className="price-item">Monthly: ৳{daycare.monthlyFee.toLocaleString()}</div>
+                        <div className="price-item">Daily: ৳{daycare.dailyFee}</div>
+                        <div className="price-item">Hourly: ৳{daycare.hourlyFee}</div>
+                      </div>
+
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        className="book-now-btn"
+                        onClick={() => setShowBookingModal(true)}
+                        disabled={daycare.currentOccupancy >= daycare.capacity}
+                      >
+                        <FaCalendarAlt className="me-2" />
+                        {daycare.currentOccupancy >= daycare.capacity ? "Fully Booked" : "Book Now"}
+                      </Button>
+                    </div>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Image Gallery */}
+        <Row className="mb-4">
+          <Col>
+            <Card className="gallery-card">
+              <Card.Header>
+                <h4>
+                  <FaImages className="me-2" />
+                  Photo Gallery
+                </h4>
+              </Card.Header>
+              <Card.Body>
+                <Carousel>
+                  {daycare.images.map((image, index) => (
+                    <Carousel.Item key={index}>
+                      <Image
+                        src={image}
+                        alt={`${daycare.name} - Image ${index + 1}`}
+                        className="gallery-image"
+                      />
+                    </Carousel.Item>
+                  ))}
+                </Carousel>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
 
         <Row>
-          {/* Profile Info Card */}
-          <Col lg={4} className="mb-4">
-            <Card className="profile-info-card h-100" style={{ border: "2px solid #90caf9", background: "rgba(153, 242, 200, 0.08)" }}>
-              <Card.Body className="text-center">
-                <div className="profile-avatar mb-3">
-                  {profileData.main_image_url ? (
-                    <Image 
-                      src={profileData.main_image_url} 
-                      roundedCircle 
-                      width={120} 
-                      height={120}
-                      style={{ objectFit: 'cover', border: '4px solid #90caf9' }}
-                    />
-                  ) : (
-                    <div 
-                      className="avatar-placeholder d-flex align-items-center justify-content-center"
-                      style={{ 
-                        width: 120, 
-                        height: 120, 
-                        borderRadius: '50%', 
-                        background: 'linear-gradient(45deg, #99f2c8, #90caf9)',
-                        margin: '0 auto'
-                      }}
-                    >
-                      <FaBuilding size={40} color="#23395d" />
+          {/* Main Content */}
+          <Col lg={8}>
+            {/* About Section */}
+            <Card className="info-card mb-4">
+              <Card.Header>
+                <h4>About {daycare.name}</h4>
+              </Card.Header>
+              <Card.Body>
+                <p className="description">{daycare.description}</p>
+                
+                <Row className="mt-4">
+                  <Col md={6}>
+                    <h6>Operating Hours</h6>
+                    <div className="info-item">
+                      <FaClock className="me-2" />
+                      {daycare.operatingHours}
                     </div>
-                  )}
-                </div>
-                
-                <h4 style={{ color: "#23395d" }}>{formData.name || "Daycare Name"}</h4>
-                
-                <div className="mb-3">
-                  {renderStars(profileData.rating)}
-                  <small className="text-muted d-block">({profileData.rating}/5.0)</small>
-                </div>
+                    <div className="info-item">
+                      <FaCalendarAlt className="me-2" />
+                      {daycare.operatingDays}
+                    </div>
+                  </Col>
+                  <Col md={6}>
+                    <h6>Age Groups</h6>
+                    <div className="info-item">
+                      <FaChild className="me-2" />
+                      {daycare.ageGroups.join(", ")}
+                    </div>
+                    <div className="info-item">
+                      <FaUsers className="me-2" />
+                      Capacity: {daycare.capacity} children
+                    </div>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
 
-                <div className="verification-badges mb-3">
-                  <Badge 
-                    bg={profileData.is_verified ? "success" : "warning"} 
-                    className="me-2"
-                  >
-                    {profileData.is_verified ? "✓ Verified" : "⏳ Pending Verification"}
-                  </Badge>
-                  <Badge 
-                    bg={profileData.is_email_verified ? "success" : "danger"}
-                  >
-                    {profileData.is_email_verified ? "✓ Email Verified" : "✗ Email Not Verified"}
-                  </Badge>
-                </div>
+            {/* Services Section */}
+            <Card className="info-card mb-4">
+              <Card.Header>
+                <h4>Services Offered</h4>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  {daycare.services.map((service, index) => (
+                    <Col md={6} key={index} className="mb-2">
+                      <div className="service-item">
+                        <FaCheckCircle className="text-success me-2" />
+                        {service}
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              </Card.Body>
+            </Card>
 
-                <div className="profile-details text-start">
-                  <p style={{ color: "#23395d" }}>
-                    <FaEnvelope className="me-2" />
-                    {profileData.email}
-                  </p>
-                  <p style={{ color: "#23395d" }}>
-                    <FaCalendarAlt className="me-2" />
-                    Joined {formatDate(profileData.joined_at)}
-                  </p>
-                  <p style={{ color: "#23395d" }}>
-                    <FaIdCard className="me-2" />
-                    NID: {profileData.nid_number}
-                  </p>
-                </div>
+            {/* Facilities Section */}
+            <Card className="info-card mb-4">
+              <Card.Header>
+                <h4>Facilities</h4>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  {daycare.facilities.map((facility, index) => (
+                    <Col md={6} key={index} className="mb-2">
+                      <div className="facility-item">
+                        <FaCheckCircle className="text-primary me-2" />
+                        {facility}
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              </Card.Body>
+            </Card>
+
+            {/* Staff Section */}
+            <Card className="info-card mb-4">
+              <Card.Header>
+                <h4>Our Staff</h4>
+              </Card.Header>
+              <Card.Body>
+                <Row>
+                  {daycare.staff.map((member, index) => (
+                    <Col md={6} key={index} className="mb-3">
+                      <div className="staff-member">
+                        <h6>{member.name}</h6>
+                        <p className="role">{member.role}</p>
+                        <p className="experience">Experience: {member.experience}</p>
+                        <p className="qualification">{member.qualification}</p>
+                      </div>
+                    </Col>
+                  ))}
+                </Row>
+              </Card.Body>
+            </Card>
+
+            {/* Reviews Section */}
+            <Card className="info-card mb-4">
+              <Card.Header>
+                <h4>Parent Reviews ({daycare.reviewCount})</h4>
+              </Card.Header>
+              <Card.Body>
+                {daycare.reviews.map((review) => (
+                  <div key={review.id} className="review-item">
+                    <div className="review-header">
+                      <div className="reviewer-info">
+                        <strong>{review.parentName}</strong>
+                        <span className="child-age">• Child: {review.childAge}</span>
+                      </div>
+                      <div className="review-rating">
+                        {renderStars(review.rating)}
+                        <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="review-content">
+                      <FaQuoteLeft className="quote-icon" />
+                      <p>{review.comment}</p>
+                    </div>
+                    <div className="review-actions">
+                      <Button variant="outline-success" size="sm">
+                        <FaThumbsUp className="me-1" />
+                        Helpful ({review.helpful})
+                      </Button>
+                      <Button variant="outline-secondary" size="sm" className="ms-2">
+                        <FaFlag className="me-1" />
+                        Report
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </Card.Body>
             </Card>
           </Col>
 
-          {/* Main Profile Card */}
-          <Col lg={8}>
-            <Card className="profile-card" style={{ border: "2px solid #90caf9", background: "rgba(153, 242, 200, 0.08)" }}>
+          {/* Sidebar */}
+          <Col lg={4}>
+            {/* Policies Card */}
+            <Card className="sidebar-card mb-4">
+              <Card.Header>
+                <h5>Policies & Guidelines</h5>
+              </Card.Header>
               <Card.Body>
-                {!editMode ? (
-                  // View Mode
-                  <div>
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 style={{ color: "#23395d" }}>
-                        <FaUser className="me-2" />
-                        Daycare Information
-                      </h4>
-                      <Button
-                        className="btn-edit-profile"
-                        style={{
-                          background: "linear-gradient(45deg, #99f2c8, #90caf9)",
-                          color: "#23395d",
-                          border: "none",
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                        }}
-                        onClick={() => setEditMode(true)}
-                      >
-                        <FaEdit className="me-2" />
-                        Edit Profile
-                      </Button>
-                    </div>
+                <div className="policy-item">
+                  <strong>Drop-off Time:</strong>
+                  <p>{daycare.policies.dropOffTime}</p>
+                </div>
+                <div className="policy-item">
+                  <strong>Pick-up Time:</strong>
+                  <p>{daycare.policies.pickUpTime}</p>
+                </div>
+                <div className="policy-item">
+                  <strong>Sick Policy:</strong>
+                  <p>{daycare.policies.sickPolicy}</p>
+                </div>
+                <div className="policy-item">
+                  <strong>Meal Policy:</strong>
+                  <p>{daycare.policies.mealPolicy}</p>
+                </div>
+                <div className="policy-item">
+                  <strong>Emergency Contact:</strong>
+                  <p>{daycare.policies.emergencyContact}</p>
+                </div>
+              </Card.Body>
+            </Card>
 
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaBuilding className="me-2" />
-                          Daycare Name:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.name || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaPhone className="me-2" />
-                          Phone:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.phone || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaMapMarkerAlt className="me-2" />
-                          Area:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.area || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Services:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.services || "Not provided"}</p>
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaMapMarkerAlt className="me-2" />
-                          Full Address:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.address || "Not provided"}</p>
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Description:
-                        </strong>
-                        <div
-                          className="mt-2"
-                          style={{ color: "#555" }}
-                          dangerouslySetInnerHTML={{ __html: formData.description || "No description provided" }}
-                        />
-                      </Col>
-                    </Row>
-
-                    {/* Gallery */}
-                    <div className="mt-4">
-                      <h5 style={{ color: "#23395d" }}>
-                        <FaImages className="me-2" />
-                        Photo Gallery
-                      </h5>
-                      <Row>
-                        {profileData.images && profileData.images.length > 0 ? (
-                          profileData.images.map((img, idx) => (
-                            <Col md={4} sm={6} key={idx} className="mb-3">
-                              <Image
-                                src={img.image_url || img.image}
-                                alt={`Gallery ${idx + 1}`}
-                                fluid
-                                rounded
-                                style={{
-                                  width: "100%",
-                                  height: "150px",
-                                  objectFit: "cover",
-                                  border: "2px solid #90caf9"
-                                }}
-                              />
-                            </Col>
-                          ))
-                        ) : (
-                          <Col>
-                            <p style={{ color: "#666", fontStyle: "italic" }}>
-                              No photos uploaded yet. Add some photos to showcase your daycare!
-                            </p>
-                          </Col>
-                        )}
-                      </Row>
-                    </div>
-                  </div>
-                ) : (
-                  // Edit Mode
-                  <Form onSubmit={handleSave} encType="multipart/form-data">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 style={{ color: "#23395d" }}>
-                        <FaEdit className="me-2" />
-                        Edit Daycare Information
-                      </h4>
-                    </div>
-
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="name">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaBuilding className="me-2" />
-                            Daycare Name
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder="Enter daycare name"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="phone">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaPhone className="me-2" />
-                            Phone
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            placeholder="Enter phone number"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="area">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaMapMarkerAlt className="me-2" />
-                            Area
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="area"
-                            value={formData.area}
-                            onChange={handleChange}
-                            placeholder="Enter area/location"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="services">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            Services Offered
-                          </Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="services"
-                            value={formData.services}
-                            onChange={handleChange}
-                            placeholder="e.g., Full-time care, Part-time care, Meals"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={12}>
-                        <Form.Group className="mb-3" controlId="address">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaMapMarkerAlt className="me-2" />
-                            Full Address
-                          </Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={2}
-                            name="address"
-                            value={formData.address}
-                            onChange={handleChange}
-                            placeholder="Enter complete address"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={12}>
-                        <Form.Group className="mb-3" controlId="description">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            Description
-                          </Form.Label>
-                          <ReactQuill
-                            value={formData.description}
-                            onChange={handleDescriptionChange}
-                            placeholder="Describe your daycare, facilities, philosophy, etc."
-                            style={{
-                              background: "rgba(255, 255, 255, 0.9)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={12}>
-                        <Form.Group className="mb-3" controlId="images">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaImage className="me-2" />
-                            Daycare Photos (multiple allowed)
-                          </Form.Label>
-                          <Form.Control
-                            type="file"
-                            name="images"
-                            multiple
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                          
-                          {/* Image Previews */}
-                          {formData.imagePreviews.length > 0 && (
-                            <div className="mt-3">
-                              <Row>
-                                {formData.imagePreviews.map((src, idx) => (
-                                  <Col md={3} sm={4} xs={6} key={idx} className="mb-2">
-                                    <div className="position-relative">
-                                      <Image
-                                        src={src}
-                                        alt={`Preview ${idx + 1}`}
-                                        fluid
-                                        rounded
-                                        style={{
-                                          width: "100%",
-                                          height: "100px",
-                                          objectFit: "cover",
-                                          border: "2px solid #90caf9"
-                                        }}
-                                      />
-                                      <Button
-                                        variant="danger"
-                                        size="sm"
-                                        className="position-absolute top-0 end-0"
-                                        style={{ 
-                                          borderRadius: "50%", 
-                                          width: "25px", 
-                                          height: "25px",
-                                          padding: 0,
-                                          margin: "2px"
-                                        }}
-                                        onClick={() => removeImagePreview(idx)}
-                                      >
-                                        <FaTimes size={12} />
-                                      </Button>
-                                    </div>
-                                  </Col>
-                                ))}
-                              </Row>
-                            </div>
-                          )}
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <div className="d-flex gap-2 mt-4">
-                      <Button
-                        type="submit"
-                        disabled={saving}
-                        className="btn-save-profile flex-fill"
-                        style={{
-                          background: "linear-gradient(45deg, #99f2c8, #90caf9)",
-                          color: "#23395d",
-                          border: "none",
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                          padding: "12px"
-                        }}
-                      >
-                        {saving ? (
-                          <>
-                            <Spinner animation="border" size="sm" className="me-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <FaSave className="me-2" />
-                            Save Changes
-                          </>
-                        )}
-                      </Button>
-                      <Button 
-                        variant="outline-secondary" 
-                        onClick={() => setEditMode(false)} 
-                        disabled={saving}
-                        style={{
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                          padding: "12px 24px"
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </Form>
-                )}
+            {/* Quick Actions */}
+            <Card className="sidebar-card">
+              <Card.Header>
+                <h5>Quick Actions</h5>
+              </Card.Header>
+              <Card.Body>
+                <div className="d-grid gap-2">
+                  <Button variant="primary" onClick={() => setShowBookingModal(true)}>
+                    <FaCalendarAlt className="me-2" />
+                    Book a Slot
+                  </Button>
+                  <Button variant="outline-primary" href={`tel:${daycare.phone}`}>
+                    <FaPhone className="me-2" />
+                    Call Now
+                  </Button>
+                  <Button variant="outline-secondary" href={`mailto:${daycare.email}`}>
+                    <FaEnvelope className="me-2" />
+                    Send Email
+                  </Button>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         </Row>
       </Container>
+
+      {/* Booking Modal */}
+      <Modal show={showBookingModal} onHide={() => setShowBookingModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Book a Slot at {daycare.name}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Select Child</Form.Label>
+                  <Form.Select
+                    value={selectedChild}
+                    onChange={(e) => setSelectedChild(e.target.value)}
+                    required
+                  >
+                    <option value="">Choose a child...</option>
+                    {mockChildren.map((child) => (
+                      <option key={child.id} value={child.id}>
+                        {child.name} ({child.age} years old)
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Booking Type</Form.Label>
+                  <Form.Select
+                    value={bookingType}
+                    onChange={(e) => setBookingType(e.target.value)}
+                  >
+                    <option value="full-time">Full-time (Monthly)</option>
+                    <option value="part-time">Part-time (Daily)</option>
+                    <option value="hourly">Hourly</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Start Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Estimated Cost</Form.Label>
+                  <div className="cost-display">
+                    {bookingType === "full-time" && `৳${daycare.monthlyFee.toLocaleString()}/month`}
+                    {bookingType === "part-time" && `৳${daycare.dailyFee}/day`}
+                    {bookingType === "hourly" && `৳${daycare.hourlyFee}/hour`}
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Special Requirements (Optional)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Any special requirements or notes for your child..."
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowBookingModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleBooking}>
+            Continue to Booking
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

@@ -4,16 +4,18 @@ import Landing from "./screens/Landing";
 import ParentLanding from "./screens/ParentLanding";
 import ParentRegister from "./screens/ParentRegister";
 import ParentLogin from "./screens/ParentLogin";
-
 import ParentHome from "./screens/ParentHome";
 import ParentProfile from "./screens/ParentProfile";
+import ParentSearch from "./screens/ParentSearch";
+import DaycareProfile from "./screens/DaycareProfile";
+import BookingConfirmation from "./screens/BookingConfirmation";
+import ParentBookings from "./screens/ParentBookings";
 import DaycareLanding from "./screens/DaycareLanding";
 import DaycareRegister from "./screens/DaycareRegister";
 import DaycareLogin from "./screens/DaycareLogin";
 import ScrollToTop from "./components/ScrollToTop";
 import DaycareDashboard from "./screens/DaycareDashboard";
-import DaycareProfile from "./screens/DaycareProfile";
-
+import DaycareProfile as DaycareProfileManagement from "./screens/DaycareProfile";
 
 function App() {
   return (
@@ -27,11 +29,15 @@ function App() {
           <Route path="/parent/login" element={<ParentLogin />} />
           <Route path="/parent/home" element={<ParentHome />} />
           <Route path="/parent/profile" element={<ParentProfile />} />
+          <Route path="/parent/search" element={<ParentSearch />} />
+          <Route path="/parent/daycare/:id" element={<DaycareProfile />} />
+          <Route path="/parent/book/:id" element={<BookingConfirmation />} />
+          <Route path="/parent/bookings" element={<ParentBookings />} />
           <Route path="/daycare" element={<DaycareLanding />} />
           <Route path="/daycare/register" element={<DaycareRegister />} />
           <Route path="/daycare/login" element={<DaycareLogin />} />
           <Route path="/daycare/dashboard" element={<DaycareDashboard />} />
-          <Route path="/daycare/profile" element={<DaycareProfile />} />
+          <Route path="/daycare/profile" element={<DaycareProfileManagement />} />
         </Routes>
       </Router>
     </div>
