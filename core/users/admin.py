@@ -26,16 +26,16 @@ class UserAdmin(BaseUserAdmin):
 
 class ParentAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'user', 'full_name', 'profession', 'address',
-         'phone', 'joined_at'
+        'id', 'user', 'full_name', 'profession', 'phone', 'joined_at'
     )
     search_fields = (
-        'user__email', 'full_name', 'profession', 'address',
-        'emergency_contact', 'phone'
+        'user__email', 'full_name', 'profession', 'phone'
     )
     ordering = ('id',)
     readonly_fields = ('joined_at',)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user')
 
 @admin.register(DaycareCenter)
 class DaycareCenterAdmin(admin.ModelAdmin):
@@ -70,4 +70,3 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Parent, ParentAdmin)
 admin.site.unregister(blacklist_models.BlacklistedToken)
 admin.site.unregister(blacklist_models.OutstandingToken)
-

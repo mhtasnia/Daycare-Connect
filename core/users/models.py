@@ -182,7 +182,7 @@ class EmergencyContact(models.Model):
         ('other', 'Other'),
     ]
     
-    parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='emergency_contacts')
+    parent = models.OneToOneField(Parent, on_delete=models.CASCADE, related_name='emergency_contact')
     full_name = models.CharField(max_length=100)
     relationship = models.CharField(max_length=20, choices=RELATIONSHIP_CHOICES)
     phone_primary = models.CharField(max_length=20)
@@ -193,9 +193,6 @@ class EmergencyContact(models.Model):
     is_authorized_pickup = models.BooleanField(default=False, help_text="Can this person pick up your child?")
     notes = models.TextField(blank=True, help_text="Additional notes about this contact")
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['full_name']
     
     def __str__(self):
         return f"{self.full_name} ({self.relationship})"

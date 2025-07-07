@@ -4,7 +4,7 @@ from .views import (
     daycare_register_request, daycare_login, daycare_logout,
     send_otp, verify_otp, parent_profile, update_parent_profile,
     daycare_profile, update_daycare_profile,
-    manage_children, manage_child, manage_emergency_contacts, manage_emergency_contact
+    manage_children, manage_child, manage_emergency_contact, update_emergency_contact
 )
 
 urlpatterns = [
@@ -23,9 +23,9 @@ urlpatterns = [
     path('parents/children/', manage_children, name='manage-children'),
     path('parents/children/<int:child_id>/', manage_child, name='manage-child'),
     
-    # Emergency contact management endpoints
-    path('parents/emergency-contacts/', manage_emergency_contacts, name='manage-emergency-contacts'),
-    path('parents/emergency-contacts/<int:contact_id>/', manage_emergency_contact, name='manage-emergency-contact'),
+    # Emergency contact management endpoints (single contact)
+    path('parents/emergency-contact/', manage_emergency_contact, name='manage-emergency-contact'),
+    path('parents/emergency-contact/update/', update_emergency_contact, name='update-emergency-contact'),
     
     # Daycare endpoints
     path('daycares/register/', daycare_register_request, name='daycare-register'),

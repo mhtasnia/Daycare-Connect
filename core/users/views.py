@@ -230,39 +230,49 @@ def manage_child(request, child_id):
 # Emergency Contact Management Views
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated, IsParent])
-def manage_emergency_contacts(request):
-    """Get all emergency contacts or add a new one"""
+def manage_emergency_contact(request):
+    """Get emergency contact or create/update one"""
     parent = request.user.parent_profile
     
     if request.method == 'GET':
-        contacts = parent.emergency_contacts.all()
-        serializer = EmergencyContactSerializer(contacts, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            contact = parent.emergency_contact
+            serializer = EmergencyContactSerializer(contact, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except EmergencyContact.DoesNotExist:
+            return Response({'detail': 'No emergency contact found.'}, status=status.HTTP_404_NOT_FOUND)
     
     elif request.method == 'POST':
-        serializer = EmergencyContactSerializer(data=request.data, context={'request': request})
+        # Check if emergency contact already exists
+        try:
+            contact = parent.emergency_contact
+            # Update existing contact
+            serializer = EmergencyContactSerializer(contact, data=request.data, context={'request': request})
+        except EmergencyContact.DoesNotExist:
+            # Create new contact
+            serializer = EmergencyContactSerializer(data=request.data, context={'request': request})
+        
         if serializer.is_valid():
-            serializer.save(parent=parent)
+            if hasattr(parent, 'emergency_contact'):
+                serializer.save()
+            else:
+                serializer.save(parent=parent)
             return Response({
-                'detail': 'Emergency contact added successfully.',
+                'detail': 'Emergency contact saved successfully.',
                 'contact': serializer.data
-            }, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['PUT', 'DELETE'])
 @permission_classes([IsAuthenticated, IsParent])
-def manage_emergency_contact(request, contact_id):
-    """Get, update, or delete a specific emergency contact"""
+def update_emergency_contact(request):
+    """Update or delete emergency contact"""
     try:
-        contact = EmergencyContact.objects.get(id=contact_id, parent=request.user.parent_profile)
+        contact = request.user.parent_profile.emergency_contact
     except EmergencyContact.DoesNotExist:
         return Response({'detail': 'Emergency contact not found.'}, status=status.HTTP_404_NOT_FOUND)
     
-    if request.method == 'GET':
-        serializer = EmergencyContactSerializer(contact, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         serializer = EmergencyContactSerializer(contact, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()

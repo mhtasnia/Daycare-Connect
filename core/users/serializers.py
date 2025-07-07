@@ -241,14 +241,14 @@ class ParentProfileSerializer(serializers.ModelSerializer):
     profile_image_url = serializers.SerializerMethodField()
     children = ChildSerializer(many=True, read_only=True)
     address = AddressSerializer(read_only=True)
-    emergency_contacts = EmergencyContactSerializer(many=True, read_only=True)
+    emergency_contact = EmergencyContactSerializer(read_only=True)
 
     class Meta:
         model = Parent
         fields = [
             'email', 'user_type', 'is_email_verified', 'joined_at',
             'full_name', 'profession', 'phone', 'profile_image', 'profile_image_url',
-            'children', 'address', 'emergency_contacts'
+            'children', 'address', 'emergency_contact'
         ]
     
     def get_profile_image_url(self, obj):

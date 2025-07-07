@@ -46,7 +46,6 @@ function ParentProfile() {
   const [showChildModal, setShowChildModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [editingChild, setEditingChild] = useState(null);
-  const [editingContact, setEditingContact] = useState(null);
 
   // Profile data state
   const [profileData, setProfileData] = useState({
@@ -61,7 +60,7 @@ function ParentProfile() {
     profile_image_url: "",
     children: [],
     address: null,
-    emergency_contacts: [],
+    emergency_contact: null,
   });
 
   // Form data state
@@ -133,6 +132,21 @@ function ParentProfile() {
         postal_code: data.address?.postal_code || "",
         country: data.address?.country || "Bangladesh",
       });
+
+      // Set emergency contact form data if exists
+      if (data.emergency_contact) {
+        setContactFormData({
+          full_name: data.emergency_contact.full_name || "",
+          relationship: data.emergency_contact.relationship || "",
+          phone_primary: data.emergency_contact.phone_primary || "",
+          phone_secondary: data.emergency_contact.phone_secondary || "",
+          email: data.emergency_contact.email || "",
+          address: data.emergency_contact.address || "",
+          photo: null,
+          is_authorized_pickup: data.emergency_contact.is_authorized_pickup || false,
+          notes: data.emergency_contact.notes || "",
+        });
+      }
     } catch (error) {
       setAlert({
         show: true,
@@ -269,29 +283,24 @@ function ParentProfile() {
         }
       });
 
-      const url = editingContact
-        ? `http://localhost:8000/api/user-auth/parents/emergency-contacts/${editingContact.id}/`
-        : "http://localhost:8000/api/user-auth/parents/emergency-contacts/";
-
-      const method = editingContact ? "put" : "post";
-
-      await axios[method](url, data, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.post(
+        "http://localhost:8000/api/user-auth/parents/emergency-contact/",
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       setAlert({
         show: true,
         type: "success",
-        msg: `Emergency contact ${
-          editingContact ? "updated" : "added"
-        } successfully!`,
+        msg: "Emergency contact saved successfully!",
       });
 
       setShowContactModal(false);
-      setEditingContact(null);
       setContactFormData({
         full_name: "",
         relationship: "",
@@ -309,9 +318,7 @@ function ParentProfile() {
       setAlert({
         show: true,
         type: "danger",
-        msg: `Failed to ${
-          editingContact ? "update" : "add"
-        } emergency contact.`,
+        msg: "Failed to save emergency contact.",
       });
     } finally {
       setSaving(false);
@@ -346,14 +353,14 @@ function ParentProfile() {
     }
   };
 
-  const handleDeleteContact = async (contactId) => {
+  const handleDeleteContact = async () => {
     if (
       window.confirm("Are you sure you want to delete this emergency contact?")
     ) {
       try {
         const accessToken = localStorage.getItem("access");
         await axios.delete(
-          `http://localhost:8000/api/user-auth/parents/emergency-contacts/${contactId}/`,
+          "http://localhost:8000/api/user-auth/parents/emergency-contact/update/",
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
@@ -399,34 +406,7 @@ function ParentProfile() {
     setShowChildModal(true);
   };
 
-  const openContactModal = (contact = null) => {
-    if (contact) {
-      setEditingContact(contact);
-      setContactFormData({
-        full_name: contact.full_name,
-        relationship: contact.relationship,
-        phone_primary: contact.phone_primary,
-        phone_secondary: contact.phone_secondary || "",
-        email: contact.email || "",
-        address: contact.address || "",
-        photo: null,
-        is_authorized_pickup: contact.is_authorized_pickup,
-        notes: contact.notes || "",
-      });
-    } else {
-      setEditingContact(null);
-      setContactFormData({
-        full_name: "",
-        relationship: "",
-        phone_primary: "",
-        phone_secondary: "",
-        email: "",
-        address: "",
-        photo: null,
-        is_authorized_pickup: false,
-        notes: "",
-      });
-    }
+  const openContactModal = () => {
     setShowContactModal(true);
   };
 
@@ -468,7 +448,7 @@ function ParentProfile() {
                 </h1>
                 <p className="page-subtitle">
                   Manage your personal information, children, and emergency
-                  contacts
+                  contact
                 </p>
               </div>
               <Button
@@ -565,8 +545,7 @@ function ParentProfile() {
                   </p>
                   <p style={{ color: "#23395d" }}>
                     <FaUserShield className="me-2" />
-                    {profileData.emergency_contacts?.length || 0} Emergency
-                    Contacts
+                    {profileData.emergency_contact ? "1" : "0"} Emergency Contact
                   </p>
                 </div>
               </Card.Body>
@@ -597,8 +576,7 @@ function ParentProfile() {
                     <Nav.Item>
                       <Nav.Link eventKey="emergency">
                         <FaUserShield className="me-2" />
-                        Emergency Contacts (
-                        {profileData.emergency_contacts?.length || 0})
+                        Emergency Contact
                       </Nav.Link>
                     </Nav.Item>
                   </Nav>
@@ -883,31 +861,33 @@ function ParentProfile() {
                       )}
                     </Tab.Pane>
 
-                    {/* Emergency Contacts Tab */}
+                    {/* Emergency Contact Tab */}
                     <Tab.Pane eventKey="emergency">
                       <div className="d-flex justify-content-between align-items-center mb-4">
                         <h5 className="section-title">
                           <FaUserShield className="me-2" />
-                          Emergency Contacts
+                          Emergency Contact
                         </h5>
-                        <Button
-                          variant="primary"
-                          onClick={() => openContactModal()}
-                        >
-                          <FaPlus className="me-2" />
-                          Add Contact
-                        </Button>
+                        {!profileData.emergency_contact && (
+                          <Button
+                            variant="primary"
+                            onClick={() => openContactModal()}
+                          >
+                            <FaPlus className="me-2" />
+                            Add Contact
+                          </Button>
+                        )}
                       </div>
 
-                      <Row>
-                        {profileData.emergency_contacts?.map((contact) => (
-                          <Col md={6} key={contact.id} className="mb-3">
+                      {profileData.emergency_contact ? (
+                        <Row>
+                          <Col md={12}>
                             <Card className="emergency-card">
                               <Card.Header className="d-flex justify-content-between align-items-center">
                                 <div className="d-flex align-items-center">
-                                  {contact.photo_url ? (
+                                  {profileData.emergency_contact.photo_url ? (
                                     <Image
-                                      src={contact.photo_url}
+                                      src={profileData.emergency_contact.photo_url}
                                       roundedCircle
                                       width={40}
                                       height={40}
@@ -931,11 +911,11 @@ function ParentProfile() {
                                     </div>
                                   )}
                                   <div>
-                                    <strong>{contact.full_name}</strong>
+                                    <strong>{profileData.emergency_contact.full_name}</strong>
                                     <br />
                                     <small className="text-muted">
-                                      {contact.relationship.charAt(0).toUpperCase() +
-                                        contact.relationship.slice(1)}
+                                      {profileData.emergency_contact.relationship.charAt(0).toUpperCase() +
+                                        profileData.emergency_contact.relationship.slice(1)}
                                     </small>
                                   </div>
                                 </div>
@@ -944,65 +924,74 @@ function ParentProfile() {
                                     variant="outline-primary"
                                     size="sm"
                                     className="me-2"
-                                    onClick={() => openContactModal(contact)}
+                                    onClick={() => openContactModal()}
                                   >
                                     <FaEdit />
                                   </Button>
                                   <Button
                                     variant="outline-danger"
                                     size="sm"
-                                    onClick={() =>
-                                      handleDeleteContact(contact.id)
-                                    }
+                                    onClick={() => handleDeleteContact()}
                                   >
                                     <FaTrash />
                                   </Button>
                                 </div>
                               </Card.Header>
                               <Card.Body>
-                                <p>
-                                  <FaPhone className="me-2" />
-                                  <strong>Primary:</strong>{" "}
-                                  {contact.phone_primary}
-                                </p>
-                                {contact.phone_secondary && (
-                                  <p>
-                                    <FaPhone className="me-2" />
-                                    <strong>Secondary:</strong>{" "}
-                                    {contact.phone_secondary}
-                                  </p>
-                                )}
-                                {contact.email && (
-                                  <p>
-                                    <FaEnvelope className="me-2" />
-                                    {contact.email}
-                                  </p>
-                                )}
-                                {contact.is_authorized_pickup && (
-                                  <Badge bg="success" className="mb-2">
-                                    ✓ Authorized for Pickup
-                                  </Badge>
-                                )}
-                                {contact.notes && (
-                                  <p>
-                                    <small className="text-muted">
-                                      {contact.notes}
-                                    </small>
-                                  </p>
-                                )}
+                                <Row>
+                                  <Col md={6}>
+                                    <p>
+                                      <FaPhone className="me-2" />
+                                      <strong>Primary:</strong>{" "}
+                                      {profileData.emergency_contact.phone_primary}
+                                    </p>
+                                    {profileData.emergency_contact.phone_secondary && (
+                                      <p>
+                                        <FaPhone className="me-2" />
+                                        <strong>Secondary:</strong>{" "}
+                                        {profileData.emergency_contact.phone_secondary}
+                                      </p>
+                                    )}
+                                    {profileData.emergency_contact.email && (
+                                      <p>
+                                        <FaEnvelope className="me-2" />
+                                        {profileData.emergency_contact.email}
+                                      </p>
+                                    )}
+                                  </Col>
+                                  <Col md={6}>
+                                    {profileData.emergency_contact.is_authorized_pickup && (
+                                      <Badge bg="success" className="mb-2">
+                                        ✓ Authorized for Pickup
+                                      </Badge>
+                                    )}
+                                    {profileData.emergency_contact.address && (
+                                      <p>
+                                        <FaMapMarkerAlt className="me-2" />
+                                        <strong>Address:</strong>{" "}
+                                        {profileData.emergency_contact.address}
+                                      </p>
+                                    )}
+                                    {profileData.emergency_contact.notes && (
+                                      <p>
+                                        <strong>Notes:</strong>{" "}
+                                        <small className="text-muted">
+                                          {profileData.emergency_contact.notes}
+                                        </small>
+                                      </p>
+                                    )}
+                                  </Col>
+                                </Row>
                               </Card.Body>
                             </Card>
                           </Col>
-                        ))}
-                      </Row>
-
-                      {(!profileData.emergency_contacts ||
-                        profileData.emergency_contacts.length === 0) && (
+                        </Row>
+                      ) : (
                         <div className="text-center py-5">
                           <FaUserShield size={48} className="text-muted mb-3" />
-                          <h5>No Emergency Contacts</h5>
+                          <h5>No Emergency Contact</h5>
                           <p className="text-muted">
-                            Add emergency contacts for your children's safety and
+                            Add an emergency contact for your children's safety and
                             security.
                           </p>
                           <Button
@@ -1155,7 +1144,7 @@ function ParentProfile() {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              {editingContact ? "Edit Emergency Contact" : "Add Emergency Contact"}
+              {profileData.emergency_contact ? "Edit Emergency Contact" : "Add Emergency Contact"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
@@ -1328,7 +1317,7 @@ function ParentProfile() {
                   ) : (
                     <>
                       <FaSave className="me-2" />
-                      {editingContact ? "Update" : "Add"} Contact
+                      {profileData.emergency_contact ? "Update" : "Add"} Contact
                     </>
                   )}
                 </Button>
