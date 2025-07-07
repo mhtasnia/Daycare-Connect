@@ -47,6 +47,16 @@ function ParentProfile() {
   const [showContactModal, setShowContactModal] = useState(false);
   const [editingChild, setEditingChild] = useState(null);
 
+  // Area choices for dropdown
+  const areaChoices = [
+    { value: 'gulshan', label: 'Gulshan' },
+    { value: 'banani', label: 'Banani' },
+    { value: 'uttara', label: 'Uttara' },
+    { value: 'mirpur', label: 'Mirpur' },
+    { value: 'wari', label: 'Wari' },
+    { value: 'dhanmondi', label: 'Dhanmondi' },
+  ];
+
   // Profile data state
   const [profileData, setProfileData] = useState({
     email: "",
@@ -71,7 +81,7 @@ function ParentProfile() {
     profile_image: null,
     street_address: "",
     city: "",
-    state_division: "",
+    area: "",
     postal_code: "",
     country: "Bangladesh",
   });
@@ -128,7 +138,7 @@ function ParentProfile() {
         profile_image: null,
         street_address: data.address?.street_address || "",
         city: data.address?.city || "",
-        state_division: data.address?.state_division || "",
+        area: data.address?.area || "",
         postal_code: data.address?.postal_code || "",
         country: data.address?.country || "Bangladesh",
       });
@@ -684,14 +694,19 @@ function ParentProfile() {
                             </Col>
                             <Col md={6}>
                               <Form.Group className="mb-3">
-                                <Form.Label>State/Division</Form.Label>
-                                <Form.Control
-                                  type="text"
-                                  name="state_division"
-                                  value={formData.state_division}
+                                <Form.Label>Area</Form.Label>
+                                <Form.Select
+                                  name="area"
+                                  value={formData.area}
                                   onChange={handleChange}
-                                  placeholder="Enter your state/division"
-                                />
+                                >
+                                  <option value="">Select Area</option>
+                                  {areaChoices.map((area) => (
+                                    <option key={area.value} value={area.value}>
+                                      {area.label}
+                                    </option>
+                                  ))}
+                                </Form.Select>
                               </Form.Group>
                             </Col>
                             <Col md={6}>

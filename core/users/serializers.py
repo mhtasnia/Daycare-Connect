@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage, Child, Address, EmergencyContact
+from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage, Child, Address, EmergencyContact, AREA_CHOICES
 from .email_service import EmailService
 
 User = get_user_model()
@@ -208,10 +208,14 @@ class ChildSerializer(serializers.ModelSerializer):
 # Address Serializer
 class AddressSerializer(serializers.ModelSerializer):
     full_address = serializers.ReadOnlyField()
+    area_display = serializers.SerializerMethodField()
     
     class Meta:
         model = Address
-        fields = ['street_address', 'city', 'state_division', 'postal_code', 'country', 'full_address']
+        fields = ['street_address', 'city', 'area', 'area_display', 'postal_code', 'country', 'full_address']
+    
+    def get_area_display(self, obj):
+        return obj.get_area_display() if obj.area else ""
 
 # Emergency Contact Serializer
 class EmergencyContactSerializer(serializers.ModelSerializer):
@@ -264,7 +268,7 @@ class UpdateParentProfileSerializer(serializers.ModelSerializer):
     # Address fields
     street_address = serializers.CharField(required=False, allow_blank=True)
     city = serializers.CharField(required=False, allow_blank=True)
-    state_division = serializers.CharField(required=False, allow_blank=True)
+    area = serializers.ChoiceField(choices=AREA_CHOICES, required=False, allow_blank=True)
     postal_code = serializers.CharField(required=False, allow_blank=True)
     country = serializers.CharField(required=False, allow_blank=True)
     
@@ -272,7 +276,7 @@ class UpdateParentProfileSerializer(serializers.ModelSerializer):
         model = Parent
         fields = [
             'full_name', 'profession', 'phone', 'profile_image',
-            'street_address', 'city', 'state_division', 'postal_code', 'country'
+            'street_address', 'city', 'area', 'postal_code', 'country'
         ]
 
     def validate_phone(self, value):
@@ -285,7 +289,7 @@ class UpdateParentProfileSerializer(serializers.ModelSerializer):
         address_fields = {
             'street_address': validated_data.pop('street_address', None),
             'city': validated_data.pop('city', None),
-            'state_division': validated_data.pop('state_division', None),
+            'area': validated_data.pop('area', None),
             'postal_code': validated_data.pop('postal_code', None),
             'country': validated_data.pop('country', None),
         }
@@ -328,7 +332,7 @@ class DaycareCenterRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DaycareCenter
-        fields = ['email', 'password', 'otp_code', 'user_type', 'name', 'phone', 'address', 'nid_number', 'image']
+        fields = ['email', 'password', 'otp_code', 'user_type', 'name', 'phone', 'address', 'area', 'nid_number', 'image']
 
     def validate(self, data):
         email = data['email']
@@ -412,13 +416,14 @@ class DaycareProfileSerializer(serializers.ModelSerializer):
     is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
     joined_at = serializers.DateTimeField(source='user.created_at', read_only=True)
     main_image_url = serializers.SerializerMethodField()
+    area_display = serializers.SerializerMethodField()
     
     class Meta:
         model = DaycareCenter
         fields = [
             'email', 'user_type', 'is_verified', 'is_email_verified', 'joined_at',
-            'name', 'phone', 'address', 'description', 'nid_number', 'rating',
-            'services', 'area', 'image', 'main_image_url', 'images'
+            'name', 'phone', 'address', 'area', 'area_display', 'description', 'nid_number', 'rating',
+            'services', 'image', 'main_image_url', 'images'
         ]
     
     def get_main_image_url(self, obj):
@@ -428,6 +433,9 @@ class DaycareProfileSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.image.url)
             return obj.image.url
         return None
+    
+    def get_area_display(self, obj):
+        return obj.get_area_display() if obj.area else ""
 
 class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
@@ -436,7 +444,7 @@ class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DaycareCenter
-        fields = ['name', 'phone', 'address', 'description', 'services', 'area', 'images']
+        fields = ['name', 'phone', 'address', 'area', 'description', 'services', 'images']
 
     def update(self, instance, validated_data):
         images = validated_data.pop('images', None)

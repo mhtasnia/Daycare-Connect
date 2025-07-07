@@ -6,6 +6,16 @@ import random
 import string
 from datetime import timedelta
 
+# Area choices for Bangladesh
+AREA_CHOICES = [
+    ('gulshan', 'Gulshan'),
+    ('banani', 'Banani'),
+    ('uttara', 'Uttara'),
+    ('mirpur', 'Mirpur'),
+    ('wari', 'Wari'),
+    ('dhanmondi', 'Dhanmondi'),
+]
+
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -132,16 +142,16 @@ class Address(models.Model):
     parent = models.OneToOneField(Parent, on_delete=models.CASCADE, related_name='address')
     street_address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
-    state_division = models.CharField(max_length=100, blank=True)
+    area = models.CharField(max_length=20, choices=AREA_CHOICES, blank=True)
     postal_code = models.CharField(max_length=20, blank=True)
     country = models.CharField(max_length=100, default='Bangladesh')
     
     def __str__(self):
-        return f"{self.street_address}, {self.city}"
+        return f"{self.street_address}, {self.get_area_display()}"
     
     @property
     def full_address(self):
-        parts = [self.street_address, self.city, self.state_division, self.postal_code, self.country]
+        parts = [self.street_address, self.get_area_display(), self.city, self.postal_code, self.country]
         return ', '.join([part for part in parts if part])
 
 class Child(models.Model):
@@ -201,7 +211,7 @@ class DaycareCenter(models.Model):
     user = models.OneToOneField('users.User', on_delete=models.CASCADE, related_name='daycare_profile')
     name = models.CharField(max_length=200)
     address = models.TextField()
-    area = models.CharField(max_length=100)
+    area = models.CharField(max_length=20, choices=AREA_CHOICES, blank=True)
     phone = models.CharField(max_length=20)
     is_verified = models.BooleanField(default=False)
     rating = models.FloatField(default=0.0)
@@ -214,7 +224,7 @@ class DaycareCenter(models.Model):
         null=False,
         blank=True
     )
-    description = models.TextField(blank=True, default="")  # <-- Add this line
+    description = models.TextField(blank=True, default="")
 
     def __str__(self):
         return self.name
