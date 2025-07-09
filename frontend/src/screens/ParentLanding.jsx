@@ -199,7 +199,7 @@ function ParentLanding() {
                   Join thousands of parents who trust Daycare Connect for their child's care
                 </p>
                 <div className="cta-buttons">
-                  <Button as={Link} to="/parent/register" className="btn-parent-primary me-3" size="lg">
+                  <Button as={Link} to="/daycare/search" className="btn-parent-primary me-3" size="lg">
                     <FaChild className="me-2" />
                     Start Your Search
                   </Button>

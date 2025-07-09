@@ -28,7 +28,7 @@ function Hero() {
               <div className="d-flex flex-wrap justify-content-center gap-2">
                 <Button 
                   as= {Link}
-                  to= "/parent/search" 
+                  to= "/daycare/search" 
                   variant="primary"
                   size="lg">
                   <FaSearch className="me-2" />
