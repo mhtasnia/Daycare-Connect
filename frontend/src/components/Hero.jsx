@@ -26,7 +26,11 @@ function Hero() {
               </Card.Text>
               <br />
               <div className="d-flex flex-wrap justify-content-center gap-2">
-                <Button variant="primary" size="lg">
+                <Button 
+                  as= {Link}
+                  to= "/parent/search" 
+                  variant="primary"
+                  size="lg">
                   <FaSearch className="me-2" />
                   Explore Daycares
                 </Button>
