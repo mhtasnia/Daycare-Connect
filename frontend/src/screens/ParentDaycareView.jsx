@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { bookingAPI, childrenAPI } from "../services/api";
 import {
   Container,
   Row,
@@ -45,123 +46,45 @@ function ParentDaycareView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [daycare, setDaycare] = useState(null);
+  const [children, setChildren] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
   const [bookingDate, setBookingDate] = useState("");
   const [bookingType, setBookingType] = useState("full-time");
+  const [specialInstructions, setSpecialInstructions] = useState("");
+  const [emergencyContactName, setEmergencyContactName] = useState("");
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [isBooking, setIsBooking] = useState(false);
 
-  // Mock data - will be replaced with API call
-  const mockDaycare = {
-    id: 1,
-    name: "Little Stars Daycare",
-    area: "Dhanmondi",
-    address: "House 15, Road 7, Dhanmondi, Dhaka",
-    phone: "01712345678",
-    email: "info@littlestars.com",
-    rating: 4.8,
-    reviewCount: 24,
-    isVerified: true,
-    services: [
-      "Full-time care",
-      "Part-time care", 
-      "Meals included",
-      "Educational activities",
-      "Outdoor play",
-      "Art & crafts",
-      "Music classes",
-      "Nap time"
-    ],
-    ageGroups: ["6 months - 2 years", "2-4 years"],
-    capacity: 30,
-    currentOccupancy: 22,
-    monthlyFee: 8000,
-    dailyFee: 300,
-    hourlyFee: 50,
-    images: [
-      "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "https://images.pexels.com/photos/8613092/pexels-photo-8613092.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "https://images.pexels.com/photos/8613093/pexels-photo-8613093.jpeg?auto=compress&cs=tinysrgb&w=800",
-      "https://images.pexels.com/photos/8613094/pexels-photo-8613094.jpeg?auto=compress&cs=tinysrgb&w=800",
-    ],
-    description: "Little Stars Daycare provides a nurturing and safe environment for children aged 6 months to 4 years. Our experienced caregivers focus on early childhood development through play-based learning, creative activities, and structured routines. We offer nutritious meals, educational programs, and a loving atmosphere where your child can grow and thrive.",
-    operatingHours: "7:00 AM - 6:00 PM",
-    operatingDays: "Monday - Friday",
-    facilities: [
-      "Air-conditioned rooms",
-      "Secure playground",
-      "CCTV monitoring",
-      "Medical first aid",
-      "Nutritious meals",
-      "Educational toys",
-      "Reading corner",
-      "Art supplies"
-    ],
-    staff: [
-      {
-        name: "Ms. Fatima Rahman",
-        role: "Head Teacher",
-        experience: "8 years",
-        qualification: "B.Ed in Early Childhood"
-      },
-      {
-        name: "Ms. Nasreen Ahmed",
-        role: "Assistant Teacher", 
-        experience: "5 years",
-        qualification: "Diploma in Child Care"
-      }
-    ],
-    reviews: [
-      {
-        id: 1,
-        parentName: "Rashida Begum",
-        rating: 5,
-        date: "2024-01-15",
-        comment: "Excellent care for my daughter. The teachers are very loving and professional. Highly recommended!",
-        helpful: 12,
-        childAge: "2 years"
-      },
-      {
-        id: 2,
-        parentName: "Ahmed Hassan",
-        rating: 4,
-        date: "2024-01-10", 
-        comment: "Good daycare with nice facilities. My son enjoys going there every day. The only issue is sometimes they're a bit crowded.",
-        helpful: 8,
-        childAge: "3 years"
-      },
-      {
-        id: 3,
-        parentName: "Salma Khatun",
-        rating: 5,
-        date: "2024-01-05",
-        comment: "Amazing staff and clean environment. They take great care of the children and provide regular updates to parents.",
-        helpful: 15,
-        childAge: "18 months"
-      }
-    ],
-    policies: {
-      dropOffTime: "7:00 AM - 9:00 AM",
-      pickUpTime: "4:00 PM - 6:00 PM", 
-      sickPolicy: "Children with fever or contagious illness should stay home",
-      mealPolicy: "Nutritious breakfast, lunch and snacks provided",
-      emergencyContact: "01712345678"
+  useEffect(() => {
+    fetchDaycareDetails();
+    fetchChildren();
+  }, [id]);
+
+  const fetchDaycareDetails = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await bookingAPI.getDaycareDetail(id);
+      setDaycare(response.data);
+    } catch (error) {
+      console.error("Error fetching daycare details:", error);
+      setError("Failed to load daycare details. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Mock children data - would come from parent profile
-  const mockChildren = [
-    { id: 1, name: "Aisha Rahman", age: 2, gender: "female" },
-    { id: 2, name: "Omar Hassan", age: 3, gender: "male" }
-  ];
-
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDaycare(mockDaycare);
-      setIsLoading(false);
-    }, 1000);
-  }, [id]);
+  const fetchChildren = async () => {
+    try {
+      const response = await childrenAPI.getChildren();
+      setChildren(response.data);
+    } catch (error) {
+      console.error("Error fetching children:", error);
+    }
+  };
 
   const renderStars = (rating) => {
     const stars = [];
@@ -193,21 +116,40 @@ function ParentDaycareView() {
     }
   };
 
-  const handleBooking = () => {
-    if (!selectedChild || !bookingDate) {
-      alert("Please select a child and booking date");
+  const handleBooking = async () => {
+    if (!selectedChild || !bookingDate || !emergencyContactName || !emergencyContactPhone) {
+      alert("Please fill in all required fields");
       return;
     }
     
-    // Navigate to booking confirmation page
-    navigate(`/parent/book/${id}`, {
-      state: {
-        daycare,
-        selectedChild,
-        bookingDate,
-        bookingType
-      }
-    });
+    setIsBooking(true);
+    
+    try {
+      const bookingData = {
+        daycare: parseInt(id),
+        child: parseInt(selectedChild),
+        booking_type: bookingType,
+        start_date: bookingDate,
+        special_instructions: specialInstructions,
+        emergency_contact_name: emergencyContactName,
+        emergency_contact_phone: emergencyContactPhone,
+      };
+
+      await bookingAPI.createBooking(bookingData);
+      
+      alert("Booking request submitted successfully! The daycare will contact you soon.");
+      setShowBookingModal(false);
+      navigate("/parent/bookings");
+      
+    } catch (error) {
+      console.error("Booking error:", error);
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.non_field_errors?.[0] ||
+                          "Failed to create booking. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   if (isLoading) {
@@ -230,8 +172,8 @@ function ParentDaycareView() {
       <div className="parent-daycare-view-wrapper">
         <Container className="py-5">
           <Alert variant="danger">
-            <h4>Daycare Not Found</h4>
-            <p>The daycare you're looking for doesn't exist or has been removed.</p>
+            <h4>{error ? "Error Loading Daycare" : "Daycare Not Found"}</h4>
+            <p>{error || "The daycare you're looking for doesn't exist or has been removed."}</p>
             <Button as={Link} to="/parent/search" variant="primary">
               Back to Search
             </Button>
@@ -320,7 +262,7 @@ function ParentDaycareView() {
                           {renderStars(daycare.rating)}
                         </div>
                         <span className="rating-text ms-2">
-                          {daycare.rating} ({daycare.reviewCount} reviews)
+                          {daycare.rating} ({daycare.review_count} reviews)
                         </span>
                       </div>
 
@@ -334,10 +276,6 @@ function ParentDaycareView() {
                           <FaPhone className="me-2" />
                           <a href={`tel:${daycare.phone}`}>{daycare.phone}</a>
                         </div>
-                        <div className="contact-item">
-                          <FaEnvelope className="me-2" />
-                          <a href={`mailto:${daycare.email}`}>{daycare.email}</a>
-                        </div>
                       </div>
                     </div>
                   </Col>
@@ -345,20 +283,10 @@ function ParentDaycareView() {
                     <div className="booking-summary">
                       <div className="availability-info">
                         <h5>Availability</h5>
-                        <div className="capacity-bar">
-                          <div 
-                            className="capacity-fill" 
-                            style={{ width: `${(daycare.currentOccupancy / daycare.capacity) * 100}%` }}
-                          ></div>
-                        </div>
-                        <p>{daycare.capacity - daycare.currentOccupancy} of {daycare.capacity} slots available</p>
-                      </div>
-                      
-                      <div className="pricing-info">
-                        <h5>Pricing</h5>
-                        <div className="price-item">Monthly: ৳{daycare.monthlyFee.toLocaleString()}</div>
-                        <div className="price-item">Daily: ৳{daycare.dailyFee}</div>
-                        <div className="price-item">Hourly: ৳{daycare.hourlyFee}</div>
+                        <p className="text-success">
+                          <FaCheckCircle className="me-1" />
+                          Available for booking
+                        </p>
                       </div>
 
                       <Button
@@ -366,10 +294,9 @@ function ParentDaycareView() {
                         size="lg"
                         className="book-now-btn"
                         onClick={() => setShowBookingModal(true)}
-                        disabled={daycare.currentOccupancy >= daycare.capacity}
                       >
                         <FaCalendarAlt className="me-2" />
-                        {daycare.currentOccupancy >= daycare.capacity ? "Fully Booked" : "Book Now"}
+                        Book Now
                       </Button>
                     </div>
                   </Col>
@@ -391,7 +318,7 @@ function ParentDaycareView() {
               </Card.Header>
               <Card.Body>
                 <Carousel>
-                  {daycare.images.map((image, index) => (
+                  {(daycare.images && daycare.images.length > 0 ? daycare.images : [daycare.main_image_url]).map((image, index) => (
                     <Carousel.Item key={index}>
                       <Image
                         src={image}
@@ -419,25 +346,17 @@ function ParentDaycareView() {
                 
                 <Row className="mt-4">
                   <Col md={6}>
-                    <h6>Operating Hours</h6>
+                    <h6>Location</h6>
                     <div className="info-item">
-                      <FaClock className="me-2" />
-                      {daycare.operatingHours}
-                    </div>
-                    <div className="info-item">
-                      <FaCalendarAlt className="me-2" />
-                      {daycare.operatingDays}
+                      <FaMapMarkerAlt className="me-2" />
+                      {daycare.area_display}
                     </div>
                   </Col>
                   <Col md={6}>
-                    <h6>Age Groups</h6>
+                    <h6>Contact</h6>
                     <div className="info-item">
-                      <FaChild className="me-2" />
-                      {daycare.ageGroups.join(", ")}
-                    </div>
-                    <div className="info-item">
-                      <FaUsers className="me-2" />
-                      Capacity: {daycare.capacity} children
+                      <FaPhone className="me-2" />
+                      {daycare.phone}
                     </div>
                   </Col>
                 </Row>
@@ -451,51 +370,11 @@ function ParentDaycareView() {
               </Card.Header>
               <Card.Body>
                 <Row>
-                  {daycare.services.map((service, index) => (
+                  {daycare.services && daycare.services.split(',').map((service, index) => (
                     <Col md={6} key={index} className="mb-2">
                       <div className="service-item">
                         <FaCheckCircle className="text-success me-2" />
-                        {service}
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
-              </Card.Body>
-            </Card>
-
-            {/* Facilities Section */}
-            <Card className="info-card mb-4">
-              <Card.Header>
-                <h4>Facilities</h4>
-              </Card.Header>
-              <Card.Body>
-                <Row>
-                  {daycare.facilities.map((facility, index) => (
-                    <Col md={6} key={index} className="mb-2">
-                      <div className="facility-item">
-                        <FaCheckCircle className="text-primary me-2" />
-                        {facility}
-                      </div>
-                    </Col>
-                  ))}
-                </Row>
-              </Card.Body>
-            </Card>
-
-            {/* Staff Section */}
-            <Card className="info-card mb-4">
-              <Card.Header>
-                <h4>Our Staff</h4>
-              </Card.Header>
-              <Card.Body>
-                <Row>
-                  {daycare.staff.map((member, index) => (
-                    <Col md={6} key={index} className="mb-3">
-                      <div className="staff-member">
-                        <h6>{member.name}</h6>
-                        <p className="role">{member.role}</p>
-                        <p className="experience">Experience: {member.experience}</p>
-                        <p className="qualification">{member.qualification}</p>
+                        {service.trim()}
                       </div>
                     </Col>
                   ))}
@@ -504,73 +383,57 @@ function ParentDaycareView() {
             </Card>
 
             {/* Reviews Section */}
-            <Card className="info-card mb-4">
-              <Card.Header>
-                <h4>Parent Reviews ({daycare.reviewCount})</h4>
-              </Card.Header>
-              <Card.Body>
-                {daycare.reviews.map((review) => (
-                  <div key={review.id} className="review-item">
-                    <div className="review-header">
-                      <div className="reviewer-info">
-                        <strong>{review.parentName}</strong>
-                        <span className="child-age">• Child: {review.childAge}</span>
+            {daycare.reviews && daycare.reviews.length > 0 && (
+              <Card className="info-card mb-4">
+                <Card.Header>
+                  <h4>Parent Reviews ({daycare.review_count})</h4>
+                </Card.Header>
+                <Card.Body>
+                  {daycare.reviews.map((review) => (
+                    <div key={review.id} className="review-item">
+                      <div className="review-header">
+                        <div className="reviewer-info">
+                          <strong>{review.parent_name}</strong>
+                        </div>
+                        <div className="review-rating">
+                          {renderStars(review.rating)}
+                          <span className="review-date">{new Date(review.created_at).toLocaleDateString()}</span>
+                        </div>
                       </div>
-                      <div className="review-rating">
-                        {renderStars(review.rating)}
-                        <span className="review-date">{new Date(review.date).toLocaleDateString()}</span>
+                      <div className="review-content">
+                        <FaQuoteLeft className="quote-icon" />
+                        <p>{review.comment}</p>
                       </div>
                     </div>
-                    <div className="review-content">
-                      <FaQuoteLeft className="quote-icon" />
-                      <p>{review.comment}</p>
-                    </div>
-                    <div className="review-actions">
-                      <Button variant="outline-success" size="sm">
-                        <FaThumbsUp className="me-1" />
-                        Helpful ({review.helpful})
-                      </Button>
-                      <Button variant="outline-secondary" size="sm" className="ms-2">
-                        <FaFlag className="me-1" />
-                        Report
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </Card.Body>
-            </Card>
+                  ))}
+                </Card.Body>
+              </Card>
+            )}
           </Col>
 
           {/* Sidebar */}
           <Col lg={4}>
-            {/* Policies Card */}
-            <Card className="sidebar-card mb-4">
-              <Card.Header>
-                <h5>Policies & Guidelines</h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="policy-item">
-                  <strong>Drop-off Time:</strong>
-                  <p>{daycare.policies.dropOffTime}</p>
-                </div>
-                <div className="policy-item">
-                  <strong>Pick-up Time:</strong>
-                  <p>{daycare.policies.pickUpTime}</p>
-                </div>
-                <div className="policy-item">
-                  <strong>Sick Policy:</strong>
-                  <p>{daycare.policies.sickPolicy}</p>
-                </div>
-                <div className="policy-item">
-                  <strong>Meal Policy:</strong>
-                  <p>{daycare.policies.mealPolicy}</p>
-                </div>
-                <div className="policy-item">
-                  <strong>Emergency Contact:</strong>
-                  <p>{daycare.policies.emergencyContact}</p>
-                </div>
-              </Card.Body>
-            </Card>
+            {/* Availability Card */}
+            {daycare.availability && daycare.availability.length > 0 && (
+              <Card className="sidebar-card mb-4">
+                <Card.Header>
+                  <h5>Weekly Schedule</h5>
+                </Card.Header>
+                <Card.Body>
+                  {daycare.availability.map((schedule) => (
+                    <div key={schedule.day_of_week} className="policy-item">
+                      <strong>{schedule.day_display}:</strong>
+                      <p>
+                        {schedule.is_available 
+                          ? `${schedule.opening_time} - ${schedule.closing_time} (${schedule.available_slots} slots)`
+                          : "Closed"
+                        }
+                      </p>
+                    </div>
+                  ))}
+                </Card.Body>
+              </Card>
+            )}
 
             {/* Quick Actions */}
             <Card className="sidebar-card">
@@ -586,10 +449,6 @@ function ParentDaycareView() {
                   <Button variant="outline-primary" href={`tel:${daycare.phone}`}>
                     <FaPhone className="me-2" />
                     Call Now
-                  </Button>
-                  <Button variant="outline-secondary" href={`mailto:${daycare.email}`}>
-                    <FaEnvelope className="me-2" />
-                    Send Email
                   </Button>
                 </div>
               </Card.Body>
@@ -615,9 +474,9 @@ function ParentDaycareView() {
                     required
                   >
                     <option value="">Choose a child...</option>
-                    {mockChildren.map((child) => (
+                    {children.map((child) => (
                       <option key={child.id} value={child.id}>
-                        {child.name} ({child.age} years old)
+                        {child.full_name} ({child.age} years old)
                       </option>
                     ))}
                   </Form.Select>
@@ -630,9 +489,10 @@ function ParentDaycareView() {
                     value={bookingType}
                     onChange={(e) => setBookingType(e.target.value)}
                   >
-                    <option value="full-time">Full-time (Monthly)</option>
-                    <option value="part-time">Part-time (Daily)</option>
+                    <option value="full_time">Full-time</option>
+                    <option value="part_time">Part-time</option>
                     <option value="hourly">Hourly</option>
+                    <option value="drop_in">Drop In</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -650,12 +510,26 @@ function ParentDaycareView() {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Estimated Cost</Form.Label>
-                  <div className="cost-display">
-                    {bookingType === "full-time" && `৳${daycare.monthlyFee.toLocaleString()}/month`}
-                    {bookingType === "part-time" && `৳${daycare.dailyFee}/day`}
-                    {bookingType === "hourly" && `৳${daycare.hourlyFee}/hour`}
-                  </div>
+                  <Form.Label>Emergency Contact Name *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={emergencyContactName}
+                    onChange={(e) => setEmergencyContactName(e.target.value)}
+                    placeholder="Enter emergency contact name"
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Emergency Contact Phone *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={emergencyContactPhone}
+                    onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                    placeholder="Enter emergency contact phone"
+                    required
+                  />
                 </Form.Group>
               </Col>
             </Row>
@@ -665,6 +539,8 @@ function ParentDaycareView() {
               <Form.Control
                 as="textarea"
                 rows={3}
+                value={specialInstructions}
+                onChange={(e) => setSpecialInstructions(e.target.value)}
                 placeholder="Any special requirements or notes for your child..."
               />
             </Form.Group>
@@ -674,8 +550,19 @@ function ParentDaycareView() {
           <Button variant="secondary" onClick={() => setShowBookingModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleBooking}>
-            Continue to Booking
+          <Button 
+            variant="primary" 
+            onClick={handleBooking}
+            disabled={isBooking}
+          >
+            {isBooking ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Creating Booking...
+              </>
+            ) : (
+              "Create Booking"
+            )}
           </Button>
         </Modal.Footer>
       </Modal>

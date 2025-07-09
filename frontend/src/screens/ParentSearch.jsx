@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { bookingAPI } from "../services/api";
 import {
   Container,
   Row,
@@ -39,148 +40,57 @@ import "../styles/ParentSearch.css";
 function ParentSearch() {
   const navigate = useNavigate();
   const [daycares, setDaycares] = useState([]);
-  const [filteredDaycares, setFilteredDaycares] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedArea, setSelectedArea] = useState("");
   const [minRating, setMinRating] = useState(0);
-  const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("rating");
+  const [showFilters, setShowFilters] = useState(false);
+  const [hasAvailability, setHasAvailability] = useState(false);
+  const [services, setServices] = useState("");
 
-  // Mock data - will be replaced with API calls
-  const mockDaycares = [
-    {
-      id: 1,
-      name: "Little Stars Daycare",
-      area: "Dhanmondi",
-      address: "House 15, Road 7, Dhanmondi, Dhaka",
-      phone: "01712345678",
-      rating: 4.8,
-      reviewCount: 24,
-      isVerified: true,
-      services: ["Full-time care", "Meals included", "Educational activities"],
-      ageGroups: ["6 months - 2 years", "2-4 years"],
-      capacity: 30,
-      currentOccupancy: 22,
-      monthlyFee: 8000,
-      image: "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400",
-        "https://images.pexels.com/photos/8613092/pexels-photo-8613092.jpeg?auto=compress&cs=tinysrgb&w=400",
-      ],
-      description: "A loving environment for your little ones with experienced caregivers.",
-      operatingHours: "7:00 AM - 6:00 PM",
-    },
-    {
-      id: 2,
-      name: "Happy Kids Center",
-      area: "Gulshan",
-      address: "Plot 45, Road 11, Gulshan-2, Dhaka",
-      phone: "01798765432",
-      rating: 4.6,
-      reviewCount: 18,
-      isVerified: true,
-      services: ["Part-time care", "Educational programs", "Outdoor activities"],
-      ageGroups: ["1-3 years", "3-5 years"],
-      capacity: 25,
-      currentOccupancy: 20,
-      monthlyFee: 12000,
-      image: "https://images.pexels.com/photos/8613093/pexels-photo-8613093.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/8613093/pexels-photo-8613093.jpeg?auto=compress&cs=tinysrgb&w=400",
-        "https://images.pexels.com/photos/8613094/pexels-photo-8613094.jpeg?auto=compress&cs=tinysrgb&w=400",
-      ],
-      description: "Modern facilities with qualified teachers and nutritious meals.",
-      operatingHours: "8:00 AM - 5:00 PM",
-    },
-    {
-      id: 3,
-      name: "Sunshine Daycare",
-      area: "Uttara",
-      address: "Sector 7, Road 12, Uttara, Dhaka",
-      phone: "01634567890",
-      rating: 4.4,
-      reviewCount: 31,
-      isVerified: true,
-      services: ["Full-time care", "Transportation", "Medical care"],
-      ageGroups: ["6 months - 5 years"],
-      capacity: 40,
-      currentOccupancy: 35,
-      monthlyFee: 10000,
-      image: "https://images.pexels.com/photos/8613095/pexels-photo-8613095.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/8613095/pexels-photo-8613095.jpeg?auto=compress&cs=tinysrgb&w=400",
-        "https://images.pexels.com/photos/8613096/pexels-photo-8613096.jpeg?auto=compress&cs=tinysrgb&w=400",
-      ],
-      description: "Comprehensive childcare with transportation and medical support.",
-      operatingHours: "7:30 AM - 6:30 PM",
-    },
-    {
-      id: 4,
-      name: "Rainbow Kids Academy",
-      area: "Banani",
-      address: "Road 27, Banani, Dhaka",
-      phone: "01556789012",
-      rating: 4.9,
-      reviewCount: 42,
-      isVerified: true,
-      services: ["Educational programs", "Art & crafts", "Music classes"],
-      ageGroups: ["2-5 years"],
-      capacity: 20,
-      currentOccupancy: 18,
-      monthlyFee: 15000,
-      image: "https://images.pexels.com/photos/8613097/pexels-photo-8613097.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/8613097/pexels-photo-8613097.jpeg?auto=compress&cs=tinysrgb&w=400",
-        "https://images.pexels.com/photos/8613098/pexels-photo-8613098.jpeg?auto=compress&cs=tinysrgb&w=400",
-      ],
-      description: "Premium early childhood education with creative learning programs.",
-      operatingHours: "8:00 AM - 4:00 PM",
-    },
+  const areas = [
+    { value: "", label: "All Areas" },
+    { value: "gulshan", label: "Gulshan" },
+    { value: "banani", label: "Banani" },
+    { value: "uttara", label: "Uttara" },
+    { value: "mirpur", label: "Mirpur" },
+    { value: "wari", label: "Wari" },
+    { value: "dhanmondi", label: "Dhanmondi" },
   ];
 
-  const areas = ["All Areas", "Dhanmondi", "Gulshan", "Uttara", "Banani", "Mirpur", "Wari"];
-
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDaycares(mockDaycares);
-      setFilteredDaycares(mockDaycares);
-      setIsLoading(false);
-    }, 1000);
+    fetchDaycares();
   }, []);
 
   useEffect(() => {
-    filterDaycares();
-  }, [searchTerm, selectedArea, minRating, sortBy, daycares]);
+    fetchDaycares();
+  }, [searchTerm, selectedArea, minRating, sortBy, hasAvailability, services]);
 
-  const filterDaycares = () => {
-    let filtered = daycares.filter((daycare) => {
-      const matchesSearch = daycare.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           daycare.area.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesArea = selectedArea === "" || selectedArea === "All Areas" || daycare.area === selectedArea;
-      const matchesRating = daycare.rating >= minRating;
+  const fetchDaycares = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const params = {};
       
-      return matchesSearch && matchesArea && matchesRating;
-    });
+      if (searchTerm) params.search = searchTerm;
+      if (selectedArea) params.area = selectedArea;
+      if (minRating > 0) params.min_rating = minRating;
+      if (hasAvailability) params.has_availability = 'true';
+      if (services) params.services = services;
+      if (sortBy) params.ordering = sortBy === 'rating' ? '-rating' : sortBy;
 
-    // Sort daycares
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "rating":
-          return b.rating - a.rating;
-        case "price-low":
-          return a.monthlyFee - b.monthlyFee;
-        case "price-high":
-          return b.monthlyFee - a.monthlyFee;
-        case "name":
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
-
-    setFilteredDaycares(filtered);
+      const response = await bookingAPI.searchDaycares(params);
+      setDaycares(response.data.results || response.data);
+    } catch (error) {
+      console.error("Error fetching daycares:", error);
+      setError("Failed to load daycares. Please try again.");
+      setDaycares([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStars = (rating) => {
@@ -223,10 +133,6 @@ function ParentSearch() {
 
   const handleViewProfile = (daycareId) => {
     navigate(`/parent/daycare/${daycareId}`);
-  };
-
-  const handleBookNow = (daycareId) => {
-    navigate(`/parent/book/${daycareId}`);
   };
 
   if (isLoading) {
@@ -331,8 +237,8 @@ function ParentSearch() {
                         onChange={(e) => setSelectedArea(e.target.value)}
                       >
                         {areas.map((area) => (
-                          <option key={area} value={area}>
-                            {area}
+                          <option key={area.value} value={area.value}>
+                            {area.label}
                           </option>
                         ))}
                       </Form.Select>
@@ -359,10 +265,9 @@ function ParentSearch() {
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                       >
-                        <option value="rating">Highest Rated</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
+                        <option value="-rating">Highest Rated</option>
                         <option value="name">Name A-Z</option>
+                        <option value="-created_at">Newest First</option>
                       </Form.Select>
                     </Form.Group>
                   </Col>
@@ -380,49 +285,44 @@ function ParentSearch() {
 
                 {showFilters && (
                   <Row className="mt-3 pt-3 border-top">
-                    <Col md={3}>
-                      <Form.Group>
-                        <Form.Label>Age Group</Form.Label>
-                        <Form.Select>
-                          <option>All Age Groups</option>
-                          <option>6 months - 2 years</option>
-                          <option>2-4 years</option>
-                          <option>3-5 years</option>
-                        </Form.Select>
-                      </Form.Group>
-                    </Col>
-                    <Col md={3}>
+                    <Col md={4}>
                       <Form.Group>
                         <Form.Label>Services</Form.Label>
-                        <Form.Select>
-                          <option>All Services</option>
-                          <option>Full-time care</option>
-                          <option>Part-time care</option>
-                          <option>Meals included</option>
-                          <option>Transportation</option>
-                        </Form.Select>
+                        <Form.Control
+                          type="text"
+                          placeholder="e.g., Full-time care, Meals"
+                          value={services}
+                          onChange={(e) => setServices(e.target.value)}
+                        />
                       </Form.Group>
                     </Col>
-                    <Col md={3}>
+                    <Col md={4}>
                       <Form.Group>
-                        <Form.Label>Price Range</Form.Label>
-                        <Form.Select>
-                          <option>Any Price</option>
-                          <option>Under ৳8,000</option>
-                          <option>৳8,000 - ৳12,000</option>
-                          <option>৳12,000 - ৳15,000</option>
-                          <option>Above ৳15,000</option>
-                        </Form.Select>
+                        <Form.Check
+                          type="checkbox"
+                          label="Has Available Slots"
+                          checked={hasAvailability}
+                          onChange={(e) => setHasAvailability(e.target.checked)}
+                          className="mt-4"
+                        />
                       </Form.Group>
                     </Col>
-                    <Col md={3}>
+                    <Col md={4}>
                       <Form.Group>
-                        <Form.Label>Availability</Form.Label>
-                        <Form.Select>
-                          <option>Any Availability</option>
-                          <option>Has Available Slots</option>
-                          <option>Nearly Full</option>
-                        </Form.Select>
+                        <Button
+                          variant="outline-secondary"
+                          onClick={() => {
+                            setSearchTerm("");
+                            setSelectedArea("");
+                            setMinRating(0);
+                            setServices("");
+                            setHasAvailability(false);
+                            setSortBy("-rating");
+                          }}
+                          className="mt-4"
+                        >
+                          Clear All Filters
+                        </Button>
                       </Form.Group>
                     </Col>
                   </Row>
@@ -435,10 +335,15 @@ function ParentSearch() {
         {/* Results Summary */}
         <Row className="mb-3">
           <Col>
+            {error && (
+              <Alert variant="danger" className="mb-3">
+                {error}
+              </Alert>
+            )}
             <div className="results-summary">
               <h5>
-                Found {filteredDaycares.length} daycare{filteredDaycares.length !== 1 ? 's' : ''} 
-                {selectedArea && selectedArea !== "All Areas" && ` in ${selectedArea}`}
+                Found {daycares.length} daycare{daycares.length !== 1 ? 's' : ''} 
+                {selectedArea && ` in ${areas.find(a => a.value === selectedArea)?.label}`}
               </h5>
             </div>
           </Col>
@@ -446,25 +351,23 @@ function ParentSearch() {
 
         {/* Daycare Cards */}
         <Row>
-          {filteredDaycares.length > 0 ? (
-            filteredDaycares.map((daycare) => (
+          {daycares.length > 0 ? (
+            daycares.map((daycare) => (
               <Col lg={6} className="mb-4" key={daycare.id}>
                 <Card className="daycare-card h-100">
                   <div className="daycare-image-container">
                     <Image
-                      src={daycare.image}
+                      src={daycare.main_image_url || "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400"}
                       alt={daycare.name}
                       className="daycare-image"
                     />
                     <div className="daycare-badges">
-                      {daycare.isVerified && (
-                        <Badge bg="success" className="verified-badge">
-                          <FaCheckCircle className="me-1" />
-                          Verified
-                        </Badge>
-                      )}
+                      <Badge bg="success" className="verified-badge">
+                        <FaCheckCircle className="me-1" />
+                        Verified
+                      </Badge>
                       <Badge bg="primary" className="availability-badge">
-                        {daycare.capacity - daycare.currentOccupancy} slots available
+                        {daycare.available_slots} slots available
                       </Badge>
                     </div>
                   </div>
@@ -477,54 +380,42 @@ function ParentSearch() {
                           {renderStars(daycare.rating)}
                         </div>
                         <span className="rating-text">
-                          {daycare.rating} ({daycare.reviewCount} reviews)
+                          {daycare.rating} ({daycare.review_count} reviews)
                         </span>
                       </div>
                     </div>
 
                     <div className="daycare-location">
                       <FaMapMarkerAlt className="me-1" />
-                      {daycare.area} • {daycare.address}
+                      {daycare.area_display} • {daycare.address}
                     </div>
 
                     <div className="daycare-info">
                       <Row>
                         <Col sm={6}>
                           <div className="info-item">
-                            <FaUsers className="me-1" />
-                            <span>Capacity: {daycare.currentOccupancy}/{daycare.capacity}</span>
+                            <FaChild className="me-1" />
+                            <span>Available: {daycare.available_slots} slots</span>
                           </div>
                         </Col>
                         <Col sm={6}>
                           <div className="info-item">
                             <FaClock className="me-1" />
-                            <span>{daycare.operatingHours}</span>
-                          </div>
-                        </Col>
-                        <Col sm={6}>
-                          <div className="info-item">
-                            <FaChild className="me-1" />
-                            <span>{daycare.ageGroups.join(", ")}</span>
-                          </div>
-                        </Col>
-                        <Col sm={6}>
-                          <div className="info-item">
-                            <FaDollarSign className="me-1" />
-                            <span>৳{daycare.monthlyFee.toLocaleString()}/month</span>
+                            <span>Open Today</span>
                           </div>
                         </Col>
                       </Row>
                     </div>
 
                     <div className="daycare-services">
-                      {daycare.services.slice(0, 3).map((service, index) => (
+                      {daycare.services && daycare.services.split(',').slice(0, 3).map((service, index) => (
                         <Badge key={index} bg="light" text="dark" className="service-badge">
-                          {service}
+                          {service.trim()}
                         </Badge>
                       ))}
-                      {daycare.services.length > 3 && (
+                      {daycare.services && daycare.services.split(',').length > 3 && (
                         <Badge bg="light" text="dark" className="service-badge">
-                          +{daycare.services.length - 3} more
+                          +{daycare.services.split(',').length - 3} more
                         </Badge>
                       )}
                     </div>
@@ -544,11 +435,11 @@ function ParentSearch() {
                       </Button>
                       <Button
                         variant="primary"
-                        onClick={() => handleBookNow(daycare.id)}
-                        disabled={daycare.currentOccupancy >= daycare.capacity}
+                        onClick={() => handleViewProfile(daycare.id)}
+                        disabled={daycare.available_slots <= 0}
                       >
                         <FaCalendarAlt className="me-1" />
-                        {daycare.currentOccupancy >= daycare.capacity ? "Fully Booked" : "Book Now"}
+                        {daycare.available_slots <= 0 ? "Fully Booked" : "View & Book"}
                       </Button>
                     </div>
 
@@ -577,6 +468,8 @@ function ParentSearch() {
                       setSearchTerm("");
                       setSelectedArea("");
                       setMinRating(0);
+                      setServices("");
+                      setHasAvailability(false);
                     }}
                   >
                     Clear Filters

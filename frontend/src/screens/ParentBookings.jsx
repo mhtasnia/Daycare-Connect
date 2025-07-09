@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { bookingAPI } from "../services/api";
 import {
   Container,
   Row,
@@ -41,121 +42,45 @@ function ParentBookings() {
   const [activeTab, setActiveTab] = useState("active");
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
-
-  // Mock bookings data
-  const mockBookings = [
-    {
-      id: 1,
-      daycare: {
-        id: 1,
-        name: "Little Stars Daycare",
-        address: "House 15, Road 7, Dhanmondi, Dhaka",
-        phone: "01712345678",
-        image: "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400"
-      },
-      child: {
-        name: "Aisha Rahman",
-        age: 2
-      },
-      bookingDate: "2024-02-01",
-      startDate: "2024-02-15",
-      endDate: "2024-03-15",
-      type: "full-time",
-      status: "confirmed",
-      monthlyFee: 8000,
-      emergencyContact: "Rashida Begum",
-      specialInstructions: "Allergic to peanuts",
-      createdAt: "2024-01-20"
-    },
-    {
-      id: 2,
-      daycare: {
-        id: 2,
-        name: "Happy Kids Center",
-        address: "Plot 45, Road 11, Gulshan-2, Dhaka",
-        phone: "01798765432",
-        image: "https://images.pexels.com/photos/8613093/pexels-photo-8613093.jpeg?auto=compress&cs=tinysrgb&w=400"
-      },
-      child: {
-        name: "Omar Hassan",
-        age: 3
-      },
-      bookingDate: "2024-01-25",
-      startDate: "2024-03-01",
-      endDate: "2024-04-01",
-      type: "part-time",
-      status: "pending",
-      monthlyFee: 12000,
-      emergencyContact: "Ahmed Hassan",
-      specialInstructions: "",
-      createdAt: "2024-01-25"
-    },
-    {
-      id: 3,
-      daycare: {
-        id: 3,
-        name: "Sunshine Daycare",
-        address: "Sector 7, Road 12, Uttara, Dhaka",
-        phone: "01634567890",
-        image: "https://images.pexels.com/photos/8613095/pexels-photo-8613095.jpeg?auto=compress&cs=tinysrgb&w=400"
-      },
-      child: {
-        name: "Aisha Rahman",
-        age: 2
-      },
-      bookingDate: "2024-01-10",
-      startDate: "2024-01-15",
-      endDate: "2024-01-30",
-      type: "hourly",
-      status: "completed",
-      monthlyFee: 5000,
-      emergencyContact: "Fatima Ahmed",
-      specialInstructions: "Needs afternoon nap",
-      createdAt: "2024-01-10"
-    },
-    {
-      id: 4,
-      daycare: {
-        id: 4,
-        name: "Rainbow Kids Academy",
-        address: "Road 27, Banani, Dhaka",
-        phone: "01556789012",
-        image: "https://images.pexels.com/photos/8613097/pexels-photo-8613097.jpeg?auto=compress&cs=tinysrgb&w=400"
-      },
-      child: {
-        name: "Omar Hassan",
-        age: 3
-      },
-      bookingDate: "2024-01-05",
-      startDate: "2024-01-10",
-      endDate: "2024-01-20",
-      type: "full-time",
-      status: "cancelled",
-      monthlyFee: 15000,
-      emergencyContact: "Ahmed Hassan",
-      specialInstructions: "",
-      createdAt: "2024-01-05",
-      cancelReason: "Changed plans"
-    }
-  ];
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setBookings(mockBookings);
-      setIsLoading(false);
-    }, 1000);
+    fetchBookings();
   }, []);
+
+  const fetchBookings = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await bookingAPI.getBookings();
+      setBookings(response.data.results || response.data);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      setError("Failed to load bookings. Please try again.");
+      setBookings([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
+      const refresh = localStorage.getItem("refresh");
+      const access = localStorage.getItem("access");
+
+      if (refresh && access) {
+        await bookingAPI.logout(refresh);
+      }
       localStorage.clear();
       navigate("/parent/login");
     } catch (error) {
       console.error("Logout error:", error);
+      localStorage.clear();
+      navigate("/parent/login");
     }
   };
 
@@ -212,25 +137,27 @@ function ParentBookings() {
       return;
     }
 
+    setIsCancelling(true);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await bookingAPI.cancelBooking(selectedBooking.id, cancelReason);
       
-      // Update booking status
-      setBookings(prev => prev.map(b => 
-        b.id === selectedBooking.id 
-          ? { ...b, status: "cancelled", cancelReason }
-          : b
-      ));
+      // Refresh bookings list
+      await fetchBookings();
 
       setShowCancelModal(false);
       setSelectedBooking(null);
       setCancelReason("");
       
-      alert("Booking cancelled successfully");
+      alert("Booking cancelled successfully!");
     } catch (error) {
       console.error("Cancel booking error:", error);
-      alert("Failed to cancel booking. Please try again.");
+      const errorMessage = error.response?.data?.error || 
+                          error.response?.data?.detail ||
+                          "Failed to cancel booking. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -241,15 +168,15 @@ function ParentBookings() {
           <Col md={3}>
             <div className="daycare-info">
               <img 
-                src={booking.daycare.image} 
-                alt={booking.daycare.name}
+                src={booking.daycare_image || "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400"} 
+                alt={booking.daycare_name}
                 className="daycare-thumbnail"
               />
               <div className="daycare-details">
-                <h6 className="daycare-name">{booking.daycare.name}</h6>
+                <h6 className="daycare-name">{booking.daycare_name}</h6>
                 <p className="daycare-location">
                   <FaMapMarkerAlt className="me-1" />
-                  {booking.daycare.address}
+                  {booking.daycare_address}
                 </p>
               </div>
             </div>
@@ -269,42 +196,42 @@ function ParentBookings() {
                 <Col sm={6}>
                   <div className="info-item">
                     <FaChild className="me-1" />
-                    <strong>Child:</strong> {booking.child.name} ({booking.child.age} years)
+                    <strong>Child:</strong> {booking.child_name} ({booking.child_age} years)
                   </div>
                   <div className="info-item">
                     <FaCalendarAlt className="me-1" />
-                    <strong>Start:</strong> {new Date(booking.startDate).toLocaleDateString()}
+                    <strong>Start:</strong> {new Date(booking.start_date).toLocaleDateString()}
                   </div>
                   <div className="info-item">
                     <FaDollarSign className="me-1" />
-                    <strong>Fee:</strong> ৳{booking.monthlyFee.toLocaleString()}/month
+                    <strong>Fee:</strong> ৳{booking.total_amount.toLocaleString()}
                   </div>
                 </Col>
                 <Col sm={6}>
                   <div className="info-item">
                     <FaClock className="me-1" />
-                    <strong>Type:</strong> {booking.type.charAt(0).toUpperCase() + booking.type.slice(1)}
+                    <strong>Type:</strong> {booking.booking_type_display}
                   </div>
                   <div className="info-item">
                     <FaCalendarAlt className="me-1" />
-                    <strong>End:</strong> {new Date(booking.endDate).toLocaleDateString()}
+                    <strong>End:</strong> {booking.end_date ? new Date(booking.end_date).toLocaleDateString() : "Ongoing"}
                   </div>
                   <div className="info-item">
                     <FaPhone className="me-1" />
-                    <strong>Contact:</strong> {booking.emergencyContact}
+                    <strong>Contact:</strong> {booking.emergency_contact_name}
                   </div>
                 </Col>
               </Row>
 
-              {booking.specialInstructions && (
+              {booking.special_instructions && (
                 <div className="special-instructions">
-                  <strong>Special Instructions:</strong> {booking.specialInstructions}
+                  <strong>Special Instructions:</strong> {booking.special_instructions}
                 </div>
               )}
 
-              {booking.cancelReason && (
+              {booking.cancellation_reason && (
                 <div className="cancel-reason">
-                  <strong>Cancellation Reason:</strong> {booking.cancelReason}
+                  <strong>Cancellation Reason:</strong> {booking.cancellation_reason}
                 </div>
               )}
             </div>
@@ -316,24 +243,13 @@ function ParentBookings() {
                 <Button
                   variant="outline-primary"
                   size="sm"
-                  as={Link}
-                  to={`/parent/daycare/${booking.daycare.id}`}
+                  onClick={() => navigate(`/parent/daycare/${booking.daycare}`)}
                 >
                   <FaEye className="me-1" />
                   View Daycare
                 </Button>
                 
-                {booking.status === "confirmed" && (
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                  >
-                    <FaEdit className="me-1" />
-                    Modify
-                  </Button>
-                )}
-
-                {["pending", "confirmed"].includes(booking.status) && (
+                {booking.can_cancel && (
                   <Button
                     variant="outline-danger"
                     size="sm"
@@ -347,13 +263,13 @@ function ParentBookings() {
                 <Button
                   variant="outline-info"
                   size="sm"
-                  href={`tel:${booking.daycare.phone}`}
+                  href={`tel:${booking.daycare_phone}`}
                 >
                   <FaPhone className="me-1" />
                   Call Daycare
                 </Button>
 
-                {booking.status === "completed" && (
+                {booking.can_review && (
                   <Button
                     variant="outline-warning"
                     size="sm"
@@ -430,6 +346,11 @@ function ParentBookings() {
         {/* Page Header */}
         <Row className="mb-4">
           <Col>
+            {error && (
+              <Alert variant="danger" className="mb-3">
+                {error}
+              </Alert>
+            )}
             <div className="page-header">
               <h1 className="page-title">
                 <FaCalendarAlt className="me-2" />
@@ -535,7 +456,7 @@ function ParentBookings() {
             <Card className="stats-card">
               <Card.Body className="text-center">
                 <h3 className="stats-number">
-                  ৳{bookings.reduce((total, booking) => total + booking.monthlyFee, 0).toLocaleString()}
+                  ৳{bookings.reduce((total, booking) => total + parseFloat(booking.total_amount || 0), 0).toLocaleString()}
                 </h3>
                 <p className="stats-label">Total Spent</p>
               </Card.Body>
@@ -554,7 +475,7 @@ function ParentBookings() {
             <>
               <Alert variant="warning">
                 <FaExclamationTriangle className="me-2" />
-                Are you sure you want to cancel your booking at {selectedBooking.daycare.name}?
+                Are you sure you want to cancel your booking at {selectedBooking.daycare_name}?
               </Alert>
               
               <Form.Group className="mb-3">
@@ -582,9 +503,22 @@ function ParentBookings() {
           <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
             Keep Booking
           </Button>
-          <Button variant="danger" onClick={confirmCancelBooking}>
-            <FaTimes className="me-1" />
-            Cancel Booking
+          <Button 
+            variant="danger" 
+            onClick={confirmCancelBooking}
+            disabled={isCancelling}
+          >
+            {isCancelling ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Cancelling...
+              </>
+            ) : (
+              <>
+                <FaTimes className="me-1" />
+                Cancel Booking
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Modal>
