@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// Create axios instance with base configuration
+
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
@@ -8,7 +8,8 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add Authorization header with token
+// This will automatically attach the token to every request if it exists
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access');
