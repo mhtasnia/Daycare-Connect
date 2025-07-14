@@ -47,6 +47,8 @@ function DaycareProfile() {
     address: "",
     description: "",
     services: "",
+    pricing: "",
+    featured_services: "",
     area: "",
     images: [],
     imagePreviews: [],
@@ -99,6 +101,8 @@ function DaycareProfile() {
         address: data.address || "",
         description: data.description || "",
         services: data.services || "",
+        pricing: data.pricing || "",
+        featured_services: data.featured_services || "",
         area: data.area || "",
         images: [],
         imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
@@ -154,6 +158,8 @@ function DaycareProfile() {
       data.append("address", formData.address);
       data.append("description", formData.description);
       data.append("services", formData.services);
+      data.append("pricing", formData.pricing);
+      data.append("featured_services", formData.featured_services);
       data.append("area", formData.area);
       
       // Only append images if there are any
@@ -570,6 +576,46 @@ function DaycareProfile() {
                             placeholder="Describe your daycare, facilities, philosophy, etc."
                             style={{
                               background: "rgba(255, 255, 255, 0.9)",
+                              borderRadius: "10px"
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3" controlId="pricing">
+                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                            Pricing
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={2}
+                            name="pricing"
+                            value={formData.pricing}
+                            onChange={handleChange}
+                            placeholder="Enter pricing details (e.g., hourly, daily, monthly rates)"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.8)",
+                              border: "2px solid rgba(255, 255, 255, 0.3)",
+                              borderRadius: "10px"
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={6}>
+                        <Form.Group className="mb-3" controlId="featured_services">
+                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                            Featured Services
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={2}
+                            name="featured_services"
+                            value={formData.featured_services}
+                            onChange={handleChange}
+                            placeholder="Highlight your best services (e.g., special programs, activities)"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.8)",
+                              border: "2px solid rgba(255, 255, 255, 0.3)",
                               borderRadius: "10px"
                             }}
                           />

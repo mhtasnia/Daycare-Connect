@@ -216,6 +216,8 @@ class DaycareCenter(models.Model):
     is_verified = models.BooleanField(default=False)
     rating = models.FloatField(default=0.0)
     services = models.TextField()
+    pricing = models.TextField(blank=True)
+    featured_services = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     nid_number = models.CharField(max_length=100, default='UNKNOWN')  # changed from license
     image = models.ImageField(

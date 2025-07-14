@@ -26,7 +26,7 @@ urlpatterns = [
     path('stats/', views.booking_stats, name='booking-stats'),
     path('history/summary/', views.booking_history_summary, name='booking-history-summary'),
 
-    # --- Daycare Booking Management ---
+    # Daycare Booking Management
     path('daycare/bookings/', views.DaycareBookingListView.as_view(), name='daycare-booking-list'),
     path('daycare/bookings/<int:booking_id>/accept/', views.accept_booking, name='daycare-booking-accept'),
     path('daycare/history/summary/', views.daycare_booking_history, name='daycare-booking-history-summary'),

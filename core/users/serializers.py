@@ -423,7 +423,7 @@ class DaycareProfileSerializer(serializers.ModelSerializer):
         fields = [
             'email', 'user_type', 'is_verified', 'is_email_verified', 'joined_at',
             'name', 'phone', 'address', 'area', 'area_display', 'description', 'nid_number', 'rating',
-            'services', 'image', 'main_image_url', 'images'
+            'services', 'pricing', 'featured_services', 'image', 'main_image_url', 'images'
         ]
     
     def get_main_image_url(self, obj):
@@ -444,7 +444,7 @@ class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DaycareCenter
-        fields = ['name', 'phone', 'address', 'area', 'description', 'services', 'images']
+        fields = ['name', 'phone', 'address', 'area', 'description', 'services', 'pricing', 'featured_services', 'images']
 
     def update(self, instance, validated_data):
         images = validated_data.pop('images', None)
