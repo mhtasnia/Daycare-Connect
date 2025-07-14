@@ -12,13 +12,149 @@ from .models import (
     DaycareAvailability, BookingPayment
 )
 from users.models import DaycareCenter, Parent
-from users.permissions import IsParent
+from users.permissions import IsParent, IsDaycare
+
 from .serializers import (
     DaycareSearchSerializer, DaycareDetailSerializer,
     BookingCreateSerializer, BookingSerializer, BookingUpdateSerializer,
     BookingCancelSerializer, BookingReviewSerializer,
     BookingMessageSerializer, BookingStatsSerializer
 )
+from users.serializers import ParentProfileSerializer
+from rest_framework import serializers
+
+# Daycare cancels a booking
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsDaycare])
+def daycare_cancel_booking(request, booking_id):
+    """
+    Daycare cancels a booking (pending or confirmed)
+    """
+    try:
+        daycare = request.user.daycare_profile
+        booking = Booking.objects.get(id=booking_id, daycare=daycare)
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if booking.status not in ['pending', 'confirmed']:
+        return Response({'error': 'Only pending or confirmed bookings can be cancelled.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    reason = request.data.get('cancellation_reason', '')
+    booking.status = 'cancelled'
+    booking.cancelled_at = timezone.now()
+    booking.cancelled_by = 'daycare'
+    booking.cancellation_reason = reason
+    booking.save()
+
+    return Response({
+        'message': 'Booking cancelled by daycare.',
+        'booking': BookingSerializer(booking, context={'request': request}).data
+    })
+
+
+# --- DAYCARE VIEWS ---
+
+class DaycareBookingListView(generics.ListAPIView):
+    """
+    List all bookings for the authenticated daycare
+    """
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated, IsDaycare]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['status', 'booking_type', 'parent']
+    ordering_fields = ['created_at', 'start_date']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        daycare = self.request.user.daycare_profile
+        return Booking.objects.filter(daycare=daycare).select_related(
+            'parent', 'child', 'daycare', 'parent__user'
+        )
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        # Attach parent profile for each booking
+        for booking, data in zip(self.get_queryset(), response.data):
+            data['parent_profile'] = ParentProfileSerializer(booking.parent, context={'request': request}).data
+        return response
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsDaycare])
+def accept_booking(request, booking_id):
+    """
+    Daycare accepts a pending booking
+    """
+    try:
+        daycare = request.user.daycare_profile
+        booking = Booking.objects.get(id=booking_id, daycare=daycare)
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if booking.status != 'pending':
+        return Response({'error': 'Only pending bookings can be accepted.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    booking.status = 'confirmed'
+    booking.confirmed_at = timezone.now()
+    booking.save()
+
+    return Response({
+        'message': 'Booking accepted and confirmed.',
+        'booking': BookingSerializer(booking, context={'request': request}).data
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsDaycare])
+def daycare_booking_history(request):
+    """
+    Get booking history summary for daycare
+    """
+    daycare = request.user.daycare_profile
+    bookings = Booking.objects.filter(daycare=daycare)
+
+    # Monthly booking summary for the last 6 months
+    six_months_ago = timezone.now().date() - timedelta(days=180)
+    monthly_bookings = []
+    for i in range(6):
+        month_start = six_months_ago + timedelta(days=30*i)
+        month_end = month_start + timedelta(days=30)
+        month_bookings = bookings.filter(
+            created_at__date__gte=month_start,
+            created_at__date__lt=month_end
+        )
+        monthly_bookings.append({
+            'month': month_start.strftime('%B %Y'),
+            'bookings': month_bookings.count(),
+            'amount_earned': month_bookings.aggregate(
+                total=Sum('paid_amount')
+            )['total'] or 0
+        })
+
+    # Frequent parents (most bookings)
+    frequent_parents = bookings.values(
+        'parent__full_name', 'parent__id'
+    ).annotate(
+        booking_count=Count('id')
+    ).order_by('-booking_count')[:5]
+
+    return Response({
+        'monthly_summary': monthly_bookings,
+        'frequent_parents': frequent_parents,
+        'total_children_served': bookings.values('child').distinct().count(),
+        'average_booking_duration': bookings.filter(
+            end_date__isnull=False
+        ).aggregate(
+            avg_duration=Avg('duration_days')
+        )['avg_duration'] or 0
+    })
+from .serializers import (
+    DaycareSearchSerializer, DaycareDetailSerializer,
+    BookingCreateSerializer, BookingSerializer, BookingUpdateSerializer,
+    BookingCancelSerializer, BookingReviewSerializer,
+    BookingMessageSerializer, BookingStatsSerializer
+)
+from rest_framework import serializers
 
 
 class DaycareSearchView(generics.ListAPIView):

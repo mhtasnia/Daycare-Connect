@@ -58,16 +58,6 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
-export const authAPI = {
-  login: (credentials) => api.post('/user-auth/parents/login/', credentials),
-  register: (userData) => api.post('/user-auth/parents/register/', userData),
-  logout: (refreshToken) => api.post('/user-auth/parents/logout/', { refresh: refreshToken }),
-  sendOTP: (email, purpose = 'registration') => api.post('/user-auth/send-otp/', { email, purpose }),
-  verifyOTP: (email, otp_code, purpose = 'registration') => api.post('/user-auth/verify-otp/', { email, otp_code, purpose }),
-  getProfile: () => api.get('/user-auth/parents/profile/'),
-  updateProfile: (profileData) => api.put('/user-auth/parents/profile/update/', profileData),
-};
 
 // Booking API
 export const bookingAPI = {

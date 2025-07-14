@@ -106,7 +106,6 @@ function PublicDaycareSearch() {
   ];
 
   useEffect(() => {
-    // Simulate loading
     setIsLoading(true);
     setTimeout(() => {
       setDaycares(mockDaycares);

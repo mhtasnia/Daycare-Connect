@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'jazzmin',
+    'django_filters',
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
