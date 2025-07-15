@@ -5,11 +5,20 @@ from datetime import datetime, timedelta
 
 from .models import (
     Booking, BookingReview, BookingMessage, 
-    DaycareAvailability, BookingPayment
+    DaycareAvailability, BookingPayment, DaycarePricing
 )
 from users.models import DaycareCenter, Child, Parent
 from users.serializers import ChildSerializer
 
+class DaycarePricingSerializer(serializers.ModelSerializer):
+    booking_type_display = serializers.CharField(source='get_booking_type_display', read_only=True)
+    
+    class Meta:
+        model = DaycarePricing
+        fields = [
+            'id', 'booking_type', 'booking_type_display', 'price', 
+            'duration_unit', 'description', 'is_active'
+        ]
 
 class DaycareSearchSerializer(serializers.ModelSerializer):
     """Serializer for daycare search results"""
@@ -72,13 +81,14 @@ class DaycareDetailSerializer(serializers.ModelSerializer):
     availability = serializers.SerializerMethodField()
     main_image_url = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    pricing_tiers = DaycarePricingSerializer(many=True, read_only=True)
     
     class Meta:
         model = DaycareCenter
         fields = [
             'id', 'name', 'address', 'area', 'area_display', 'phone', 
             'rating', 'review_count', 'services', 'description',
-            'main_image_url', 'images', 'reviews', 'availability',
+            'main_image_url', 'images', 'reviews', 'availability', 'pricing_tiers',
             'created_at'
         ]
     

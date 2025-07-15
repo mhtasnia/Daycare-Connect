@@ -4,9 +4,23 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import (
     Booking, BookingReview, BookingMessage, 
-    DaycareAvailability, BookingPayment
+    DaycareAvailability, BookingPayment, DaycarePricing
 )
 
+@admin.register(DaycarePricing)
+class DaycarePricingAdmin(admin.ModelAdmin):
+    list_display = [
+        'daycare_name', 'booking_type', 'price', 'duration_unit', 
+        'is_active', 'created_at'
+    ]
+    list_filter = ['booking_type', 'duration_unit', 'is_active', 'created_at']
+    search_fields = ['daycare__name']
+    ordering = ['daycare__name', 'booking_type']
+    
+    def daycare_name(self, obj):
+        return obj.daycare.name
+    daycare_name.short_description = 'Daycare'
+    daycare_name.admin_order_field = 'daycare__name'
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):

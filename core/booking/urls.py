@@ -28,7 +28,12 @@ urlpatterns = [
 
     # Daycare Booking Management
     path('daycare/bookings/', views.DaycareBookingListView.as_view(), name='daycare-booking-list'),
+    path('daycare/bookings/<int:booking_id>/', views.daycare_booking_detail, name='daycare-booking-detail'),
     path('daycare/bookings/<int:booking_id>/accept/', views.accept_booking, name='daycare-booking-accept'),
     path('daycare/history/summary/', views.daycare_booking_history, name='daycare-booking-history-summary'),
-    path('daycare/cancel/<int:booking_id>/', views.daycare_cancel_booking, name='daycare-cancel-booking')
+    path('daycare/cancel/<int:booking_id>/', views.daycare_cancel_booking, name='daycare-cancel-booking'),
+    
+    # Daycare Pricing Management
+    path('daycare/pricing/', views.DaycarePricingListView.as_view(), name='daycare-pricing-list'),
+    path('daycare/pricing/update/', views.update_daycare_pricing, name='daycare-pricing-update'),
 ]

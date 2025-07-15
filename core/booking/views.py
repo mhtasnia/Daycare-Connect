@@ -9,16 +9,64 @@ from datetime import datetime, timedelta
 
 from .models import (
     Booking, BookingReview, BookingMessage, 
-    DaycareAvailability, BookingPayment
+    DaycareAvailability, BookingPayment, DaycarePricing
 )
 from users.models import DaycareCenter, Parent
+class DaycarePricingListView(generics.ListAPIView):
+    """
+    List pricing tiers for the authenticated daycare
+    """
+    serializer_class = DaycarePricingSerializer
+    permission_classes = [IsAuthenticated, IsDaycare]
+    
+    def get_queryset(self):
+        daycare = self.request.user.daycare_profile
+        return DaycarePricing.objects.filter(daycare=daycare)
 from users.permissions import IsParent, IsDaycare
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsDaycare])
+def update_daycare_pricing(request):
+    """
+    Update or create pricing tiers for daycare
+    """
+    daycare = request.user.daycare_profile
+    pricing_data = request.data.get('pricing_tiers', [])
+    
+    if not pricing_data:
+        return Response({'error': 'No pricing data provided'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    updated_pricing = []
+    
+    for pricing_item in pricing_data:
+        booking_type = pricing_item.get('booking_type')
+        price = pricing_item.get('price')
+        
+        if not booking_type or not price:
+            continue
+            
+        pricing_tier, created = DaycarePricing.objects.update_or_create(
+            daycare=daycare,
+            booking_type=booking_type,
+            defaults={
+                'price': price,
+                'duration_unit': pricing_item.get('duration_unit', 'month'),
+                'description': pricing_item.get('description', ''),
+                'is_active': pricing_item.get('is_active', True)
+            }
+        )
+        updated_pricing.append(pricing_tier)
+    
+    serializer = DaycarePricingSerializer(updated_pricing, many=True)
+    return Response({
+        'message': 'Pricing updated successfully',
+        'pricing_tiers': serializer.data
+    })
 
 from .serializers import (
     DaycareSearchSerializer, DaycareDetailSerializer,
     BookingCreateSerializer, BookingSerializer, BookingUpdateSerializer,
     BookingCancelSerializer, BookingReviewSerializer,
-    BookingMessageSerializer, BookingStatsSerializer
+    BookingMessageSerializer, BookingStatsSerializer, DaycarePricingSerializer
 )
 from users.serializers import ParentProfileSerializer
 from rest_framework import serializers

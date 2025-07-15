@@ -441,13 +441,21 @@ class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
         child=serializers.ImageField(), write_only=True, required=False
     )
+    pricing_tiers = serializers.ListField(
+        child=serializers.DictField(), write_only=True, required=False
+    )
 
     class Meta:
         model = DaycareCenter
-        fields = ['name', 'phone', 'address', 'area', 'description', 'services', 'pricing', 'featured_services', 'images']
+        fields = [
+            'name', 'phone', 'address', 'area', 'description', 
+            'services', 'pricing', 'featured_services', 'images', 'pricing_tiers'
+        ]
 
     def update(self, instance, validated_data):
         images = validated_data.pop('images', None)
+        pricing_tiers = validated_data.pop('pricing_tiers', None)
+        
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -457,4 +465,21 @@ class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
             DaycareImage.objects.filter(daycare=instance).delete()
             for img in images:
                 DaycareImage.objects.create(daycare=instance, image=img)
+        
+        if pricing_tiers:
+            from booking.models import DaycarePricing
+            for pricing_item in pricing_tiers:
+                booking_type = pricing_item.get('booking_type')
+                if booking_type:
+                    DaycarePricing.objects.update_or_create(
+                        daycare=instance,
+                        booking_type=booking_type,
+                        defaults={
+                            'price': pricing_item.get('price', 0),
+                            'duration_unit': pricing_item.get('duration_unit', 'month'),
+                            'description': pricing_item.get('description', ''),
+                            'is_active': pricing_item.get('is_active', True)
+                        }
+                    )
+        
         return instance

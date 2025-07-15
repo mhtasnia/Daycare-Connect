@@ -3,9 +3,33 @@ from django.contrib.auth import get_user_model
 from users.models import Parent, DaycareCenter, Child
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
 User = get_user_model()
 
+class DaycarePricing(models.Model):
+    BOOKING_TYPE_CHOICES = [
+        ('full_time', 'Full Time'),
+        ('part_time', 'Part Time'),
+        ('hourly', 'Hourly'),
+        ('drop_in', 'Drop In'),
+    ]
+    
+    daycare = models.ForeignKey(DaycareCenter, on_delete=models.CASCADE, related_name='pricing_tiers')
+    booking_type = models.CharField(max_length=20, choices=BOOKING_TYPE_CHOICES)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_unit = models.CharField(max_length=20, default='month')  # hour, day, week, month
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['daycare', 'booking_type']
+        ordering = ['booking_type']
+    
+    def __str__(self):
+        return f"{self.daycare.name} - {self.get_booking_type_display()}: ৳{self.price}/{self.duration_unit}"
 class Booking(models.Model):
     BOOKING_TYPE_CHOICES = [
         ('full_time', 'Full Time'),
