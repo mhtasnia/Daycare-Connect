@@ -45,3 +45,15 @@ uritemplate==4.2.0
 vine==5.1.0
 wcwidth==0.2.13
 whitenoise==6.9.0
+
+from django.contrib import admin
+from django.urls import path
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("Welcome to Daycare Connect!")
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', home),  # This maps the root URL to the home view
+]
