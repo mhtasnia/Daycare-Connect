@@ -271,6 +271,7 @@ function ParentRegister() {
                           placeholder="Create a password"
                           size="lg"
                           disabled={isLoading}
+                          autoComplete="new-password"
                         />
                         <Button
                           variant="link"
@@ -302,6 +303,7 @@ function ParentRegister() {
                           placeholder="Confirm your password"
                           size="lg"
                           disabled={isLoading}
+                          autoComplete="new-password"
                         />
                         <Button
                           variant="link"

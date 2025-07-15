@@ -6,11 +6,19 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Avg, Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
-
 from .models import (
     Booking, BookingReview, BookingMessage, 
     DaycareAvailability, BookingPayment, DaycarePricing
 )
+from .serializers import (
+    DaycareSearchSerializer, DaycareDetailSerializer,
+    BookingCreateSerializer, BookingSerializer, BookingUpdateSerializer,
+    BookingCancelSerializer, BookingReviewSerializer,
+    BookingMessageSerializer, BookingStatsSerializer, DaycarePricingSerializer
+)
+from users.permissions import IsParent, IsDaycare
+from users.serializers import ParentProfileSerializer
+from rest_framework import serializers
 from users.models import DaycareCenter, Parent
 class DaycarePricingListView(generics.ListAPIView):
     """
@@ -62,14 +70,7 @@ def update_daycare_pricing(request):
         'pricing_tiers': serializer.data
     })
 
-from .serializers import (
-    DaycareSearchSerializer, DaycareDetailSerializer,
-    BookingCreateSerializer, BookingSerializer, BookingUpdateSerializer,
-    BookingCancelSerializer, BookingReviewSerializer,
-    BookingMessageSerializer, BookingStatsSerializer, DaycarePricingSerializer
-)
-from users.serializers import ParentProfileSerializer
-from rest_framework import serializers
+
 
 # Daycare cancels a booking
 @api_view(['POST'])

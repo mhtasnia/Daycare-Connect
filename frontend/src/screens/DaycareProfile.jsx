@@ -418,6 +418,18 @@ function DaycareProfile() {
                           dangerouslySetInnerHTML={{ __html: formData.description || "No description provided" }}
                         />
                       </Col>
+                      <Col md={6} className="mb-3">
+                        <strong style={{ color: "#23395d" }}>
+                          Pricing:
+                        </strong>
+                        <p style={{ color: "#555" }}>{formData.pricing || "Not provided"}</p>
+                      </Col>
+                      <Col md={6} className="mb-3">
+                        <strong style={{ color: "#23395d" }}>
+                          Featured Services:
+                        </strong>
+                        <p style={{ color: "#555" }}>{formData.featured_services || "Not provided"}</p>
+                      </Col>
                     </Row>
 
                     {/* Gallery */}

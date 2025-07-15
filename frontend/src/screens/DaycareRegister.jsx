@@ -249,6 +249,7 @@ function DaycareRegister() {
                           isInvalid={!!errors.password}
                           placeholder="Enter password"
                           disabled={isLoading}
+                          autoComplete="new-password"
                         />
                         <Button
                           variant="outline-secondary"
@@ -273,6 +274,7 @@ function DaycareRegister() {
                           isInvalid={!!errors.confirmPassword}
                           placeholder="Confirm password"
                           disabled={isLoading}
+                          autoComplete="new-password"
                         />
                         <Button
                           variant="outline-secondary"
