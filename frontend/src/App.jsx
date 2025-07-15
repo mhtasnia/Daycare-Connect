@@ -7,6 +7,8 @@ import ParentLogin from "./screens/ParentLogin";
 
 import ParentHome from "./screens/ParentHome";
 import ParentProfile from "./screens/ParentProfile";
+import ParentBooking from "./screens/ParentBooking";
+import ParentHistory from "./screens/ParentHistory";
 import DaycareLanding from "./screens/DaycareLanding";
 import DaycareRegister from "./screens/DaycareRegister";
 import DaycareLogin from "./screens/DaycareLogin";
@@ -25,6 +27,8 @@ function App() {
           <Route path="/parent/login" element={<ParentLogin />} />
           <Route path="/parent/home" element={<ParentHome />} />
           <Route path="/parent/profile" element={<ParentProfile />} />
+          <Route path="/parent/booking" element={<ParentBooking />} />
+          <Route path="/parent/history" element={<ParentHistory />} />
           <Route path="/daycare" element={<DaycareLanding />} />
           <Route path="/daycare/register" element={<DaycareRegister />} />
           <Route path="/daycare/login" element={<DaycareLogin />} />

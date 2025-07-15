@@ -1,0 +1,31 @@
+.parent-history-page {
+  background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
+}
+
+.parent-history-container {
+  padding-top: 2rem;
+}
+
+.history-card {
+  border: none;
+  border-radius: 15px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.history-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.stars {
+  cursor: pointer;
+}
+
+.stars > svg {
+  margin-right: 2px;
+  color: #ddd;
+}
+
+.stars:hover > svg {
+  color: #ffc107;
+}

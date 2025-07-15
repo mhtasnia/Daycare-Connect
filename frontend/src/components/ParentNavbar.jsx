@@ -1,5 +1,6 @@
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
+import { Book, History } from "lucide-react";
 import "../styles/ParentNavbar.css";
 
 function ParentNavbar() {
@@ -20,6 +21,22 @@ function ParentNavbar() {
               active={location.pathname === "/parent"}
             >
               Home
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to="/parent/booking"
+              active={location.pathname.startsWith("/parent/booking")}
+            >
+              <Book className="me-1" size={18} />
+              Booking
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to="/parent/history"
+              active={location.pathname.startsWith("/parent/history")}
+            >
+              <History className="me-1" size={18} />
+              History
             </Nav.Link>
             <Nav.Link
               as={Link}

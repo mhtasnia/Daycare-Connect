@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "api_app",
     "users",
     "corsheaders",
+    "mcp_server",
 ]
 
 MIDDLEWARE = [
