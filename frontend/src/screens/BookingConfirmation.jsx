@@ -31,6 +31,7 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
 } from "react-icons/fa";
+import axios from "axios";
 import "../styles/BookingConfirmation.css";
 
 function BookingConfirmation() {
@@ -39,32 +40,47 @@ function BookingConfirmation() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [bookingData, setBookingData] = useState(null);
+  const [children, setChildren] = useState([]);
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
   const [emergencyContact, setEmergencyContact] = useState("");
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Mock children and emergency contacts data
-  const mockChildren = [
-    { id: 1, name: "Aisha Rahman", age: 2, gender: "female" },
-    { id: 2, name: "Omar Hassan", age: 3, gender: "male" }
-  ];
+  // Replace with your actual token retrieval logic
+  const yourToken = localStorage.getItem("access");
 
-  const mockEmergencyContacts = [
-    { id: 1, name: "Rashida Begum", relationship: "Mother", phone: "01712345678" },
-    { id: 2, name: "Ahmed Hassan", relationship: "Father", phone: "01798765432" },
-    { id: 3, name: "Fatima Ahmed", relationship: "Grandmother", phone: "01634567890" }
-  ];
-
+  // Fetch booking data from API instead of mock data
   useEffect(() => {
-    // Get booking data from navigation state
-    if (location.state) {
-      setBookingData(location.state);
-    } else {
-      // If no state, redirect back to search
-      navigate("/parent/search");
-    }
-  }, [location.state, navigate]);
+    const fetchBookingDetails = async () => {
+      try {
+        const response = await axios.get(
+          `/api/booking/daycare/bookings/${id}/`,
+          {
+            headers: { Authorization: `Bearer ${yourToken}` },
+          }
+        );
+        setBookingData(response.data);
+
+        // Fetch children and emergency contacts if needed
+        // Example endpoints, adjust as per your backend
+        const childrenRes = await axios.get("/api/parent/children/", {
+          headers: { Authorization: `Bearer ${yourToken}` },
+        });
+        setChildren(childrenRes.data);
+
+        const contactsRes = await axios.get("/api/parent/emergency-contacts/", {
+          headers: { Authorization: `Bearer ${yourToken}` },
+        });
+        setEmergencyContacts(contactsRes.data);
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+        navigate("/parent/search");
+      }
+    };
+
+    fetchBookingDetails();
+  }, [id, yourToken, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -89,22 +105,66 @@ function BookingConfirmation() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Show success message
+      // Example API call to confirm booking
+      await axios.post(
+        `/api/booking/daycare/bookings/${id}/confirm/`,
+        {
+          emergency_contact: emergencyContact,
+          special_instructions: specialInstructions,
+        },
+        { headers: { Authorization: `Bearer ${yourToken}` } }
+      );
+
       setShowSuccess(true);
-      
-      // Redirect to bookings page after 3 seconds
+
       setTimeout(() => {
         navigate("/parent/bookings");
       }, 3000);
-
     } catch (error) {
       console.error("Booking error:", error);
       alert("Failed to confirm booking. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Accept a booking
+  const acceptBooking = async (bookingId) => {
+    try {
+      const response = await axios.post(
+        `/api/booking/daycare/bookings/${bookingId}/accept/`,
+        {},
+        { headers: { Authorization: `Bearer ${yourToken}` } }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // Cancel a booking
+  const cancelBooking = async (bookingId, reason) => {
+    try {
+      const response = await axios.post(
+        `/api/booking/daycare/cancel/${bookingId}/`,
+        { cancellation_reason: reason },
+        { headers: { Authorization: `Bearer ${yourToken}` } }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // View bookings for daycare
+  const fetchDaycareBookings = async () => {
+    try {
+      const response = await axios.get("/api/booking/daycare/bookings/", {
+        headers: { Authorization: `Bearer ${yourToken}` },
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -124,16 +184,18 @@ function BookingConfirmation() {
   }
 
   const { daycare, selectedChild, bookingDate, bookingType } = bookingData;
-  const selectedChildData = mockChildren.find(child => child.id == selectedChild);
+  const selectedChildData = children.find(
+    (child) => child.id === selectedChild
+  );
 
   const calculateCost = () => {
     switch (bookingType) {
       case "full-time":
         return daycare.monthlyFee;
       case "part-time":
-        return daycare.dailyFee * 30; // Assuming 30 days
+        return daycare.dailyFee * 30;
       case "hourly":
-        return daycare.hourlyFee * 8 * 30; // 8 hours per day, 30 days
+        return daycare.hourlyFee * 8 * 30;
       default:
         return daycare.monthlyFee;
     }
@@ -150,15 +212,27 @@ function BookingConfirmation() {
                   <FaCheckCircle size={80} className="text-success mb-4" />
                   <h2 className="text-success mb-3">Booking Confirmed!</h2>
                   <p className="lead mb-4">
-                    Your booking request has been submitted successfully. 
-                    The daycare will contact you within 24 hours to confirm the details.
+                    Your booking request has been submitted successfully. The
+                    daycare will contact you within 24 hours to confirm the
+                    details.
                   </p>
                   <div className="booking-summary">
                     <h5>Booking Summary</h5>
-                    <p><strong>Daycare:</strong> {daycare.name}</p>
-                    <p><strong>Child:</strong> {selectedChildData?.name}</p>
-                    <p><strong>Start Date:</strong> {new Date(bookingDate).toLocaleDateString()}</p>
-                    <p><strong>Type:</strong> {bookingType.charAt(0).toUpperCase() + bookingType.slice(1)}</p>
+                    <p>
+                      <strong>Daycare:</strong> {daycare.name}
+                    </p>
+                    <p>
+                      <strong>Child:</strong> {selectedChildData?.name}
+                    </p>
+                    <p>
+                      <strong>Start Date:</strong>{" "}
+                      {new Date(bookingDate).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <strong>Type:</strong>{" "}
+                      {bookingType.charAt(0).toUpperCase() +
+                        bookingType.slice(1)}
+                    </p>
                   </div>
                   <p className="text-muted">Redirecting to your bookings...</p>
                 </Card.Body>
@@ -198,7 +272,7 @@ function BookingConfirmation() {
                 <FaBell className="me-1" /> Notifications
               </Nav.Link>
             </Nav>
-            
+
             <Button
               variant="outline-danger"
               size="sm"
@@ -256,7 +330,9 @@ function BookingConfirmation() {
                       <h6>Daycare Information</h6>
                       <div className="info-item">
                         <strong>{daycare.name}</strong>
-                        <Badge bg="success" className="ms-2">Verified</Badge>
+                        <Badge bg="success" className="ms-2">
+                          Verified
+                        </Badge>
                       </div>
                       <div className="info-item">
                         <FaMapMarkerAlt className="me-2" />
@@ -273,19 +349,24 @@ function BookingConfirmation() {
                       <h6>Booking Details</h6>
                       <div className="info-item">
                         <FaChild className="me-2" />
-                        <strong>Child:</strong> {selectedChildData?.name} ({selectedChildData?.age} years)
+                        <strong>Child:</strong> {selectedChildData?.name} (
+                        {selectedChildData?.age} years)
                       </div>
                       <div className="info-item">
                         <FaCalendarAlt className="me-2" />
-                        <strong>Start Date:</strong> {new Date(bookingDate).toLocaleDateString()}
+                        <strong>Start Date:</strong>{" "}
+                        {new Date(bookingDate).toLocaleDateString()}
                       </div>
                       <div className="info-item">
                         <FaClock className="me-2" />
-                        <strong>Type:</strong> {bookingType.charAt(0).toUpperCase() + bookingType.slice(1)}
+                        <strong>Type:</strong>{" "}
+                        {bookingType.charAt(0).toUpperCase() +
+                          bookingType.slice(1)}
                       </div>
                       <div className="info-item">
                         <FaDollarSign className="me-2" />
-                        <strong>Estimated Cost:</strong> ৳{calculateCost().toLocaleString()}
+                        <strong>Estimated Cost:</strong> ৳
+                        {calculateCost().toLocaleString()}
                         {bookingType === "full-time" && "/month"}
                         {bookingType === "part-time" && "/month"}
                         {bookingType === "hourly" && "/month"}
@@ -310,14 +391,16 @@ function BookingConfirmation() {
                     required
                   >
                     <option value="">Choose an emergency contact...</option>
-                    {mockEmergencyContacts.map((contact) => (
+                    {emergencyContacts.map((contact) => (
                       <option key={contact.id} value={contact.id}>
-                        {contact.name} ({contact.relationship}) - {contact.phone}
+                        {contact.name} ({contact.relationship}) -{" "}
+                        {contact.phone}
                       </option>
                     ))}
                   </Form.Select>
                   <Form.Text className="text-muted">
-                    This person will be contacted in case of emergencies and can pick up your child if needed.
+                    This person will be contacted in case of emergencies and can
+                    pick up your child if needed.
                   </Form.Text>
                 </Form.Group>
               </Card.Body>
@@ -351,17 +434,31 @@ function BookingConfirmation() {
                 <div className="terms-content">
                   <h6>Booking Terms:</h6>
                   <ul>
-                    <li>Booking confirmation is subject to availability and daycare approval</li>
-                    <li>Payment terms will be discussed directly with the daycare</li>
-                    <li>Cancellation policy applies as per daycare guidelines</li>
-                    <li>All children must have up-to-date vaccination records</li>
+                    <li>
+                      Booking confirmation is subject to availability and
+                      daycare approval
+                    </li>
+                    <li>
+                      Payment terms will be discussed directly with the daycare
+                    </li>
+                    <li>
+                      Cancellation policy applies as per daycare guidelines
+                    </li>
+                    <li>
+                      All children must have up-to-date vaccination records
+                    </li>
                     <li>Parents must provide emergency contact information</li>
                   </ul>
-                  
+
                   <h6>Health and Safety:</h6>
                   <ul>
-                    <li>Children with fever or contagious illness should not attend</li>
-                    <li>All incidents will be reported to parents immediately</li>
+                    <li>
+                      Children with fever or contagious illness should not
+                      attend
+                    </li>
+                    <li>
+                      All incidents will be reported to parents immediately
+                    </li>
                     <li>Daycare follows strict safety and hygiene protocols</li>
                   </ul>
                 </div>
@@ -418,9 +515,10 @@ function BookingConfirmation() {
               <Card.Body>
                 <Alert variant="info" className="mb-3">
                   <FaExclamationTriangle className="me-2" />
-                  This is a booking request. The daycare will contact you within 24 hours to confirm availability and discuss payment terms.
+                  This is a booking request. The daycare will contact you within
+                  24 hours to confirm availability and discuss payment terms.
                 </Alert>
-                
+
                 <div className="info-section">
                   <h6>Next Steps:</h6>
                   <ol>
@@ -450,11 +548,17 @@ function BookingConfirmation() {
               </Card.Header>
               <Card.Body>
                 <div className="d-grid gap-2">
-                  <Button variant="outline-primary" href={`tel:${daycare.phone}`}>
+                  <Button
+                    variant="outline-primary"
+                    href={`tel:${daycare.phone}`}
+                  >
                     <FaPhone className="me-2" />
                     Call {daycare.name}
                   </Button>
-                  <Button variant="outline-secondary" href={`mailto:${daycare.email}`}>
+                  <Button
+                    variant="outline-secondary"
+                    href={`mailto:${daycare.email}`}
+                  >
                     <FaEnvelope className="me-2" />
                     Send Email
                   </Button>

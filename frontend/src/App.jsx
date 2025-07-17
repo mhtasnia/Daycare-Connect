@@ -18,6 +18,8 @@ import DaycareDashboard from "./screens/DaycareDashboard";
 import DaycareProfile from "./screens/DaycareProfile";
 import PublicDaycareSearch from "./screens/PublicDaycareSearch";
 import PublicDaycareView from "./screens/PublicDaycareView";
+import DaycareBookings from "./screens/DaycareBookings";
+import DaycareBookingHistory from "./screens/DaycareBookingHistory";
 
 function App() {
   return (
@@ -40,6 +42,8 @@ function App() {
           <Route path="/daycare/login" element={<DaycareLogin />} />
           <Route path="/daycare/dashboard" element={<DaycareDashboard />} />
           <Route path="/daycare/profile" element={<DaycareProfile />} />
+          <Route path="/daycare/bookings" element={<DaycareBookings />} />
+          <Route path="/daycare/booking-history" element={<DaycareBookingHistory />} />
           <Route path="/daycare/search" element={<PublicDaycareSearch />} />
           <Route path="/daycare/view/:id" element={<PublicDaycareView />} />
         </Routes>
