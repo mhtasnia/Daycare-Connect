@@ -130,30 +130,6 @@ class DaycareBookingListView(generics.ListAPIView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsDaycare])
-def decline_booking(request, booking_id):
-    """
-    Daycare declines a pending booking
-    """
-    try:
-        daycare = request.user.daycare_profile
-        booking = Booking.objects.get(id=booking_id, daycare=daycare)
-    except Booking.DoesNotExist:
-        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    if booking.status != 'pending':
-        return Response({'error': 'Only pending bookings can be declined.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    booking.status = 'declined'
-    booking.save()
-
-    return Response({
-        'message': 'Booking declined.',
-        'booking': BookingSerializer(booking, context={'request': request}).data
-    })
-
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated, IsDaycare])
 def accept_booking(request, booking_id):
     """
     Daycare accepts a pending booking
@@ -211,50 +187,6 @@ def daycare_booking_history(request):
         booking_count=Count('id')
     ).order_by('-booking_count')[:5]
 
-    completed_bookings = Booking.objects.filter(
-        daycare=daycare,
-        status='completed'
-    ).select_related('parent__user', 'child').prefetch_related('review')
-
-    history_data = []
-    for booking in completed_bookings:
-        review_data = None
-        if hasattr(booking, 'review'):
-            review_data = {
-                'rating': booking.review.rating,
-                'review': booking.review.comment
-            }
-        history_data.append({
-            'id': booking.id,
-            'parent_name': booking.parent.user.full_name,
-            'child_name': booking.child.full_name,
-            'date': booking.start_date,
-            'rating': review_data['rating'] if review_data else None,
-            'review': review_data['review'] if review_data else None,
-        })
-
-    completed_bookings = Booking.objects.filter(
-        daycare=daycare,
-        status='completed'
-    ).select_related('parent__user', 'child').prefetch_related('review')
-
-    history_data = []
-    for booking in completed_bookings:
-        review_data = None
-        if hasattr(booking, 'review'):
-            review_data = {
-                'rating': booking.review.rating,
-                'review': booking.review.comment
-            }
-        history_data.append({
-            'id': booking.id,
-            'parent_name': booking.parent.user.full_name,
-            'child_name': booking.child.full_name,
-            'date': booking.start_date,
-            'rating': review_data['rating'] if review_data else None,
-            'review': review_data['review'] if review_data else None,
-        })
-
     return Response({
         'monthly_summary': monthly_bookings,
         'frequent_parents': frequent_parents,
@@ -263,8 +195,7 @@ def daycare_booking_history(request):
             end_date__isnull=False
         ).aggregate(
             avg_duration=Avg('duration_days')
-        )['avg_duration'] or 0,
-        'booking_history': history_data
+        )['avg_duration'] or 0
     })
 from .serializers import (
     DaycareSearchSerializer, DaycareDetailSerializer,

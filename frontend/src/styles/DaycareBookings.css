@@ -1,0 +1,164 @@
+.daycare-bookings-wrapper {
+  background: linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%);
+  min-height: 100vh;
+  padding: 2rem;
+  color: #23395d;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.header-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.booking-list.centered-list {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.booking-card {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.status-badge {
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Contrast update */
+.status-confirmed {
+  background-color: rgba(72, 201, 176, 0.2);
+  color: #00695c;
+  border: 1px solid rgba(72, 201, 176, 0.4);
+}
+
+.status-pending {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #856404;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-accepted {
+  background-color: rgba(40, 167, 69, 0.15);
+  color: #155724;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-declined {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #721c24;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.back-btn {
+  border-radius: 25px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border: 2px solid #f48fb1;
+  color: #f48fb1;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #f48fb1;
+  color: white;
+  box-shadow: 0 6px 20px rgba(244, 143, 177, 0.4);
+  transform: translateY(-2px);
+}
+
+.booking-filters {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid transparent;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: #23395d;
+  backdrop-filter: blur(10px);
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background: linear-gradient(45deg, #99f2c8, #90caf9);
+  border-color: #90caf9;
+  color: #23395d;
+  box-shadow: 0 4px 12px rgba(153, 242, 200, 0.3);
+}
+
+/* Match Accept Button Style (already used) */
+.btn-save-profile {
+  background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
+  border: none !important;
+  color: #23395d !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  padding: 10px 20px !important;
+  box-shadow: 0 4px 15px rgba(153, 242, 200, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-save-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(153, 242, 200, 0.4);
+}
+
+/* New Decline Button Style (similar pill shape) */
+.btn-decline-profile {
+  background: #dc3545 !important;
+  color: white !important;
+  border-radius: 25px !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3) !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+}
+
+.btn-decline-profile:hover {
+  background: #c82333 !important;
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4) !important;
+}
+
+
+@media (max-width: 768px) {
+  .booking-card {
+    padding: 1rem;
+  }
+
+  .back-btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .header-container {
+    text-align: center;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

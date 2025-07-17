@@ -82,6 +82,14 @@ export const bookingAPI = {
   // Statistics
   getBookingStats: () => api.get('/bookings/stats/'),
   getBookingHistorySummary: () => api.get('/bookings/history/summary/'),
+
+  // Daycare Booking Management
+  getDaycareBookings: () => api.get('/bookings/daycare/bookings/'),
+  updateDaycareBookingStatus: (id, status) => {
+    const action = status === 'Accepted' ? 'accept' : 'decline';
+    return api.post(`/bookings/daycare/bookings/${id}/${action}/`);
+  },
+  getDaycareBookingHistory: () => api.get('/bookings/daycare/history/summary/'),
 };
 
 // Children API
@@ -98,6 +106,20 @@ export const emergencyContactAPI = {
   saveEmergencyContact: (contactData) => api.post('/user-auth/parents/emergency-contact/', contactData),
   updateEmergencyContact: (contactData) => api.put('/user-auth/parents/emergency-contact/update/', contactData),
   deleteEmergencyContact: () => api.delete('/user-auth/parents/emergency-contact/update/'),
+};
+
+export const userAPI = {
+  parentLogin: (data) => api.post('/users/parents/login/', data),
+  parentLogout: (data) => api.post('/users/parents/logout/', data),
+  parentRegister: (data) => api.post('/users/parents/register/', data),
+  getParentProfile: () => api.get('/users/parents/profile/'),
+  updateParentProfile: (data) => api.post('/users/parents/profile/update/', data),
+
+  daycareLogin: (data) => api.post('/users/daycares/login/', data),
+  daycareLogout: (data) => api.post('/users/daycares/logout/', data),
+  daycareRegister: (data) => api.post('/users/daycares/register/', data),
+  getDaycareProfile: () => api.get('/users/daycare/profile/'),
+  updateDaycareProfile: (data) => api.post('/users/daycare/profile/update/', data),
 };
 
 export default api;

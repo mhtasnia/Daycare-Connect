@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getBookingHistory } from '../services/booking';
-import './DaycareBookingHistory.css';
+import { bookingAPI } from '../services/api';
+import '../styles/DaycareBookingHistory.css';
 
 const StarRating = ({ rating }) => {
   const stars = [];
@@ -18,7 +18,7 @@ const DaycareBookingHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await getBookingHistory();
+        const response = await bookingAPI.getDaycareBookingHistory();
         setHistory(response.data.booking_history);
       } catch (err) {
         setError('Failed to fetch booking history.');

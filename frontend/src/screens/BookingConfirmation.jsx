@@ -32,6 +32,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import axios from "axios";
+import { bookingAPI } from "../services/api";
 import "../styles/BookingConfirmation.css";
 
 function BookingConfirmation() {
@@ -55,23 +56,21 @@ function BookingConfirmation() {
     const fetchBookingDetails = async () => {
       try {
         const response = await axios.get(
-          `/api/booking/daycare/bookings/${id}/`,
-          {
-            headers: { Authorization: `Bearer ${yourToken}` },
-          }
+          `/api/bookings/daycare/bookings/${id}/`,
+          { headers: { Authorization: `Bearer ${yourToken}` } }
         );
         setBookingData(response.data);
 
         // Fetch children and emergency contacts if needed
         // Example endpoints, adjust as per your backend
-        const childrenRes = await axios.get("/api/parent/children/", {
-          headers: { Authorization: `Bearer ${yourToken}` },
-        });
+        const childrenRes = await axios.get("/api/parent/children/",
+          { headers: { Authorization: `Bearer ${yourToken}` }}
+        );
         setChildren(childrenRes.data);
 
-        const contactsRes = await axios.get("/api/parent/emergency-contacts/", {
-          headers: { Authorization: `Bearer ${yourToken}` },
-        });
+        const contactsRes = await axios.get("/api/parent/emergency-contacts/", 
+          { headers: { Authorization: `Bearer ${yourToken}` }}
+        );
         setEmergencyContacts(contactsRes.data);
       } catch (error) {
         console.error("Error fetching booking details:", error);
