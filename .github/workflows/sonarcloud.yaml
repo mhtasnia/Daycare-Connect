@@ -25,7 +25,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r core/requirements.txt
-
+      
       - name: Create .env file
         working-directory: core
         run: |
@@ -39,7 +39,15 @@ jobs:
           echo "EMAIL_USE_SSL=${{  'False' }}" >> .env
           echo "DEFAULT_FROM_EMAIL=${{ 'Daycare Connect <noreply@daycareconnect.com>' }}" >> .env
           
-
+      - name: Debug Python environment
+        run: |
+          python -V
+          pip list
+          ls -la
+          echo "DEBUG: DATABASE_URL=$DATABASE_URL"
+          
+      - name: Run DB migrations
+        run: python manage.py migrate --noinput --verbosity 3
       - name: Run tests and generate coverage report
         working-directory: core
         run: |
