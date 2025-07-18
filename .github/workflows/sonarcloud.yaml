@@ -45,9 +45,6 @@ jobs:
           pip list
           ls -la
           echo "DEBUG: DATABASE_URL=$DATABASE_URL"
-          
-      - name: Run DB migrations
-        run: python manage.py migrate --noinput --verbosity 3
       - name: Run tests and generate coverage report
         working-directory: core
         run: |
