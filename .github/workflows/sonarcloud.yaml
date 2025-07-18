@@ -31,6 +31,13 @@ jobs:
         run: |
           touch .env
           echo "SECRET_KEY= ${{ secrets.SECRET_KEY }}" >> .env
+          echo "EMAIL_HOST=${{'smtp.gmail.com'}}" >> .env 
+          echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+          echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+          echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+          echo "EMAIL_USE_TLS=${{ 'True' }}" >> .env
+          echo "EMAIL_USE_SSL=${{  'False' }}" >> .env
+          echo "DEFAULT_FROM_EMAIL=${{ 'Daycare Connect <noreply@daycareconnect.com>' }}" >> .env
           
 
       - name: Run tests and generate coverage report
