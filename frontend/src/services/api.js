@@ -122,4 +122,8 @@ export const userAPI = {
   updateDaycareProfile: (data) => api.post('/users/daycare/profile/update/', data),
 };
 
+export const publicAPI = {
+  getVerifiedDaycares: () => api.get('/bookings/public/daycares/'),
+};
+
 export default api;

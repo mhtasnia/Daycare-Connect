@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { bookingAPI } from "../services/api";
+import { bookingAPI, publicAPI } from "../services/api";
 import {
   Container,
   Row,
@@ -31,6 +31,8 @@ import {
   FaChild,
   FaClock,
   FaLock,
+  FaArrowAltCircleDown,
+  FaArrowAltCircleLeft,
 } from "react-icons/fa";
 import LandingNavbar from "../components/LandingNavbar";
 import Footer from "../components/Footer";
@@ -107,10 +109,15 @@ function PublicDaycareSearch() {
 
   useEffect(() => {
     setIsLoading(true);
-    setTimeout(() => {
-      setDaycares(mockDaycares);
-      setIsLoading(false);
-    }, 1000);
+    publicAPI.getVerifiedDaycares()
+      .then(response => {
+        setDaycares(response.data);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load daycares.");
+        setIsLoading(false);
+      });
   }, []);
 
   const renderStars = (rating) => {
@@ -170,10 +177,25 @@ function PublicDaycareSearch() {
 
   return (
     <div className="public-daycare-search-wrapper">
-      {/* Navigation Header */}
-      <LandingNavbar />
+      {/* Top Left Back to Home Button */}
+      <div className="position-absolute nav-back-btn" style={{ top: 20, left: 20, zIndex: 10 }}>
+        <Button className="btn-back-glass" onClick={() => navigate("/")}>
+          <FaArrowAltCircleLeft className="me-2" />
+          Back to Home
+        </Button>
+      </div>
 
-      <Container className="py-4" style={{ marginTop: "100px" }}>
+      {/* Navigation Header for mobile */}
+      <Button
+        className="btn-back-glass d-block d-md-none mb-3"
+        onClick={() => navigate(-1)}
+      >
+        <FaHome className="me-2" />
+        Back to Home
+      </Button>
+
+
+      <Container className="py-4" style={{ marginTop: "50px" }}>
         {/* Header */}
         <Row className="mb-4">
           <Col>
@@ -401,19 +423,12 @@ function PublicDaycareSearch() {
                       )}
                     </div>
 
-                    <p className="daycare-description">
-                      {daycare.description}
-                    </p>
+                    <p
+                      className="daycare-description"
+                      dangerouslySetInnerHTML={{ __html: daycare.description }}
+                    />
 
                     <div className="daycare-actions">
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => handleViewProfile(daycare.id)}
-                        className="me-2"
-                      >
-                        <FaEye className="me-1" />
-                        View Profile
-                      </Button>
                       <Button
                         variant="primary"
                         onClick={() => navigate('/parent/register')}

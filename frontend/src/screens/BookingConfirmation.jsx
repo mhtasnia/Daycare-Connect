@@ -48,7 +48,7 @@ function BookingConfirmation() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Replace with your actual token retrieval logic
+  
   const yourToken = localStorage.getItem("access");
 
   // Fetch booking data from API instead of mock data

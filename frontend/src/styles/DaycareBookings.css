@@ -139,6 +139,25 @@
   box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4) !important;
 }
 
+.btn-view-child {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 2px solid rgba(144, 202, 249, 0.4) !important;
+  color: #23395d !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  padding: 10px 20px !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 12px rgba(144, 202, 249, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-view-child:hover {
+  background: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 6px 18px rgba(144, 202, 249, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+
 
 @media (max-width: 768px) {
   .booking-card {

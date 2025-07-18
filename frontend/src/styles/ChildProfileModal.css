@@ -1,0 +1,11 @@
+.nav-tabs .nav-link.active {
+  background: linear-gradient(45deg, #99f2c8, #90caf9);
+  color: #23395d;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.nav-tabs .nav-link {
+  color: #555;
+  transition: all 0.3s ease;
+}

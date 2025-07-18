@@ -92,7 +92,7 @@ def parent_register(request):
     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginThrottle(UserRateThrottle):
-    rate = '3/min'  
+    rate = '5/min'  
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -105,6 +105,9 @@ def parent_login(request):
     
     user = authenticate(request, email=email, password=password)
     if user is not None:
+        # Only allow parent accounts to login here
+        if user.user_type != 'parent':
+            return Response({'detail': 'This login is only for parent accounts.'}, status=status.HTTP_403_FORBIDDEN)
         if not user.is_email_verified:
             return Response({
                 'detail': 'Please verify your email address before logging in.',
@@ -372,7 +375,7 @@ def daycare_profile(request):
         }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsDaycare])
 def update_daycare_profile(request):
     try:
         daycare = request.user.daycare_profile

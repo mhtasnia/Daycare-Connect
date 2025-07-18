@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { bookingAPI } from '../services/api';
 import '../styles/DaycareBookings.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import { Button } from 'react-bootstrap';
+import ChildProfileModal from '../components/ChildProfileModal';
 
 const DaycareBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -79,26 +85,40 @@ const DaycareBookings = () => {
               <p><strong>Instructions:</strong> {booking.special_instructions || "None"}</p>
             </div>
 
-            {booking.status.toLowerCase() === "pending" && (
-          <div className="booking-actions mt-4 d-flex flex-column flex-md-row gap-3">
-            <button
-              onClick={() => handleStatusUpdate(booking.id, "Accepted")}
-              className="btn btn-save-profile flex-fill"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => handleStatusUpdate(booking.id, "Declined")}
-              className="btn btn-decline-profile flex-fill"
-            >
-              Decline
-            </button>
-          </div>
-
-            )}
+            <div className="booking-actions mt-4 d-flex flex-column flex-md-row gap-3">
+              {booking.status.toLowerCase() === "pending" && (
+                <>
+                  <button
+                    onClick={() => handleStatusUpdate(booking.id, "Accepted")}
+                    className="btn btn-save-profile flex-fill"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleStatusUpdate(booking.id, "Declined")}
+                    className="btn btn-decline-profile flex-fill"
+                  >
+                    Decline
+                  </button>
+                </>
+              )}
+              <Button
+                className="btn btn-view-child flex-fill"
+                onClick={() => setSelectedBooking(booking)}
+              >
+                View Child Profile
+              </Button>
+            </div>
           </div>
         ))}
       </div>
+
+      {/* Use ChildProfileModal instead of the previous Modal */}
+      <ChildProfileModal
+        show={!!selectedBooking}
+        onHide={() => setSelectedBooking(null)}
+        booking={selectedBooking}
+      />
     </div>
   );
 };

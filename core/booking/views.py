@@ -1,6 +1,6 @@
 from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Avg, Count, Sum
@@ -157,12 +157,24 @@ def accept_booking(request, booking_id):
 @permission_classes([IsAuthenticated, IsDaycare])
 def daycare_booking_history(request):
     """
-    Get booking history summary for daycare
+    Get booking history for daycare (with reviews)
     """
     daycare = request.user.daycare_profile
-    bookings = Booking.objects.filter(daycare=daycare)
+    bookings = Booking.objects.filter(daycare=daycare).select_related('parent', 'child')
 
-    # Monthly booking summary for the last 6 months
+    # Build booking history list
+    booking_history = []
+    for booking in bookings:
+        review = BookingReview.objects.filter(booking=booking).first()
+        booking_history.append({
+            'id': booking.id,
+            'parent_name': booking.parent.full_name if booking.parent else '',
+            'child_name': booking.child.full_name if booking.child else '',
+            'date': booking.start_date.strftime('%Y-%m-%d') if booking.start_date else '',
+            'rating': review.rating if review else 0,
+            'review': review.text if review else '',
+        })
+
     six_months_ago = timezone.now().date() - timedelta(days=180)
     monthly_bookings = []
     for i in range(6):
@@ -180,7 +192,6 @@ def daycare_booking_history(request):
             )['total'] or 0
         })
 
-    # Frequent parents (most bookings)
     frequent_parents = bookings.values(
         'parent__full_name', 'parent__id'
     ).annotate(
@@ -188,6 +199,7 @@ def daycare_booking_history(request):
     ).order_by('-booking_count')[:5]
 
     return Response({
+        'booking_history': booking_history,
         'monthly_summary': monthly_bookings,
         'frequent_parents': frequent_parents,
         'total_children_served': bookings.values('child').distinct().count(),
@@ -581,3 +593,18 @@ def booking_history_summary(request):
             avg_duration=Avg('duration_days')
         )['avg_duration'] or 0
     })
+from rest_framework.permissions import AllowAny
+from rest_framework import generics
+
+class PublicDaycareListView(generics.ListAPIView):
+    """
+    Public: List verified daycares (no authentication required)
+    """
+    serializer_class = DaycareSearchSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return DaycareCenter.objects.filter(
+            user__is_verified=True,
+            user__is_email_verified=True
+        ).select_related('user')
