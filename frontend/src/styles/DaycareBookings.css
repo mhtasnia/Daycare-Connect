@@ -109,8 +109,8 @@
 
 /* Match Accept Button Style (already used) */
 .btn-save-profile {
-  background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
-  border: none !important;
+  background:  rgb(22, 150, 52)  !important;
+  border: white !important;
   color: #23395d !important;
   font-weight: 600 !important;
   border-radius: 25px !important;

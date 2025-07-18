@@ -19,7 +19,7 @@ import DaycareProfile from "./screens/DaycareProfile";
 import PublicDaycareSearch from "./screens/PublicDaycareSearch";
 import DaycareBookings from "./screens/DaycareBookings";
 import DaycareBookingHistory from "./screens/DaycareBookingHistory";
-
+import ComingSoonPage from "./screens/ComingSoon";
 function App() {
   return (
     <div className="full-width-theme">
@@ -44,6 +44,9 @@ function App() {
           <Route path="/daycare/bookings" element={<DaycareBookings />} />
           <Route path="/daycare/history" element={<DaycareBookingHistory />} />
           <Route path="/daycare/search" element={<PublicDaycareSearch />} />
+          <Route path="/*" element={<ComingSoonPage />} />
+          
+         
           
         </Routes>
       </Router>

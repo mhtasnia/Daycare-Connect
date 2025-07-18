@@ -186,13 +186,7 @@ function PublicDaycareSearch() {
       </div>
 
       {/* Navigation Header for mobile */}
-      <Button
-        className="btn-back-glass d-block d-md-none mb-3"
-        onClick={() => navigate(-1)}
-      >
-        <FaHome className="me-2" />
-        Back to Home
-      </Button>
+      
 
 
       <Container className="py-4" style={{ marginTop: "50px" }}>

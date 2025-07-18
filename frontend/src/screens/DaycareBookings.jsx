@@ -125,7 +125,7 @@ const DaycareBookings = () => {
               {booking.status.toLowerCase() === "pending" && (
                 <button
                   onClick={() => handleStatusUpdate(booking.id, "Accepted")}
-                  className="btn btn-save-profile flex-fill"
+                  className="btn btn-success flex-fill"
                 >
                   Accept
                 </button>
@@ -134,7 +134,7 @@ const DaycareBookings = () => {
               {["pending"].includes(booking.status.toLowerCase()) && (
                 <button
                   onClick={() => handleCancel(booking.id)}
-                  className="btn btn-outline-danger flex-fill"
+                  className="btn btn-decline-profile"
                 >
                   Cancel Booking
                 </button>

@@ -29,7 +29,9 @@ import {
   Doughnut,
 } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend } from "chart.js";
-import "../styles/ParentHome.css"; // Reuse for layout, override colors below
+import "../styles/ParentHome.css";
+import "../components/Footer" // Reuse for layout, override colors below
+import Footer from "../components/Footer";
 
 
 ChartJS.register(
@@ -452,7 +454,9 @@ function DaycareDashboard() {
             </Card>
           </Col>
         </Row>
+
       </Container>
+      <Footer />
     </div>
   );
 }
