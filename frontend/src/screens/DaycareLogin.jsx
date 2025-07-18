@@ -74,7 +74,7 @@ function DaycareLogin() {
               <Card.Body>
                 <h2 className="mb-4 text-center">Daycare Login</h2>
                 {showAlert && <Alert variant={alertVariant}>{alertMsg}</Alert>}
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} autocomplete="off">
                   <Form.Group className="mb-3" controlId="email">
                     <Form.Label><FaEnvelope className="me-2" />Email</Form.Label>
                     <Form.Control
