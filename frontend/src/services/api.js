@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const api = axios.create({
@@ -72,7 +74,10 @@ export const bookingAPI = {
   createBooking: (bookingData) => api.post('/bookings/bookings/create/', bookingData),
   getBookingDetail: (id) => api.get(`/bookings/bookings/${id}/`),
   updateBooking: (id, bookingData) => api.put(`/bookings/bookings/${id}/update/`, bookingData),
-  cancelBooking: (id, reason) => api.post(`/bookings/bookings/${id}/cancel/`, { cancellation_reason: reason }),
+  cancelBooking: (id, reason) => api.post(`bookings/daycare/cancel/${id}/`, {
+  cancellation_reason: reason
+}),
+
   
   // Reviews and messages
   createReview: (bookingId, reviewData) => api.post(`/bookings/bookings/${bookingId}/review/`, reviewData),
