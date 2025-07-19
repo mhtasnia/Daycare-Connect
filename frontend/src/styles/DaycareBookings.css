@@ -1,18 +1,30 @@
 /* Modern Corporate Styling for Daycare Bookings */
 
 .daycare-bookings-wrapper {
-  background: #f7f9fb;
+  background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
   min-height: 100vh;
+  animation: fadeInBg 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeInBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .parent-navbar {
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  background: rgba(255,255,255,0.95);
+  border-bottom: 2px solid #f8bbd0;
+  box-shadow: 0 2px 12px 0 rgba(144,202,249,0.08);
+  z-index: 1050;
+  animation: slideDownNav 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideDownNav {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .brand-highlight {
-  color: #007bff;
+  color: #f48fb1;
 }
 
 .page-header {
@@ -21,10 +33,11 @@
 .page-title {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #22223b;
+  color: #23395d;
+  letter-spacing: 0.01em;
 }
 .page-subtitle {
-  color: #6c757d;
+  color: #ce93d8;
   font-size: 1.1rem;
 }
 
@@ -33,22 +46,69 @@
   color: #495057;
   border-radius: 0.5rem 0.5rem 0 0;
   transition: background 0.2s, color 0.2s;
+  background: none;
+  position: relative;
+  overflow: hidden;
 }
 .booking-tabs .nav-link.active {
   background: #fff;
-  color: #007bff;
-  border-bottom: 2px solid #007bff;
+  color: #f48fb1;
+  border-bottom: 2.5px solid #f48fb1;
+  box-shadow: 0 2px 8px rgba(244,143,177,0.08);
+  animation: fadeInTab 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.booking-tabs .nav-link.active .me-2 {
+  animation: tabIconPop 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.booking-tabs .nav-link.active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #f8bbd0 0%, #ce93d8 100%);
+  border-radius: 2px;
+  animation: tabUnderlineSlide 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInTab {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tabUnderlineSlide {
+  from { left: 50%; right: 50%; opacity: 0; }
+  to { left: 30%; right: 30%; opacity: 1; }
+}
+@keyframes tabIconPop {
+  0% { transform: scale(0.7); opacity: 0.5; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
 .booking-card {
   border: none;
   border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 16px rgba(244,143,177,0.13);
+  transition: box-shadow 0.3s, transform 0.3s;
   background: #fff;
+  animation: fadeInCard 0.8s cubic-bezier(0.4,0,0.2,1);
+  position: relative;
 }
 .booking-card:hover {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 32px rgba(206,147,216,0.18);
+  transform: translateY(-4px) scale(1.015);
+}
+.booking-card.active {
+  animation: pulseCard 1.2s infinite alternate cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseCard {
+  0% { box-shadow: 0 2px 16px rgba(244,143,177,0.13); }
+  100% { box-shadow: 0 8px 32px rgba(206,147,216,0.22); }
 }
 
 .daycare-info {
@@ -61,8 +121,13 @@
   height: 70px;
   object-fit: cover;
   border-radius: 0.75rem;
-  border: 2px solid #e5e7eb;
-  background: #f1f3f6;
+  border: 2px solid #f8bbd0;
+  background: #fce4ec;
+  transition: box-shadow 0.2s, border 0.2s;
+}
+.daycare-thumbnail:hover {
+  box-shadow: 0 4px 16px rgba(244,143,177,0.18);
+  border: 2px solid #ce93d8;
 }
 .daycare-details {
   margin-top: 0.25rem;
@@ -70,10 +135,10 @@
 .daycare-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #22223b;
+  color: #23395d;
 }
 .daycare-location {
-  color: #6c757d;
+  color: #ce93d8;
   font-size: 0.95rem;
 }
 
@@ -83,49 +148,68 @@
 .booking-id {
   font-size: 1rem;
   font-weight: 500;
-  color: #495057;
+  color: #23395d;
   margin-right: 0.75rem;
 }
 
 .info-item {
   margin-bottom: 0.5rem;
-  color: #343a40;
+  color: #23395d;
   font-size: 1rem;
 }
 
 .special-instructions, .cancel-reason {
   background: #f8f9fa;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #f48fb1;
   padding: 0.5rem 1rem;
   margin-top: 0.5rem;
   border-radius: 0.5rem;
-  color: #495057;
+  color: #23395d;
   font-size: 0.98rem;
+  animation: fadeInReview 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInReview {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .booking-actions .btn {
   font-weight: 500;
   border-radius: 0.5rem;
-  transition: box-shadow 0.2s, background 0.2s;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+  color: #f48fb1;
+  border: 1.5px solid #f48fb1;
+  background: #fff;
 }
 .booking-actions .btn:hover {
-  box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+  background: linear-gradient(90deg, #f8bbd0 0%, #ce93d8 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(244,143,177,0.18);
+  border: 1.5px solid #ce93d8;
+  transform: translateY(-2px) scale(1.04);
 }
 
 .stats-card {
   border: none;
   border-radius: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(244,143,177,0.10);
   background: #fff;
   margin-bottom: 1rem;
+  animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1);
+  opacity: 0;
+  animation-fill-mode: forwards;
 }
+.stats-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-card:nth-child(2) { animation-delay: 0.25s; }
+.stats-card:nth-child(3) { animation-delay: 0.4s; }
+.stats-card:nth-child(4) { animation-delay: 0.55s; }
 .stats-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #007bff;
+  color: #f48fb1;
 }
 .stats-label {
-  color: #6c757d;
+  color: #90caf9;
   font-size: 1rem;
 }
 
@@ -133,7 +217,50 @@
   border: none;
   border-radius: 1rem;
   background: #f8f9fa;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(244,143,177,0.08);
+  animation: bounceIn 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes bounceIn {
+  0% { opacity: 0; transform: scale(0.8) translateY(40px); }
+  60% { opacity: 1; transform: scale(1.05) translateY(-8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Modal Customization */
+.modal-content {
+  border-radius: 1rem;
+  box-shadow: 0 4px 32px rgba(244,143,177,0.13);
+  animation: fadeInModal 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Shimmer effect for loading spinner area */
+.daycare-bookings-wrapper .spinner-border, .daycare-bookings-wrapper .spinner {
+  position: relative;
+  z-index: 1;
+}
+.daycare-bookings-wrapper .spinner-border::after, .daycare-bookings-wrapper .spinner::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -8px; left: -8px; right: -8px; bottom: -8px;
+  border-radius: 50%;
+  background: linear-gradient(120deg, rgba(244,143,177,0.18) 0%, rgba(144,202,249,0.13) 100%);
+  animation: shimmerSpin 1.2s linear infinite;
+  z-index: -1;
+}
+@keyframes shimmerSpin {
+  0% { opacity: 0.7; filter: blur(1px); }
+  50% { opacity: 1; filter: blur(2px); }
+  100% { opacity: 0.7; filter: blur(1px); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {

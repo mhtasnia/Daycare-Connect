@@ -1,18 +1,30 @@
 /* Modern Corporate Styling for Daycare Booking History */
 
 .daycare-booking-history-wrapper {
-  background: #f7f9fb;
+  background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
   min-height: 100vh;
+  animation: fadeInBg 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes fadeInBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .parent-navbar {
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  background: rgba(255,255,255,0.95);
+  border-bottom: 2px solid #f8bbd0;
+  box-shadow: 0 2px 12px 0 rgba(144,202,249,0.08);
+  z-index: 1050;
+  animation: slideDownNav 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes slideDownNav {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .brand-highlight {
-  color: #007bff;
+  color: #f48fb1;
 }
 
 .page-header {
@@ -21,39 +33,52 @@
 .page-title {
   font-size: 2.2rem;
   font-weight: 700;
-  color: #22223b;
+  color: #23395d;
+  letter-spacing: 0.01em;
 }
 .page-subtitle {
-  color: #6c757d;
+  color: #ce93d8;
   font-size: 1.1rem;
 }
 
 .stats-card {
   border: none;
   border-radius: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(244,143,177,0.10);
   background: #fff;
   margin-bottom: 1rem;
+  animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1);
 }
 .stats-number {
   font-size: 2rem;
   font-weight: 700;
-  color: #007bff;
+  color: #f48fb1;
 }
 .stats-label {
-  color: #6c757d;
+  color: #90caf9;
   font-size: 1rem;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .history-card {
   border: none;
   border-radius: 1rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
-  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 16px rgba(244,143,177,0.13);
+  transition: box-shadow 0.3s, transform 0.3s;
   background: #fff;
+  animation: fadeInCard 0.8s cubic-bezier(0.4,0,0.2,1);
 }
 .history-card:hover {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 32px rgba(206,147,216,0.18);
+  transform: translateY(-4px) scale(1.015);
+}
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .history-details {
@@ -62,12 +87,12 @@
 .history-id {
   font-size: 1rem;
   font-weight: 500;
-  color: #495057;
+  color: #23395d;
 }
 
 .info-item {
   margin-bottom: 0.5rem;
-  color: #343a40;
+  color: #23395d;
   font-size: 1rem;
 }
 
@@ -83,25 +108,36 @@
   vertical-align: middle;
 }
 .star-filled {
-  color: #ffc107;
+  color: #f48fb1;
   font-size: 1.2em;
+  animation: popStar 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 .star-empty {
   color: #e4e5e9;
   font-size: 1.2em;
 }
+@keyframes popStar {
+  0% { transform: scale(0.7); opacity: 0.5; }
+  60% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); }
+}
 
 .review-section {
   background: #f8f9fa;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #f48fb1;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  color: #495057;
+  color: #23395d;
   font-size: 0.98rem;
   margin-top: 0.5rem;
+  animation: fadeInReview 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInReview {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 .review-text {
-  color: #343a40;
+  color: #23395d;
   font-style: italic;
 }
 
@@ -109,7 +145,8 @@
   border: none;
   border-radius: 1rem;
   background: #f8f9fa;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 4px rgba(244,143,177,0.08);
+  animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1);
 }
 
 /* Star Selector (Interactive) */
@@ -123,7 +160,7 @@
 }
 .star-select {
   color: #e4e5e9;
-  transition: color 0.2s, transform 0.15s;
+  transition: color 0.2s, transform 0.15s, box-shadow 0.2s;
   cursor: pointer;
   user-select: none;
   border-radius: 50%;
@@ -132,17 +169,18 @@
   align-items: center;
 }
 .star-select.selected {
-  color: #007bff;
+  color: #f48fb1;
   transform: scale(1.15);
-  background: #eaf4ff;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+  background: #fce4ec;
+  box-shadow: 0 2px 8px rgba(244,143,177,0.13);
 }
 .star-select:hover:not(.disabled),
 .star-select:focus:not(.disabled) {
-  color: #0056b3;
-  background: #e3f0ff;
+  color: #ce93d8;
+  background: #f8bbd0;
   outline: none;
   transform: scale(1.18);
+  box-shadow: 0 4px 16px rgba(206,147,216,0.18);
 }
 .star-select.disabled {
   cursor: not-allowed;
@@ -153,27 +191,37 @@
 .review-btn {
   border-radius: 0.5rem;
   font-weight: 500;
-  transition: box-shadow 0.2s, background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,123,255,0.04);
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s, transform 0.2s;
+  box-shadow: 0 2px 8px rgba(244,143,177,0.08);
+  color: #f48fb1;
+  border: 1.5px solid #f48fb1;
+  background: #fff;
 }
 .review-btn:hover {
-  background: #007bff;
+  background: linear-gradient(90deg, #f8bbd0 0%, #ce93d8 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(0,123,255,0.10);
+  box-shadow: 0 4px 16px rgba(244,143,177,0.18);
+  border: 1.5px solid #ce93d8;
+  transform: translateY(-2px) scale(1.04);
 }
 
 /* Modal Customization */
 .modal-content {
   border-radius: 1rem;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 32px rgba(244,143,177,0.13);
+  animation: fadeInModal 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 .modal-title {
   font-weight: 700;
-  color: #22223b;
+  color: #23395d;
 }
 .modal-body label {
   font-weight: 500;
-  color: #495057;
+  color: #23395d;
 }
 
 @media (max-width: 768px) {
