@@ -99,7 +99,7 @@ CORS_ALLOW_ALL_ORIGINS = True  # For development only!
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
