@@ -26,7 +26,10 @@ import {
   FaEdit,
   FaTimes,
   FaCheckCircle,
+  FaClipboardList,
   FaClock,
+  FaHistory,  
+  FaCog,
   FaExclamationTriangle,
   FaChild,
   FaPhone,
@@ -111,6 +114,36 @@ const DaycareBookings = () => {
       fetchBookings();
     } catch {
       setError('Failed to update booking status.');
+    }
+  };
+ 
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const refresh = localStorage.getItem("refresh");
+      const access = localStorage.getItem("access");
+      console.log("Tokens:", { refresh, access }); // Add this line
+
+      if (refresh && access) {
+        const res = await axios.post(
+          "http://localhost:8000/api/user-auth/daycares/logout/",
+          { refresh },
+          {
+            headers: {
+              Authorization: `Bearer ${access}`,
+            },
+          }
+        );
+        console.log("Logout response:", res.data);
+      } else {
+        console.warn("Tokens missing");
+      }
+    } catch (error) {
+      console.error("Logout error:", error.response?.data || error.message);
+    } finally {
+      // Always clear storage and navigate
+      localStorage.clear();
+      navigate("/daycare/login");
     }
   };
 
@@ -247,33 +280,49 @@ const DaycareBookings = () => {
   return (
     <div className="daycare-bookings-wrapper">
       {/* Navigation Header */}
-      <Navbar bg="white" expand="lg" className="parent-navbar shadow-sm">
-        <Container>
-          <Navbar.Brand as={Link} to="/daycare/dashboard" className="fw-bold">
-            Daycare <span className="brand-highlight">Connect</span>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="daycare-navbar" />
-          <Navbar.Collapse id="daycare-navbar">
-            <Nav className="ms-auto align-items-center">
-              <Nav.Link as={Link} to="/daycare/dashboard" className="nav-item">
-                <FaHome className="me-1" /> Dashboard
-              </Nav.Link>
-              <Nav.Link as={Link} to="/daycare/profile" className="nav-item">
-                <FaUser className="me-1" /> Profile
-              </Nav.Link>
-              <Nav.Link as={Link} to="/daycare/bookings" className="nav-item active">
-                <FaCalendarAlt className="me-1" /> Bookings
-              </Nav.Link>
-              <Nav.Link as={Link} to="/daycare/search" className="nav-item">
-                <FaSearch className="me-1" /> Search
-              </Nav.Link>
-              <Nav.Link className="nav-item">
-                <FaBell className="me-1" /> Notifications
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <Navbar
+            expand="lg"
+            className="parent-navbar shadow-sm"
+            style={{
+              background: "linear-gradient(45deg, #99f2c8, #90caf9)",
+              borderBottom: "2px solid #90caf9",
+            }}
+          >
+            <Container>
+              <Navbar.Brand as={Link} to="/daycare/dashboard" className="fw-bold" style={{ color: "#23395d" }}>
+                Daycare <span className="brand-highlight" style={{ color: "#90caf9" }}>Connect</span>
+                <span className="small daycare-highlight" style={{ fontSize: '0.85rem', color: "#004a99" }}> | Daycare</span>
+              </Navbar.Brand>
+              <Navbar.Toggle aria-controls="daycare-navbar" />
+              <Navbar.Collapse id="daycare-navbar">
+                <Nav className="ms-auto align-items-center">
+                  <Nav.Link as={Link} to="/daycare/dashboard" className="nav-item" style={{ color: "#23395d" }}>
+                    <FaHome className="me-1" /> Dashboard
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/daycare/profile" className="nav-item" style={{ color: "#23395d" }}>
+                    <FaUser className="me-1" /> Profile
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/daycare/bookings" className="nav-item" style={{ color: "#23395d" }}>
+                    <FaClipboardList className="me-1" /> Bookings
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/daycare/history" className="nav-item" style={{ color: "#23395d" }}>
+                    <FaHistory className="me-1" /> History
+                  </Nav.Link>
+                  <Nav.Link as={Link} to="/daycare/settings" className="nav-item" style={{ color: "#23395d" }}>
+                    <FaCog className="me-1" /> Settings
+                  </Nav.Link>
+                </Nav>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="ms-2"
+                >
+                  <FaSignOutAlt className="me-1" /> Logout
+                </Button>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
       <Container className="py-4">
         {/* Page Header */}
         <Row className="mb-4">

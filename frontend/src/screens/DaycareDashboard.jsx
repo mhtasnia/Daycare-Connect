@@ -231,7 +231,7 @@ function DaycareDashboard() {
         <Container>
           <Navbar.Brand as={Link} to="/daycare/dashboard" className="fw-bold" style={{ color: "#23395d" }}>
             Daycare <span className="brand-highlight" style={{ color: "#90caf9" }}>Connect</span>
-            <span className="text-muted small daycare-highlight">| Daycare</span>
+            <span className="small daycare-highlight" style={{ fontSize: '0.85rem', color: "#004a99" }}>| Daycare</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="daycare-navbar" />
           <Navbar.Collapse id="daycare-navbar">
