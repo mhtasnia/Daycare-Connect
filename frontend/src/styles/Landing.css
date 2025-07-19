@@ -1,0 +1,129 @@
+
+/* Full width and theme background */
+
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.full-width-theme > * {
+  animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  animation-fill-mode: both;
+}
+
+/* Example: Card and button color tweaks */
+.card,
+.shadow-lg,
+.shadow-sm {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-radius: 1.5rem !important;
+}
+
+.btn-primary {
+  background-color: #f48fb1;
+  border-color: #f48fb1;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #ce93d8;
+  border-color: #ce93d8;
+}
+
+.btn-outline-primary {
+  color: #64b5f6;
+  border-color: #64b5f6;
+}
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: #64b5f6;
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  color: #90caf9;
+  border-color: #90caf9;
+}
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+  background-color: #90caf9;
+  color: #fff;
+}
+
+/* Optional: Soft box shadow for hero images */
+img.shadow {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.hero-card {
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  transition: box-shadow 0.3s;
+}
+
+.hero-card:hover {
+  box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.3);
+}
+
+.feature-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.footer-custom {
+  margin-top: auto;
+  width: 100%;
+}
+
+/* Baby-themed background icons using react-icons */
+.baby-bg-icon {
+  position: absolute;
+  z-index: 0;
+  opacity: 0.10;
+  pointer-events: none;
+  font-size: 90px;
+}
+.baby-bg-teddy {
+  top: 5%;
+  left: 2%;
+  color: white;
+}
+.baby-bg-bottle {
+  bottom: 10%;
+  right: 5%;
+  color: #90caf9;
+}
+.baby-bg-stroller {
+  top: 60%;
+  left: 80%;
+  color: #90caf9;
+}
+
+/* Responsive adjustments for background icons */
+@media (max-width: 768px) {
+  .baby-bg-icon {
+    font-size: 48px;
+  }
+  .baby-bg-teddy {
+    top: 2%;
+    left: 1%;
+  }
+  .baby-bg-bottle {
+    bottom: 5%;
+    right: 2%;
+  }
+  .baby-bg-stroller {
+    top: 70%;
+    left: 70%;
+  }
+}

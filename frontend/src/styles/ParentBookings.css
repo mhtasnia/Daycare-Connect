@@ -1,0 +1,503 @@
+/* Parent Bookings Styles */
+.parent-bookings-wrapper {
+  background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+/* Navigation */
+.parent-navbar {
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.parent-navbar .navbar-brand {
+  color: #23395d !important;
+  font-size: 1.5rem;
+}
+
+.brand-highlight {
+  color: #f48fb1 !important;
+}
+
+.parent-navbar .nav-item {
+  color: #23395d !important;
+  font-weight: 500;
+  margin: 0 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.parent-navbar .nav-item:hover,
+.parent-navbar .nav-item.active {
+  color: #f48fb1 !important;
+  transform: translateY(-1px);
+}
+
+/* Page Header */
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  color: #23395d;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  color: #666;
+  font-size: 1.2rem;
+  margin-bottom: 0;
+}
+
+/* Booking Tabs */
+.booking-tabs {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 15px 15px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+}
+
+.booking-tabs .nav-link {
+  color: #666 !important;
+  font-weight: 600;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  background: transparent !important;
+  margin: 0 0.25rem;
+}
+
+.booking-tabs .nav-link:hover {
+  color: #f48fb1 !important;
+  background: rgba(244, 143, 177, 0.1) !important;
+}
+
+.booking-tabs .nav-link.active {
+  color: #f48fb1 !important;
+  background: rgba(244, 143, 177, 0.15) !important;
+  box-shadow: 0 2px 8px rgba(244, 143, 177, 0.2);
+}
+
+/* Booking Cards */
+.booking-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.booking-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Daycare Info */
+.daycare-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.daycare-thumbnail {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.daycare-details {
+  flex: 1;
+}
+
+.daycare-name {
+  color: #23395d;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.daycare-location {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Booking Details */
+.booking-details {
+  padding: 0 1rem;
+}
+
+.booking-header {
+  margin-bottom: 1rem;
+}
+
+.booking-id {
+  color: #23395d;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.booking-info {
+  margin-bottom: 1rem;
+}
+
+.info-item {
+  color: #555;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.info-item .fa {
+  width: 16px;
+  color: #f48fb1;
+  margin-right: 8px;
+}
+
+.info-item strong {
+  color: #23395d;
+  margin-right: 0.5rem;
+}
+
+.special-instructions {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.special-instructions strong {
+  color: #23395d;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.cancel-reason {
+  background: rgba(220, 53, 69, 0.1);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.cancel-reason strong {
+  color: #dc3545;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+/* Booking Actions */
+.booking-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.booking-actions .btn {
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.booking-actions .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Status Badges */
+.badge {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 600;
+}
+
+/* No Bookings Card */
+.no-bookings-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Stats Cards */
+.stats-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stats-number {
+  color: #23395d;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.stats-label {
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Modal Styling */
+.modal-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-title {
+  color: #23395d;
+  font-weight: 700;
+}
+
+/* Form Controls in Modal */
+.modal .form-control {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 10px !important;
+}
+
+.modal .form-control:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: #f48fb1 !important;
+  box-shadow: 0 0 0 0.2rem rgba(244, 143, 177, 0.25) !important;
+}
+
+/* Button Styles */
+.btn-primary {
+  background: linear-gradient(45deg, #f48fb1, #ff6b9d);
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(45deg, #ff6b9d, #f48fb1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(244, 143, 177, 0.4);
+}
+
+.btn-outline-primary {
+  border: 2px solid #f48fb1;
+  color: #f48fb1;
+  border-radius: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: #f48fb1;
+  border-color: #f48fb1;
+  color: white;
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  border-radius: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+.btn-outline-secondary:hover {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.btn-outline-danger {
+  border: 2px solid #dc3545;
+  color: #dc3545;
+  border-radius: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+.btn-outline-danger:hover {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.btn-outline-info {
+  border: 2px solid #17a2b8;
+  color: #17a2b8;
+  border-radius: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+.btn-outline-info:hover {
+  background: #17a2b8;
+  border-color: #17a2b8;
+  color: white;
+}
+
+.btn-outline-warning {
+  border: 2px solid #ffc107;
+  color: #ffc107;
+  border-radius: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+.btn-outline-warning:hover {
+  background: #ffc107;
+  border-color: #ffc107;
+  color: #212529;
+}
+
+/* Alert Styling */
+.alert {
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+}
+
+.alert-warning {
+  background: rgba(255, 193, 7, 0.1) !important;
+  border-color: rgba(255, 193, 7, 0.3) !important;
+  color: #856404 !important;
+}
+
+.alert-info {
+  background: rgba(23, 162, 184, 0.1) !important;
+  border-color: rgba(23, 162, 184, 0.3) !important;
+  color: #0c5460 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .booking-card .row {
+    flex-direction: column;
+  }
+  
+  .daycare-info {
+    margin-bottom: 1rem;
+  }
+  
+  .booking-details {
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .booking-actions {
+    padding: 0;
+  }
+  
+  .booking-actions .d-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  
+  .stats-number {
+    font-size: 1.5rem;
+  }
+  
+  .booking-tabs .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .daycare-info {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .daycare-thumbnail {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .booking-actions .d-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .booking-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .booking-tabs .nav-item {
+    display: inline-block;
+    float: none;
+  }
+  
+  .stats-card .card-body {
+    padding: 1rem;
+  }
+}
+
+/* Loading Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.booking-card,
+.stats-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Tab Content */
+.tab-content {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 0 0 15px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: none;
+  padding: 1.5rem;
+}

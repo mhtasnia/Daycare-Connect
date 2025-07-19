@@ -1,0 +1,27 @@
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.full-width-theme {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
+  color: #333;
+  overflow-x: hidden;
+  padding: 0; /* Remove top padding */
+  position: relative;
+}
+
+/* Section spacing */
+.full-width-theme > * {
+  margin-bottom: 0;
+}

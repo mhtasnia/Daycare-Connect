@@ -1,0 +1,74 @@
+.whoitsfor-btn-parent {
+  background: #f48fb1 !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  border-radius: 50px !important;
+  font-size: 1.15rem;
+  padding: 0.7rem 2.2rem;
+  box-shadow: 0 0 8px 0 #f8bbd0;
+  animation: whoitsfor-glow 1.2s infinite alternate;
+  transition: background 0.2s, color 0.2s, box-shadow 0.3s, transform 0.15s;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 4px rgba(244,143,177,0.10);
+}
+
+@keyframes whoitsfor-glow {
+  from {
+    box-shadow: 0 0 8px 0 #f8bbd0;
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 18px 4px #f8bbd0;
+    transform: scale(1.03);
+  }
+}
+
+/* For the daycare button, solid blue with breathing effect */
+.whoitsfor-card .btn-outline-secondary {
+  background: #90caf9 !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  border-radius: 50px !important;
+  font-size: 1.15rem;
+  padding: 0.7rem 2.2rem;
+  box-shadow: 0 0 8px 0 #e0eafc;
+  animation: whoitsfor-glow-blue 1.2s infinite alternate;
+  transition: background 0.2s, color 0.2s, box-shadow 0.3s, transform 0.15s;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 4px rgba(144,202,249,0.10);
+}
+
+@keyframes whoitsfor-glow-blue {
+  from {
+    box-shadow: 0 0 8px 0 #e0eafc;
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 18px 4px #e0eafc;
+    transform: scale(1.03);
+  }
+}
+
+.whoitsfor-card {
+  transition: transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.25s;
+}
+.whoitsfor-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.section-header {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #23395d;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}

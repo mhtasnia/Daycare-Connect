@@ -1,0 +1,151 @@
+/* Modern Corporate Styling for Daycare Bookings */
+
+.daycare-bookings-wrapper {
+  background: #f7f9fb;
+  min-height: 100vh;
+}
+
+.parent-navbar {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.brand-highlight {
+  color: #007bff;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.page-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #22223b;
+}
+.page-subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.booking-tabs .nav-link {
+  font-weight: 500;
+  color: #495057;
+  border-radius: 0.5rem 0.5rem 0 0;
+  transition: background 0.2s, color 0.2s;
+}
+.booking-tabs .nav-link.active {
+  background: #fff;
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+}
+
+.booking-card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  transition: box-shadow 0.2s;
+  background: #fff;
+}
+.booking-card:hover {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+.daycare-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.daycare-thumbnail {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 2px solid #e5e7eb;
+  background: #f1f3f6;
+}
+.daycare-details {
+  margin-top: 0.25rem;
+}
+.daycare-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #22223b;
+}
+.daycare-location {
+  color: #6c757d;
+  font-size: 0.95rem;
+}
+
+.booking-header {
+  margin-bottom: 0.5rem;
+}
+.booking-id {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #495057;
+  margin-right: 0.75rem;
+}
+
+.info-item {
+  margin-bottom: 0.5rem;
+  color: #343a40;
+  font-size: 1rem;
+}
+
+.special-instructions, .cancel-reason {
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+  color: #495057;
+  font-size: 0.98rem;
+}
+
+.booking-actions .btn {
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+.booking-actions .btn:hover {
+  box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+}
+
+.stats-card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  background: #fff;
+  margin-bottom: 1rem;
+}
+.stats-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #007bff;
+}
+.stats-label {
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.no-bookings-card {
+  border: none;
+  border-radius: 1rem;
+  background: #f8f9fa;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+@media (max-width: 768px) {
+  .booking-card {
+    padding: 0.5rem;
+  }
+  .daycare-info {
+    flex-direction: column;
+    align-items: center;
+  }
+  .daycare-thumbnail {
+    width: 56px;
+    height: 56px;
+  }
+}

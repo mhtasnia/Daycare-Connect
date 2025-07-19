@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to {{ app_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #23395d;
+            margin-bottom: 10px;
+        }
+        .highlight {
+            color: #f48fb1;
+        }
+        .welcome-message {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #f48fb1, #ce93d8);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                Daycare <span class="highlight">Connect</span>
+            </div>
+            <h2>🎉 Welcome to Our Community!</h2>
+        </div>
+
+        <div class="welcome-message">
+            <h3>Hello and Welcome!</h3>
+            <p>Congratulations! Your email has been successfully verified and your {{ app_name }} account is now active.</p>
+            
+            {% if user_type == 'parent' %}
+            <p>As a parent, you now have access to:</p>
+            <ul>
+                <li>🔍 Search verified daycare centers in your area</li>
+                <li>📅 Book and manage daycare services</li>
+                <li>👶 Create profiles for your children</li>
+                <li>💬 Direct communication with daycare providers</li>
+                <li>⭐ Read reviews and share your experiences</li>
+            </ul>
+            {% else %}
+            <p>As a daycare provider, you can now:</p>
+            <ul>
+                <li>🏢 Set up your daycare profile</li>
+                <li>📊 Manage bookings and schedules</li>
+                <li>👥 Connect with parents in your community</li>
+                <li>📈 Grow your business with our platform</li>
+                <li>⭐ Build trust through reviews and ratings</li>
+            </ul>
+            {% endif %}
+
+            <div style="text-align: center;">
+                <a href="{{ login_url }}" class="cta-button">Get Started Now</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Thank you for choosing {{ app_name }}!</p>
+            <p>Need help? Contact us at support@daycareconnect.com</p>
+            <p>&copy; 2025 {{ app_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

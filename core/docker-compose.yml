@@ -1,0 +1,10 @@
+name: Daycare-Connect
+ 
+services:
+  app:
+    image: daycaredocker 
+    container_name: daycaredocker-container_name
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/app

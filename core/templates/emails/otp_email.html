@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - {{ app_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: linear-gradient(120deg, #f8bbd0 0%, #e0eafc 60%, #90caf9 100%);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #23395d;
+            margin-bottom: 10px;
+        }
+        .highlight {
+            color: #f48fb1;
+        }
+        .otp-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #f48fb1;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #23395d;
+            letter-spacing: 8px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed #f48fb1;
+        }
+        .message {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+        }
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                Daycare <span class="highlight">Connect</span>
+            </div>
+            <h2>Email Verification Required</h2>
+        </div>
+
+        <div class="message">
+            <p>Hello,</p>
+            <p>Thank you for registering with <strong>{{ app_name }}</strong>! To complete your registration and secure your account, please verify your email address using the verification code below:</p>
+        </div>
+
+        <div class="otp-container">
+            <h3>Your Verification Code</h3>
+            <div class="otp-code">{{ otp_code }}</div>
+            <p><strong>This code will expire in 10 minutes</strong></p>
+        </div>
+
+        <div class="warning">
+            <strong>Security Notice:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Never share this code with anyone</li>
+                <li>Our team will never ask for this code</li>
+                <li>If you didn't request this, please ignore this email</li>
+            </ul>
+        </div>
+
+        <div class="message">
+            <p>Once verified, you'll be able to:</p>
+            <ul>
+                {% if purpose == 'registration' %}
+                    {% if user_type == 'parent' %}
+                    <li>🔍 Search and discover verified daycare centers</li>
+                    <li>📅 Book daycare services for your children</li>
+                    <li>💬 Communicate directly with daycare providers</li>
+                    <li>⭐ Read and write reviews</li>
+                    {% else %}
+                    <li>🏢 Manage your daycare profile and services</li>
+                    <li>📊 View and manage bookings</li>
+                    <li>👥 Connect with parents in your community</li>
+                    <li>📈 Grow your daycare business</li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Need help? Contact us at <a href="mailto:{{ support_email }}">{{ support_email }}</a></p>
+            <p>&copy; 2025 {{ app_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

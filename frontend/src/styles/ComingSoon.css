@@ -1,0 +1,188 @@
+/* Overall page wrapper for background and centering */
+.coming-soon-wrapper {
+  background-color: linear-gradient(45deg, #f48fb1, #ce93d8); /* Your footer background color */
+  min-height: 100vh; /* Make it take up most of the viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff; /* White text for contrast */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+  padding: 2rem;
+}
+
+/* Container for the content */
+.coming-soon-container {
+  max-width: 800px;
+  width: 100%;
+  padding: 4rem 3rem; /* Increased padding for more internal space */
+  border-radius: 15px;
+  background-color: rgba(35, 57, 93, 0.9); /* Slightly transparent background for depth */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative; /* For icon positioning */
+  overflow: hidden; /* To clip icons if they go outside */
+  z-index: 1; /* Ensure container is above potential background elements */
+}
+
+/* Titles and Messages */
+.coming-soon-title {
+  color: #f8bbd0; /* Your pink accent color */
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.coming-soon-message {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2rem;
+}
+
+/* Animated Icons Styling */
+.animated-icon {
+  font-size: 8rem; /* Made icons larger to be background elements */
+  color: #90caf9; /* Your light blue accent color */
+  position: absolute; /* Allow positioning for animation */
+  opacity: 0.1; /* Reduced opacity to make them subtle background elements */
+  z-index: 0; /* Ensures icons are behind the content */
+}
+
+/* Specific Icon Positioning for a "background" effect */
+.icon-hourglass {
+  top: -20px; /* Adjusted to be partially off-container */
+  left: -30px; /* Adjusted to be partially off-container */
+  animation: bounceAndFade 4s ease-in-out infinite;
+}
+
+.icon-tools {
+  bottom: -20px; /* Adjusted */
+  right: -30px; /* Adjusted */
+  animation: rotateAndScale 5s linear infinite;
+}
+
+.icon-lightbulb {
+  top: 60%; /* Adjusted */
+  left: 80%; /* Adjusted */
+  transform: translate(-50%, -50%); /* Center based on its own size */
+  animation: floatAndGlow 6s ease-in-out infinite alternate;
+  /* Adding an extra icon for more spread if desired, or remove if too much */
+}
+
+
+/* Back Home Button */
+.back-home-btn {
+  background-color: #90caf9; /* Your light blue */
+  border-color: #90caf9;
+  color: #23395d; /* Dark blue text on light blue button */
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px; /* Pill shape */
+  transition: all 0.3s ease;
+  text-decoration: none; /* Remove underline */
+}
+
+.back-home-btn:hover {
+  background-color: #f8bbd0; /* Pink on hover */
+  border-color: #f8bbd0;
+  color: #23395d; /* Dark blue text on pink button */
+  transform: translateY(-3px); /* Subtle lift effect */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* CSS Animations (Keeping these as they are good) */
+
+@keyframes bounceAndFade {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.1; /* Match initial opacity */
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.2; /* Slightly more visible during animation */
+  }
+}
+
+@keyframes rotateAndScale {
+  0% {
+    transform: rotate(0deg) scale(0.9);
+    opacity: 0.1;
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+    opacity: 0.2;
+  }
+  100% {
+    transform: rotate(360deg) scale(0.9);
+    opacity: 0.1;
+  }
+}
+
+@keyframes floatAndGlow {
+  0%, 100% {
+    transform: translateY(0) translate(-50%, -50%); /* Keep centering transform */
+    filter: brightness(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translateY(-15px) translate(-50%, -50%); /* Keep centering transform */
+    filter: brightness(1.2);
+    opacity: 0.2;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .coming-soon-title {
+    font-size: 2.5rem;
+  }
+  .coming-soon-message {
+    font-size: 1rem;
+  }
+  .animated-icon {
+    font-size: 5rem; /* Adjust icon size for smaller screens */
+  }
+  .icon-hourglass {
+    top: -10px;
+    left: -10px;
+  }
+  .icon-tools {
+    bottom: -10px;
+    right: -10px;
+  }
+  .icon-lightbulb {
+    top: 60%;
+    left: 85%;
+  }
+  .coming-soon-container {
+    padding: 3rem 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .coming-soon-title {
+    font-size: 2rem;
+  }
+  .animated-icon {
+    /* Instead of display: none;, we make them even smaller and position them more carefully */
+    font-size: 3rem; /* Make icons smaller on very small screens */
+    opacity: 0.08; /* Slightly less opaque */
+  }
+  /* Fine-tune positions for very small screens to avoid overlap */
+  .icon-hourglass {
+    top: 5%;
+    left: 5%;
+  }
+  .icon-tools {
+    bottom: 5%;
+    right: 5%;
+  }
+  .icon-lightbulb {
+    top: 70%; /* Adjust to avoid header */
+    left: 75%; /* Adjust to avoid button area */
+  }
+  .coming-soon-container {
+    padding: 2rem 1rem;
+  }
+}
