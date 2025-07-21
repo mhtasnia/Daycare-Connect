@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, Form, Button, Alert, Spinner, InputGroup } f
 import { FaEnvelope, FaLock, FaMapMarkerAlt, FaPhone, FaBuilding, FaCheckCircle, FaImage, FaArrowLeft, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import DaycareNavbar from "../components/DaycareNavbar";
-import Footer from "../components/Footer";
 import OTPVerification from "../components/OTPVerification";
 import axios from "axios";
 
@@ -421,7 +420,7 @@ function DaycareRegister() {
           </Col>
         </Row>
       </Container>
-      <Footer />
+      
     </div>
   );
 }

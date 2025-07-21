@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, Form, Button, Alert, InputGroup } from "reac
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import DaycareNavbar from "../components/DaycareNavbar";
-import Footer from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 
 function DaycareLogin() {
@@ -128,7 +127,7 @@ function DaycareLogin() {
           </Col>
         </Row>
       </Container>
-      <Footer />
+     
     </div>
   );
 }

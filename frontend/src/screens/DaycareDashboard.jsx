@@ -456,7 +456,7 @@ function DaycareDashboard() {
         </Row>
 
       </Container>
-      <Footer />
+      
     </div>
   );
 }

@@ -20,6 +20,7 @@ import PublicDaycareSearch from "./screens/PublicDaycareSearch";
 import DaycareBookings from "./screens/DaycareBookings";
 import DaycareBookingHistory from "./screens/DaycareBookingHistory";
 import ComingSoonPage from "./screens/ComingSoon";
+import Footer from "./components/Footer";
 function App() {
   return (
     <div className="full-width-theme">
@@ -49,6 +50,9 @@ function App() {
          
           
         </Routes>
+        {/* Footer can be added globally or on specific pages */}
+        {/* Uncomment the line below to add a footer globally */}
+        <Footer />
       </Router>
     </div>
   );

@@ -2,7 +2,7 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import { FaBullhorn, FaChartBar, FaEnvelopeOpenText, FaCheckCircle, FaUserPlus, FaClipboardCheck, FaCalendarCheck, FaQuoteLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import DaycareNavbar from "../components/DaycareNavbar";
-import Footer from "../components/Footer";
+
 
 function DaycareLanding() {
   return (
@@ -153,7 +153,7 @@ function DaycareLanding() {
           </div>
         </Container>
       </section>
-      <Footer />
+     
     </div>
   );
 }

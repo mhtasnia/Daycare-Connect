@@ -495,7 +495,7 @@ function PublicDaycareSearch() {
         </Row>
       </Container>
 
-      <Footer />
+  
     </div>
   );
 }

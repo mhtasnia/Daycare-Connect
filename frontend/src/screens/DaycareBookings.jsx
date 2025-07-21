@@ -442,6 +442,7 @@ const DaycareBookings = () => {
         onHide={() => setShowChildModal(false)}
         booking={selectedBooking}
       />
+      
     </div>
   );
 };

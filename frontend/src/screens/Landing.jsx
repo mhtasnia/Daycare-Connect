@@ -4,7 +4,6 @@ import WhoItsFor from "../components/WhoItsFor";
 import WhyChoose from "../components/WhyChoose";
 import Reviews from "../components/Reviews";
 import FAQ from "../components/FAQ";
-import Footer from "../components/Footer";
 import LandingNavbar from "../components/LandingNavbar";
 
 function Landing() {
@@ -33,7 +32,6 @@ function Landing() {
       <section id="faq">
         <FAQ />
       </section>
-      <Footer />
     </div>
   );
 }

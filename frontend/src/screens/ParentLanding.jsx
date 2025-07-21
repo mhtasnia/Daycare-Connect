@@ -212,7 +212,6 @@ function ParentLanding() {
           </Row>
         </Container>
       </section>
-      <Footer />
     </div>
   );
 }
