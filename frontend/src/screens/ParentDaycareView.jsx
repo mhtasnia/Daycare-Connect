@@ -47,20 +47,22 @@ function ParentDaycareView() {
   const navigate = useNavigate();
   const [daycare, setDaycare] = useState(null);
   const [children, setChildren] = useState([]);
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
   const [bookingDate, setBookingDate] = useState("");
-  const [bookingType, setBookingType] = useState("full-time");
+  const [bookingType, setBookingType] = useState("monthly");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
   const [specialInstructions, setSpecialInstructions] = useState("");
-  const [emergencyContactName, setEmergencyContactName] = useState("");
-  const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
+  const [selectedEmergencyContact, setSelectedEmergencyContact] = useState("");
   const [isBooking, setIsBooking] = useState(false);
 
   useEffect(() => {
     fetchDaycareDetails();
     fetchChildren();
+    fetchEmergencyContacts();
   }, [id]);
 
   const fetchDaycareDetails = async () => {
@@ -86,6 +88,34 @@ function ParentDaycareView() {
     }
   };
 
+  const fetchEmergencyContacts = async () => {
+    try {
+      const response = await emergencyContactAPI.getEmergencyContact();
+      // If response is a single contact, wrap it in an array
+      const contacts = Array.isArray(response.data) ? response.data : [response.data];
+      setEmergencyContacts(contacts.filter(contact => contact && contact.id));
+    } catch (error) {
+      console.error("Error fetching emergency contacts:", error);
+      setEmergencyContacts([]);
+    }
+  };
+
+  const calculatePrice = () => {
+    if (!daycare || !daycare.pricing_tiers) return 0;
+    
+    const pricing = daycare.pricing_tiers.find(p => p.booking_type === bookingType);
+    return pricing ? pricing.price : 0;
+  };
+
+  const getEndDate = () => {
+    if (!bookingDate) return "";
+    
+    const startDate = new Date(bookingDate);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 30); // Always 30 days later
+    
+    return endDate.toISOString().split('T')[0];
+  };
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -117,7 +147,7 @@ function ParentDaycareView() {
   };
 
   const handleBooking = async () => {
-    if (!selectedChild || !bookingDate || !emergencyContactName || !emergencyContactPhone) {
+    if (!selectedChild || !bookingDate || !selectedEmergencyContact) {
       alert("Please fill in all required fields");
       return;
     }
@@ -131,8 +161,8 @@ function ParentDaycareView() {
         booking_type: bookingType,
         start_date: bookingDate,
         special_instructions: specialInstructions,
-        emergency_contact_name: emergencyContactName,
-        emergency_contact_phone: emergencyContactPhone,
+        emergency_contact: parseInt(selectedEmergencyContact),
+        payment_method: paymentMethod,
       };
 
       await bookingAPI.createBooking(bookingData);
@@ -435,6 +465,26 @@ function ParentDaycareView() {
               </Card>
             )}
 
+            {/* Pricing Card */}
+            {daycare.pricing_tiers && daycare.pricing_tiers.length > 0 && (
+              <Card className="sidebar-card mb-4">
+                <Card.Header>
+                  <h5>Pricing</h5>
+                </Card.Header>
+                <Card.Body>
+                  {daycare.pricing_tiers.map((pricing) => (
+                    <div key={pricing.booking_type} className="policy-item">
+                      <strong>{pricing.booking_type_display}:</strong>
+                      <p>৳{pricing.price.toLocaleString()}</p>
+                      {pricing.description && (
+                        <small className="text-muted">{pricing.description}</small>
+                      )}
+                    </div>
+                  ))}
+                </Card.Body>
+              </Card>
+            )}
+
             {/* Quick Actions */}
             <Card className="sidebar-card">
               <Card.Header>
@@ -480,25 +530,28 @@ function ParentDaycareView() {
                       </option>
                     ))}
                   </Form.Select>
+                  {children.length === 0 && (
+                    <Form.Text className="text-muted">
+                      No children found. Please add a child to your profile first.
+                    </Form.Text>
+                  )}
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Booking Type</Form.Label>
+                  <Form.Label>Care Type *</Form.Label>
                   <Form.Select
                     value={bookingType}
                     onChange={(e) => setBookingType(e.target.value)}
                   >
-                    <option value="full_time">Full-time</option>
-                    <option value="part_time">Part-time</option>
-                    <option value="hourly">Hourly</option>
-                    <option value="drop_in">Drop In</option>
+                    <option value="monthly">Monthly Care</option>
+                    <option value="daily">Daily Care</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Start Date</Form.Label>
+                  <Form.Label>Start Date *</Form.Label>
                   <Form.Control
                     type="date"
                     value={bookingDate}
@@ -510,29 +563,95 @@ function ParentDaycareView() {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Emergency Contact Name *</Form.Label>
+                  <Form.Label>End Date</Form.Label>
                   <Form.Control
-                    type="text"
-                    value={emergencyContactName}
-                    onChange={(e) => setEmergencyContactName(e.target.value)}
-                    placeholder="Enter emergency contact name"
-                    required
+                    type="date"
+                    value={getEndDate()}
+                    disabled
+                    className="bg-light"
                   />
+                  <Form.Text className="text-muted">
+                    Automatically calculated (30 days from start date)
+                  </Form.Text>
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Emergency Contact Phone *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={emergencyContactPhone}
-                    onChange={(e) => setEmergencyContactPhone(e.target.value)}
-                    placeholder="Enter emergency contact phone"
+                  <Form.Label>Emergency Contact *</Form.Label>
+                  <Form.Select
+                    value={selectedEmergencyContact}
+                    onChange={(e) => setSelectedEmergencyContact(e.target.value)}
                     required
-                  />
+                  >
+                    <option value="">Choose emergency contact...</option>
+                    {emergencyContacts.map((contact) => (
+                      <option key={contact.id} value={contact.id}>
+                        {contact.full_name} ({contact.relationship}) - {contact.phone_primary}
+                      </option>
+                    ))}
+                  </Form.Select>
+                  {emergencyContacts.length === 0 && (
+                    <Form.Text className="text-muted">
+                      No emergency contacts found. Please add one to your profile first.
+                    </Form.Text>
+                  )}
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Payment Method *</Form.Label>
+                  <Form.Select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    required
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="bkash">bKash</option>
+                    <option value="nagad">Nagad</option>
+                    <option value="rocket">Rocket</option>
+                    <option value="upay">Upay</option>
+                    <option value="sure_cash">SureCash</option>
+                  </Form.Select>
                 </Form.Group>
               </Col>
             </Row>
+            
+            {/* Pricing Display */}
+            {bookingDate && (
+              <Row className="mb-3">
+                <Col md={12}>
+                  <Card className="bg-light">
+                    <Card.Body>
+                      <h6 className="mb-2">Booking Summary</h6>
+                      <div className="d-flex justify-content-between">
+                        <span>Care Type:</span>
+                        <strong>{bookingType === 'monthly' ? 'Monthly Care' : 'Daily Care'}</strong>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span>Duration:</span>
+                        <strong>30 days</strong>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span>Start Date:</span>
+                        <strong>{new Date(bookingDate).toLocaleDateString()}</strong>
+                      </div>
+                      <div className="d-flex justify-content-between">
+                        <span>End Date:</span>
+                        <strong>{getEndDate() ? new Date(getEndDate()).toLocaleDateString() : 'N/A'}</strong>
+                      </div>
+                      <hr />
+                      <div className="d-flex justify-content-between">
+                        <span><strong>Total Amount:</strong></span>
+                        <strong className="text-primary">৳{calculatePrice().toLocaleString()}</strong>
+                      </div>
+                      <small className="text-muted">
+                        Payment will be discussed with the daycare after booking confirmation.
+                      </small>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+            )}
             
             <Form.Group className="mb-3">
               <Form.Label>Special Requirements (Optional)</Form.Label>
@@ -553,7 +672,7 @@ function ParentDaycareView() {
           <Button 
             variant="primary" 
             onClick={handleBooking}
-            disabled={isBooking}
+            disabled={isBooking || !selectedChild || !bookingDate || !selectedEmergencyContact}
           >
             {isBooking ? (
               <>
@@ -561,7 +680,10 @@ function ParentDaycareView() {
                 Creating Booking...
               </>
             ) : (
-              "Create Booking"
+              <>
+                <FaCalendarAlt className="me-2" />
+                Create Booking (৳{calculatePrice().toLocaleString()})
+              </>
             )}
           </Button>
         </Modal.Footer>

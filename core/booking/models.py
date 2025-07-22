@@ -9,13 +9,14 @@ User = get_user_model()
 
 class DaycarePricing(models.Model):
     BOOKING_TYPE_CHOICES = [
-        ('monthly', 'Monthly'),
-        ('daily', 'Daily'),
+        ('monthly', 'Monthly Care'),
+        ('daily', 'Daily Care'),
     ]
     
     daycare = models.ForeignKey(DaycareCenter, on_delete=models.CASCADE, related_name='pricing_tiers')
     booking_type = models.CharField(max_length=20, choices=BOOKING_TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration_unit = models.CharField(max_length=20, default='month')
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,8 +30,8 @@ class DaycarePricing(models.Model):
         return f"{self.daycare.name} - {self.get_booking_type_display()}: ৳{self.price}"
 class Booking(models.Model):
     BOOKING_TYPE_CHOICES = [
-        ('monthly', 'Monthly'),
-        ('daily', 'Daily'),
+        ('monthly', 'Monthly Care'),
+        ('daily', 'Daily Care'),
     ]
     
     STATUS_CHOICES = [
@@ -54,7 +55,8 @@ class Booking(models.Model):
         ('bkash', 'bKash'),
         ('nagad', 'Nagad'),
         ('rocket', 'Rocket'),
-        ('bank_transfer', 'Bank Transfer'),
+        ('upay', 'Upay'),
+        ('sure_cash', 'SureCash'),
     ]
     
     # Basic Information
@@ -108,7 +110,7 @@ class Booking(models.Model):
         if self.start_date and not self.end_date:
             if self.booking_type == 'monthly':
                 self.end_date = self.start_date + timedelta(days=30)
-            elif self.booking_type == 'daily':
+            else:  # daily care
                 self.end_date = self.start_date + timedelta(days=30)  # 1 month for daily bookings
         super().save(*args, **kwargs)
     

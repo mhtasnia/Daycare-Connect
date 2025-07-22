@@ -47,7 +47,6 @@ function DaycareProfile() {
     address: "",
     description: "",
     services: "",
-    pricing: "",
     featured_services: "",
     area: "",
     images: [],
@@ -105,7 +104,6 @@ function DaycareProfile() {
         address: data.address || "",
         description: data.description || "",
         services: data.services || "",
-        pricing: data.pricing || "",
         featured_services: data.featured_services || "",
         area: data.area || "",
         images: [],
@@ -176,7 +174,6 @@ function DaycareProfile() {
       data.append("address", formData.address);
       data.append("description", formData.description);
       data.append("services", formData.services);
-      data.append("pricing", formData.pricing);
       data.append("featured_services", formData.featured_services);
       data.append("area", formData.area);
       
@@ -186,7 +183,7 @@ function DaycareProfile() {
         pricingTiers.push({
           booking_type: 'monthly',
           price: formData.pricing_tiers.monthly,
-          description: 'Monthly booking rate',
+          description: 'Monthly care rate for 30 days',
           is_active: true
         });
       }
@@ -194,7 +191,7 @@ function DaycareProfile() {
         pricingTiers.push({
           booking_type: 'daily',
           price: formData.pricing_tiers.daily,
-          description: 'Daily booking rate',
+          description: 'Daily care rate for 30 days',
           is_active: true
         });
       }
@@ -458,23 +455,23 @@ function DaycareProfile() {
                           dangerouslySetInnerHTML={{ __html: formData.description || "No description provided" }}
                         />
                       </Col>
-                      <Col md={6} className="mb-3">
+                      <Col md={12} className="mb-3">
                         <strong style={{ color: "#23395d" }}>
                           Pricing:
                         </strong>
                         <div style={{ color: "#555" }}>
                           {formData.pricing_tiers.monthly && (
-                            <p>Monthly: ৳{formData.pricing_tiers.monthly}</p>
+                            <p><strong>Monthly Care:</strong> ৳{formData.pricing_tiers.monthly} (30 days)</p>
                           )}
                           {formData.pricing_tiers.daily && (
-                            <p>Daily: ৳{formData.pricing_tiers.daily}</p>
+                            <p><strong>Daily Care:</strong> ৳{formData.pricing_tiers.daily} (30 days)</p>
                           )}
                           {!formData.pricing_tiers.monthly && !formData.pricing_tiers.daily && (
                             <p>Not provided</p>
                           )}
                         </div>
                       </Col>
-                      <Col md={6} className="mb-3">
+                      <Col md={12} className="mb-3">
                         <strong style={{ color: "#23395d" }}>
                           Featured Services:
                         </strong>
@@ -646,37 +643,45 @@ function DaycareProfile() {
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="pricing">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            Monthly Rate (৳)
+                            <FaDollarSign className="me-2" />
+                            Monthly Care Rate (৳)
                           </Form.Label>
                           <Form.Control
                             type="number"
                             value={formData.pricing_tiers.monthly}
                             onChange={(e) => handlePricingChange('monthly', e.target.value)}
-                            placeholder="Enter monthly rate"
+                            placeholder="Enter monthly care rate"
                             style={{
                               background: "rgba(255, 255, 255, 0.8)",
                               border: "2px solid rgba(255, 255, 255, 0.3)",
                               borderRadius: "10px"
                             }}
                           />
+                          <Form.Text className="text-muted">
+                            Rate for 30 days of monthly care
+                          </Form.Text>
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="daily_pricing">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            Daily Rate (৳)
+                            <FaDollarSign className="me-2" />
+                            Daily Care Rate (৳)
                           </Form.Label>
                           <Form.Control
                             type="number"
                             value={formData.pricing_tiers.daily}
                             onChange={(e) => handlePricingChange('daily', e.target.value)}
-                            placeholder="Enter daily rate"
+                            placeholder="Enter daily care rate"
                             style={{
                               background: "rgba(255, 255, 255, 0.8)",
                               border: "2px solid rgba(255, 255, 255, 0.3)",
                               borderRadius: "10px"
                             }}
                           />
+                          <Form.Text className="text-muted">
+                            Rate for 30 days of daily care
+                          </Form.Text>
                         </Form.Group>
                       </Col>
                       <Col md={12}>
