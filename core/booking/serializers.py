@@ -17,7 +17,7 @@ class DaycarePricingSerializer(serializers.ModelSerializer):
         model = DaycarePricing
         fields = [
             'id', 'booking_type', 'booking_type_display', 'price', 
-            'duration_unit', 'description', 'is_active'
+            'description', 'is_active'
         ]
 
 class DaycareSearchSerializer(serializers.ModelSerializer):
@@ -134,13 +134,14 @@ class DaycareDetailSerializer(serializers.ModelSerializer):
 
 class BookingCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating new bookings"""
+    emergency_contact_id = serializers.IntegerField(write_only=True)
     
     class Meta:
         model = Booking
         fields = [
-            'daycare', 'child', 'booking_type', 'start_date', 'end_date',
+            'daycare', 'child', 'booking_type', 'start_date',
             'start_time', 'end_time', 'special_instructions',
-            'emergency_contact_name', 'emergency_contact_phone'
+            'emergency_contact_id', 'payment_method'
         ]
     
     def validate(self, data):
@@ -150,24 +151,37 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         if data['child'].parent != parent:
             raise serializers.ValidationError("Child does not belong to this parent.")
         
+        # Validate emergency contact belongs to parent
+        try:
+            emergency_contact = parent.emergency_contact
+            if emergency_contact.id != data['emergency_contact_id']:
+                raise serializers.ValidationError("Emergency contact does not belong to this parent.")
+        except:
+            raise serializers.ValidationError("No emergency contact found for this parent.")
+        
         # Validate dates
         if data['start_date'] < timezone.now().date():
             raise serializers.ValidationError("Start date cannot be in the past.")
-        
-        if data.get('end_date') and data['end_date'] < data['start_date']:
-            raise serializers.ValidationError("End date cannot be before start date.")
         
         # Validate daycare is verified
         if not data['daycare'].user.is_verified:
             raise serializers.ValidationError("This daycare is not verified yet.")
         
+        # Calculate end_date based on booking_type
+        if data['booking_type'] == 'monthly':
+            end_date = data['start_date'] + timedelta(days=30)
+        elif data['booking_type'] == 'daily':
+            end_date = data['start_date'] + timedelta(days=30)  # 1 month for daily bookings
+        else:
+            end_date = data['start_date'] + timedelta(days=30)
+        
         # Check for overlapping bookings
         overlapping_bookings = Booking.objects.filter(
             child=data['child'],
             status__in=['pending', 'confirmed', 'active'],
-            start_date__lte=data.get('end_date', data['start_date']),
+            start_date__lte=end_date,
             end_date__gte=data['start_date']
-        ).exclude(end_date__isnull=True, start_date__lt=data['start_date'])
+        )
         
         if overlapping_bookings.exists():
             raise serializers.ValidationError("Child already has a booking during this period.")
@@ -176,25 +190,38 @@ class BookingCreateSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         parent = self.context['request'].user.parent_profile
+        emergency_contact_id = validated_data.pop('emergency_contact_id')
+        emergency_contact = parent.emergency_contact
         
-        # Calculate total amount (simplified pricing logic)
+        # Calculate total amount based on daycare pricing
         daycare = validated_data['daycare']
         booking_type = validated_data['booking_type']
         
-        # Basic pricing calculation (you can make this more sophisticated)
-        base_rates = {
-            'full_time': 8000,  # per month
-            'part_time': 5000,  # per month
-            'hourly': 100,      # per hour
-            'drop_in': 500,     # per day
-        }
+        try:
+            pricing = DaycarePricing.objects.get(daycare=daycare, booking_type=booking_type, is_active=True)
+            total_amount = pricing.price
+        except DaycarePricing.DoesNotExist:
+            # Default pricing if not set
+            default_rates = {
+                'monthly': 8000,
+                'daily': 300,
+            }
+            total_amount = default_rates.get(booking_type, 8000)
         
-        total_amount = base_rates.get(booking_type, 8000)
+        # Calculate end_date
+        if booking_type == 'monthly':
+            end_date = validated_data['start_date'] + timedelta(days=30)
+        elif booking_type == 'daily':
+            end_date = validated_data['start_date'] + timedelta(days=30)
+        else:
+            end_date = validated_data['start_date'] + timedelta(days=30)
         
         # Create booking
         booking = Booking.objects.create(
             parent=parent,
+            emergency_contact=emergency_contact,
             total_amount=total_amount,
+            end_date=end_date,
             **validated_data
         )
         
@@ -211,6 +238,9 @@ class BookingSerializer(serializers.ModelSerializer):
     child_age = serializers.IntegerField(source='child.age', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     booking_type_display = serializers.CharField(source='get_booking_type_display', read_only=True)
+    payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+    emergency_contact_name = serializers.CharField(source='emergency_contact.full_name', read_only=True)
+    emergency_contact_phone = serializers.CharField(source='emergency_contact.phone_primary', read_only=True)
     can_cancel = serializers.SerializerMethodField()
     can_review = serializers.SerializerMethodField()
     
@@ -221,7 +251,8 @@ class BookingSerializer(serializers.ModelSerializer):
             'daycare_image', 'child', 'child_name', 'child_age',
             'booking_type', 'booking_type_display', 'start_date', 'end_date',
             'start_time', 'end_time', 'status', 'status_display',
-            'payment_status', 'total_amount', 'paid_amount', 'remaining_amount',
+            'payment_status', 'payment_method', 'payment_method_display',
+            'total_amount', 'paid_amount', 'remaining_amount',
             'special_instructions', 'emergency_contact_name', 'emergency_contact_phone',
             'created_at', 'updated_at', 'confirmed_at', 'cancelled_at',
             'cancellation_reason', 'cancelled_by', 'can_cancel', 'can_review'
@@ -245,13 +276,13 @@ class BookingSerializer(serializers.ModelSerializer):
 
 class BookingUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating booking details"""
+    emergency_contact_id = serializers.IntegerField(required=False)
     
     class Meta:
         model = Booking
         fields = [
-            'start_date', 'end_date', 'start_time', 'end_time',
-            'special_instructions', 'emergency_contact_name', 
-            'emergency_contact_phone'
+            'start_date', 'start_time', 'end_time',
+            'special_instructions', 'emergency_contact_id', 'payment_method'
         ]
     
     def validate(self, data):
@@ -265,7 +296,33 @@ class BookingUpdateSerializer(serializers.ModelSerializer):
         if 'start_date' in data and data['start_date'] < timezone.now().date():
             raise serializers.ValidationError("Start date cannot be in the past.")
         
+        # Validate emergency contact if provided
+        if 'emergency_contact_id' in data:
+            parent = booking.parent
+            try:
+                emergency_contact = parent.emergency_contact
+                if emergency_contact.id != data['emergency_contact_id']:
+                    raise serializers.ValidationError("Emergency contact does not belong to this parent.")
+            except:
+                raise serializers.ValidationError("No emergency contact found for this parent.")
+        
         return data
+    
+    def update(self, instance, validated_data):
+        # Handle emergency contact update
+        if 'emergency_contact_id' in validated_data:
+            emergency_contact_id = validated_data.pop('emergency_contact_id')
+            instance.emergency_contact = instance.parent.emergency_contact
+        
+        # Update end_date if start_date changes
+        if 'start_date' in validated_data:
+            new_start_date = validated_data['start_date']
+            if instance.booking_type == 'monthly':
+                instance.end_date = new_start_date + timedelta(days=30)
+            elif instance.booking_type == 'daily':
+                instance.end_date = new_start_date + timedelta(days=30)
+        
+        return super().update(instance, validated_data)
 
 
 class BookingCancelSerializer(serializers.Serializer):

@@ -9,16 +9,13 @@ User = get_user_model()
 
 class DaycarePricing(models.Model):
     BOOKING_TYPE_CHOICES = [
-        ('full_time', 'Full Time'),
-        ('part_time', 'Part Time'),
-        ('hourly', 'Hourly'),
-        ('drop_in', 'Drop In'),
+        ('monthly', 'Monthly'),
+        ('daily', 'Daily'),
     ]
     
     daycare = models.ForeignKey(DaycareCenter, on_delete=models.CASCADE, related_name='pricing_tiers')
     booking_type = models.CharField(max_length=20, choices=BOOKING_TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    duration_unit = models.CharField(max_length=20, default='month')  # hour, day, week, month
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -29,13 +26,11 @@ class DaycarePricing(models.Model):
         ordering = ['booking_type']
     
     def __str__(self):
-        return f"{self.daycare.name} - {self.get_booking_type_display()}: ৳{self.price}/{self.duration_unit}"
+        return f"{self.daycare.name} - {self.get_booking_type_display()}: ৳{self.price}"
 class Booking(models.Model):
     BOOKING_TYPE_CHOICES = [
-        ('full_time', 'Full Time'),
-        ('part_time', 'Part Time'),
-        ('hourly', 'Hourly'),
-        ('drop_in', 'Drop In'),
+        ('monthly', 'Monthly'),
+        ('daily', 'Daily'),
     ]
     
     STATUS_CHOICES = [
@@ -54,6 +49,14 @@ class Booking(models.Model):
         ('refunded', 'Refunded'),
     ]
     
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('bkash', 'bKash'),
+        ('nagad', 'Nagad'),
+        ('rocket', 'Rocket'),
+        ('bank_transfer', 'Bank Transfer'),
+    ]
+    
     # Basic Information
     parent = models.ForeignKey(Parent, on_delete=models.CASCADE, related_name='bookings')
     daycare = models.ForeignKey(DaycareCenter, on_delete=models.CASCADE, related_name='bookings')
@@ -69,6 +72,7 @@ class Booking(models.Model):
     # Status and Payment
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='cash')
     
     # Pricing
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -76,8 +80,7 @@ class Booking(models.Model):
     
     # Additional Information
     special_instructions = models.TextField(blank=True)
-    emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_phone = models.CharField(max_length=20)
+    emergency_contact = models.ForeignKey('users.EmergencyContact', on_delete=models.CASCADE, related_name='bookings')
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -99,6 +102,15 @@ class Booking(models.Model):
     
     def __str__(self):
         return f"Booking #{self.id} - {self.child.full_name} at {self.daycare.name}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate end_date based on booking_type
+        if self.start_date and not self.end_date:
+            if self.booking_type == 'monthly':
+                self.end_date = self.start_date + timedelta(days=30)
+            elif self.booking_type == 'daily':
+                self.end_date = self.start_date + timedelta(days=30)  # 1 month for daily bookings
+        super().save(*args, **kwargs)
     
     @property
     def duration_days(self):

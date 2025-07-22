@@ -57,7 +57,6 @@ def update_daycare_pricing(request):
             booking_type=booking_type,
             defaults={
                 'price': price,
-                'duration_unit': pricing_item.get('duration_unit', 'month'),
                 'description': pricing_item.get('description', ''),
                 'is_active': pricing_item.get('is_active', True)
             }
