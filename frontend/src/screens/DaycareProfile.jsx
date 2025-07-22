@@ -53,9 +53,7 @@ function DaycareProfile() {
     area: "",
     images: [],
     imagePreviews: [],
-    pricing_tiers: [
-      { name: '', price: '', frequency: 'Monthly' }
-    ],
+    pricing_tiers: [],
   });
 
   const [profileData, setProfileData] = useState({
@@ -109,11 +107,7 @@ function DaycareProfile() {
         area: data.area || "",
         images: [],
         imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
-        pricing_tiers: data.pricing_tiers?.map(tier => ({
-          name: tier.description || "",
-          price: tier.price || "",
-          frequency: tier.duration_unit === 'month' ? 'Monthly' : 'Daily'
-        })) || [],
+        pricing_tiers: profileData.pricing_tiers || [],
       });
     } catch (err) {
       setAlert({ show: true, type: "danger", msg: "Failed to load profile." });
@@ -184,7 +178,7 @@ function DaycareProfile() {
     e.preventDefault();
     setSaving(true);
     setAlert({ show: false, type: "success", msg: "" });
-    
+   
     try {
       const accessToken = localStorage.getItem("access");
       const data = new FormData();
@@ -197,14 +191,18 @@ function DaycareProfile() {
       data.append("area", formData.area);
       
       // Add pricing tiers
+     // Add pricing tiers
       const pricingTiers = formData.pricing_tiers.map(tier => ({
-        booking_type: tier.frequency === 'Monthly' ? 'monthly' : 'daily',
+        name: tier.name,
         price: tier.price,
-        duration_unit: tier.frequency === 'Monthly' ? 'month' : 'day',
-        description: tier.name,
-        is_active: true
+        frequency: tier.frequency,
+        is_active: true 
       }));
+
       data.append("pricing_tiers", JSON.stringify(pricingTiers));
+
+      console.log("DEBUG Frontend: pricingTiers before sending:", pricingTiers); // ADD THIS LINE
+  // ...
       
       // Only append images if there are any
       if (formData.images && formData.images.length > 0) {
@@ -256,6 +254,8 @@ function DaycareProfile() {
     }
     return stars;
   };
+
+  
 
   if (isLoading) {
     return (

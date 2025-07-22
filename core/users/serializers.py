@@ -3,6 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
 from booking.models import DaycarePricing
+from booking.serializers import DaycarePricingSerializer
 import json
 
 from .models import User, Parent, DaycareCenter, EmailOTP, DaycareImage, Child, Address, EmergencyContact, AREA_CHOICES
@@ -416,75 +417,141 @@ class PricingTierSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'price', 'frequency']
 
 class DaycareProfileSerializer(serializers.ModelSerializer):
-    images = DaycareImageSerializer(many=True, read_only=True, context={'request': None})
-    email = serializers.EmailField(source='user.email', read_only=True)
-    user_type = serializers.CharField(source='user.user_type', read_only=True)
-    is_verified = serializers.BooleanField(source='user.is_verified', read_only=True)
-    is_email_verified = serializers.BooleanField(source='user.is_email_verified', read_only=True)
-    joined_at = serializers.DateTimeField(source='user.created_at', read_only=True)
-    main_image_url = serializers.SerializerMethodField()
-    area_display = serializers.SerializerMethodField()
-    pricing_tiers = PricingTierSerializer(many=True, read_only=True)
+        email = serializers.ReadOnlyField(source='user.email')
+        user_type = serializers.ReadOnlyField(source='user.user_type')
+        is_verified = serializers.ReadOnlyField()
+        is_email_verified = serializers.ReadOnlyField(source='user.is_email_verified')
+        joined_at = serializers.ReadOnlyField(source='user.joined_at')
+        main_image_url = serializers.SerializerMethodField()
+        images = DaycareImageSerializer(many=True, read_only=True)
+        # REMOVED 'source' as it's redundant when field name matches related_name
+        pricing_tiers = DaycarePricingSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = DaycareCenter
-        fields = [
-            'email', 'user_type', 'is_verified', 'is_email_verified', 'joined_at',
-            'name', 'phone', 'address', 'area', 'area_display', 'description', 'nid_number', 'rating',
-            'services', 'pricing', 'featured_services', 'image', 'main_image_url', 'images',
-            'pricing_tiers'
-        ]
-    
-    def get_main_image_url(self, obj):
-        if obj.image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.image.url)
-            return obj.image.url
-        return None
-    
-    def get_area_display(self, obj):
-        return obj.get_area_display() if obj.area else ""
+        class Meta:
+            model = DaycareCenter
+            fields = [
+                'name', 'phone', 'address', 'area', 'description', 'services',
+                'featured_services', 'rating', 'nid_number', 'email', 'user_type',
+                'is_verified', 'is_email_verified', 'joined_at', 'main_image_url',
+                'images', 'pricing_tiers'
+            ]
+
+        def get_main_image_url(self, obj):
+            if obj.image:
+                return self.context['request'].build_absolute_uri(obj.image.url)
+            return None
 
 class UpdateDaycareProfileSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
         child=serializers.ImageField(), write_only=True, required=False
     )
-    pricing_tiers = PricingTierSerializer(many=True, write_only=True, required=False)
+    # Define pricing_tiers explicitly as a nested serializer
+    # Keep required=False for now, we'll change it if needed for debugging
+    pricing_tiers = DaycarePricingSerializer(many=True, write_only=True, required=False)
 
     class Meta:
         model = DaycareCenter
         fields = [
-            'name', 'phone', 'address', 'area', 'description', 
-            'services', 'pricing', 'featured_services', 'images', 'pricing_tiers'
+            'name', 'phone', 'address', 'area', 'description',
+            'services', 'featured_services', 'images', 'pricing_tiers'
         ]
 
     def update(self, instance, validated_data):
-        print("DEBUG: validated_data in update:", validated_data)  # Add this line
+        print("DEBUG Backend (UpdateDaycareProfileSerializer update method): validated_data received:", validated_data)
 
-        images = validated_data.pop('images', None)
-        pricing_tiers = validated_data.pop('pricing_tiers', None)
+        images_data = validated_data.pop('images', None)
+        # Explicitly pop pricing_tiers_data
+        pricing_tiers_data = validated_data.pop('pricing_tiers', []) # Use [] as default if not present
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        print("DEBUG Backend (UpdateDaycareProfileSerializer update method): pricing_tiers_data:", pricing_tiers_data)
+
+        # Update main DaycareCenter fields
+        # Use .get() with instance.field as default to ensure partial updates work correctly
+        instance.name = validated_data.get('name', instance.name)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.address = validated_data.get('address', instance.address)
+        instance.description = validated_data.get('description', instance.description)
+        instance.services = validated_data.get('services', instance.services)
+        instance.featured_services = validated_data.get('featured_services', instance.featured_services)
+        instance.area = validated_data.get('area', instance.area) # Ensure area is handled
+
         instance.save()
 
-        if images:
-            DaycareImage.objects.filter(daycare=instance).delete()
-            for img in images:
+        # Handle images
+        if images_data is not None:
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): Processing images.")
+            DaycareImage.objects.filter(daycare=instance).delete() # Clear existing images
+            for img in images_data:
                 DaycareImage.objects.create(daycare=instance, image=img)
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): Images processed.")
+        else:
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): No images data provided.")
 
-        if pricing_tiers is not None:
-            instance.pricing_tiers.all().delete()
-            for tier_data in pricing_tiers:
+        # Handle pricing tiers
+        if pricing_tiers_data: # Check if the list is not empty
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): Processing pricing_tiers_data:", pricing_tiers_data)
+            instance.pricing_tiers.all().delete() # Clear existing pricing tiers
+            for tier_data in pricing_tiers_data:
+                # Create new DaycarePricing instances
                 DaycarePricing.objects.create(daycare=instance, **tier_data)
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): Pricing tiers created.")
+        else:
+            print("DEBUG Backend (UpdateDaycareProfileSerializer update method): pricing_tiers_data was empty.")
+
 
         return instance
 
     def to_internal_value(self, data):
-        if 'pricing_tiers' in data and isinstance(data['pricing_tiers'], str):
-            try:
-                data['pricing_tiers'] = json.loads(data['pricing_tiers'])
-            except json.JSONDecodeError:
-                raise serializers.ValidationError({"pricing_tiers": "Invalid JSON format."})
-        return super().to_internal_value(data)
+        print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Initial data received (raw QueryDict):", data)
+
+        # Create a mutable copy of the data
+        mutable_data = data.copy()
+
+        pricing_tiers_raw = mutable_data.get('pricing_tiers')
+
+        # This block will try to handle various forms of pricing_tiers input
+        if pricing_tiers_raw is not None:
+            if isinstance(pricing_tiers_raw, list):
+                # If it's a list, check its contents
+                if len(pricing_tiers_raw) == 1 and isinstance(pricing_tiers_raw[0], str):
+                    # Case: ['[{"name": "...", "price": "..."}]'] - a list containing a single JSON string
+                    try:
+                        parsed_pricing_tiers = json.loads(pricing_tiers_raw[0])
+                        if isinstance(parsed_pricing_tiers, list) and all(isinstance(item, dict) for item in parsed_pricing_tiers):
+                            mutable_data['pricing_tiers'] = parsed_pricing_tiers
+                            print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Parsed JSON string from list:", mutable_data['pricing_tiers'])
+                        else:
+                            raise serializers.ValidationError({'pricing_tiers': ['Invalid format after JSON parsing. Expected a list of objects.']})
+                    except json.JSONDecodeError:
+                        raise serializers.ValidationError({'pricing_tiers': ['Invalid JSON format in string.']})
+                elif len(pricing_tiers_raw) == 1 and isinstance(pricing_tiers_raw[0], list) and all(isinstance(item, dict) for item in pricing_tiers_raw[0]):
+                    # Case: [[{'name': '...', 'price': '...'}]] - a list containing a single list of dicts
+                    mutable_data['pricing_tiers'] = pricing_tiers_raw[0]
+                    print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Flattened list of list:", mutable_data['pricing_tiers'])
+                elif all(isinstance(item, dict) for item in pricing_tiers_raw):
+                    # Case: [{'name': '...', 'price': '...'}] - already a direct list of dicts
+                    mutable_data['pricing_tiers'] = pricing_tiers_raw
+                    print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Pricing tiers already list of dicts:", mutable_data['pricing_tiers'])
+                else:
+                    raise serializers.ValidationError({'pricing_tiers': ['Unexpected list format.']})
+            elif isinstance(pricing_tiers_raw, str):
+                # Case: '{"name": "...", "price": "..."}' - a single JSON string (less common with FormData)
+                try:
+                    parsed_pricing_tiers = json.loads(pricing_tiers_raw)
+                    if isinstance(parsed_pricing_tiers, list) and all(isinstance(item, dict) for item in parsed_pricing_tiers):
+                        mutable_data['pricing_tiers'] = parsed_pricing_tiers
+                        print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Parsed direct JSON string:", mutable_data['pricing_tiers'])
+                    else:
+                        raise serializers.ValidationError({'pricing_tiers': ['Invalid format after JSON parsing. Expected a list of objects.']})
+                except json.JSONDecodeError:
+                    raise serializers.ValidationError({'pricing_tiers': ['Invalid JSON format in string.']})
+            else:
+                # Fallback for unexpected types
+                raise serializers.ValidationError({'pricing_tiers': ['Unexpected data type for pricing_tiers.']})
+
+        # This is the crucial step: call the parent's to_internal_value.
+        # It will handle the validation and conversion for all fields,
+        # including invoking nested serializers like DaycarePricingSerializer.
+        internal_value = super().to_internal_value(mutable_data) # Use mutable_data here
+        print("DEBUG UpdateDaycareProfileSerializer.to_internal_value: Final internal_value before returning:", internal_value)
+        return internal_value

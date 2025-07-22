@@ -8,17 +8,28 @@ from .models import (
     DaycareAvailability, BookingPayment, DaycarePricing
 )
 from users.models import DaycareCenter, Child, Parent
-from users.serializers import ChildSerializer
+# from users.serializers import ChildSerializer
+
+# booking/serializers.py (or relevant file)
+
+# booking/serializers.py (or relevant file where DaycarePricingSerializer is defined)
 
 class DaycarePricingSerializer(serializers.ModelSerializer):
-    booking_type_display = serializers.CharField(source='get_booking_type_display', read_only=True)
-    
-    class Meta:
-        model = DaycarePricing
-        fields = [
-            'id', 'booking_type', 'booking_type_display', 'price', 
-            'description', 'is_active'
-        ]
+        class Meta:
+            model = DaycarePricing
+            # These fields MUST EXACTLY match the fields in your DaycarePricing model
+            fields = ['id', 'name', 'price', 'frequency', 'is_active']
+
+        def to_internal_value(self, data):
+            print("DEBUG DaycarePricingSerializer.to_internal_value: data received for single tier:", data)
+            try:
+                # This is crucial: call the parent's to_internal_value for default processing
+                internal_value = super().to_internal_value(data)
+                print("DEBUG DaycarePricingSerializer.to_internal_value: internal_value processed for single tier:", internal_value)
+                return internal_value
+            except serializers.ValidationError as e:
+                print("DEBUG DaycarePricingSerializer.to_internal_value: Validation Error for single tier:", e.detail)
+                raise # Re-raise the error so DRF reports it properly
 
 class DaycareSearchSerializer(serializers.ModelSerializer):
     """Serializer for daycare search results"""

@@ -398,9 +398,13 @@ def update_daycare_profile(request):
             except Exception:
                 return Response({'pricing_tiers': ['Invalid JSON format.']}, status=400)
 
+            print("DEBUG Backend (views): data['pricing_tiers'] before serializer:", data.get('pricing_tiers')) # ADD THIS LINE
+            serializer = UpdateDaycareProfileSerializer(daycare, data=data, partial=True)
+
 
         serializer = UpdateDaycareProfileSerializer(daycare, data=data, partial=True)
         if serializer.is_valid():
+            print("DEBUG Backend (views): Serializer errors (even if valid):", serializer.errors) 
             serializer.save()
             updated_serializer = DaycareProfileSerializer(daycare, context={'request': request})
             return Response({

@@ -16,7 +16,8 @@ class DaycarePricing(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)  # <-- add null=True, blank=True
     price = models.DecimalField(max_digits=10, decimal_places=2)
     frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, default='Monthly')
-
+    is_active = models.BooleanField(default=True)
+    
     def __str__(self):
         return f"{self.name} ({self.get_frequency_display()}) - {self.price}"
 class Booking(models.Model):
