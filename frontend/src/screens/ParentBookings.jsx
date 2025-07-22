@@ -217,8 +217,8 @@ function ParentBookings() {
                     <strong>End:</strong> {booking.end_date ? new Date(booking.end_date).toLocaleDateString() : "Ongoing"}
                   </div>
                   <div className="info-item">
-                    <FaPhone className="me-1" />
-                    <strong>Contact:</strong> {booking.emergency_contact_name}
+                    <FaDollarSign className="me-1" />
+                    <strong>Payment:</strong> {booking.payment_method_display}
                   </div>
                 </Col>
               </Row>
@@ -229,6 +229,9 @@ function ParentBookings() {
                 </div>
               )}
 
+              <div className="emergency-contact-info">
+                <strong>Emergency Contact:</strong> {booking.emergency_contact_name} ({booking.emergency_contact_phone})
+              </div>
               {booking.cancellation_reason && (
                 <div className="cancel-reason">
                   <strong>Cancellation Reason:</strong> {booking.cancellation_reason}

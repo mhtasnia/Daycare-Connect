@@ -52,6 +52,10 @@ function DaycareProfile() {
     area: "",
     images: [],
     imagePreviews: [],
+    pricing_tiers: {
+      monthly: "",
+      daily: ""
+    },
   });
 
   const [profileData, setProfileData] = useState({
@@ -106,6 +110,10 @@ function DaycareProfile() {
         area: data.area || "",
         images: [],
         imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
+        pricing_tiers: {
+          monthly: data.pricing_tiers?.find(p => p.booking_type === 'monthly')?.price || "",
+          daily: data.pricing_tiers?.find(p => p.booking_type === 'daily')?.price || ""
+        },
       });
     } catch (err) {
       setAlert({ show: true, type: "danger", msg: "Failed to load profile." });
@@ -125,6 +133,16 @@ function DaycareProfile() {
     setFormData((prev) => ({ ...prev, description: value }));
   };
 
+  // Handle pricing changes
+  const handlePricingChange = (type, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      pricing_tiers: {
+        ...prev.pricing_tiers,
+        [type]: value
+      }
+    }));
+  };
   // Handle image uploads
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -161,6 +179,28 @@ function DaycareProfile() {
       data.append("pricing", formData.pricing);
       data.append("featured_services", formData.featured_services);
       data.append("area", formData.area);
+      
+      // Add pricing tiers
+      const pricingTiers = [];
+      if (formData.pricing_tiers.monthly) {
+        pricingTiers.push({
+          booking_type: 'monthly',
+          price: formData.pricing_tiers.monthly,
+          description: 'Monthly booking rate',
+          is_active: true
+        });
+      }
+      if (formData.pricing_tiers.daily) {
+        pricingTiers.push({
+          booking_type: 'daily',
+          price: formData.pricing_tiers.daily,
+          description: 'Daily booking rate',
+          is_active: true
+        });
+      }
+      if (pricingTiers.length > 0) {
+        data.append("pricing_tiers", JSON.stringify(pricingTiers));
+      }
       
       // Only append images if there are any
       if (formData.images && formData.images.length > 0) {
@@ -422,7 +462,17 @@ function DaycareProfile() {
                         <strong style={{ color: "#23395d" }}>
                           Pricing:
                         </strong>
-                        <p style={{ color: "#555" }}>{formData.pricing || "Not provided"}</p>
+                        <div style={{ color: "#555" }}>
+                          {formData.pricing_tiers.monthly && (
+                            <p>Monthly: ৳{formData.pricing_tiers.monthly}</p>
+                          )}
+                          {formData.pricing_tiers.daily && (
+                            <p>Daily: ৳{formData.pricing_tiers.daily}</p>
+                          )}
+                          {!formData.pricing_tiers.monthly && !formData.pricing_tiers.daily && (
+                            <p>Not provided</p>
+                          )}
+                        </div>
                       </Col>
                       <Col md={6} className="mb-3">
                         <strong style={{ color: "#23395d" }}>
@@ -596,15 +646,13 @@ function DaycareProfile() {
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="pricing">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            Pricing
+                            Monthly Rate (৳)
                           </Form.Label>
                           <Form.Control
-                            as="textarea"
-                            rows={2}
-                            name="pricing"
-                            value={formData.pricing}
-                            onChange={handleChange}
-                            placeholder="Enter pricing details (e.g., hourly, daily, monthly rates)"
+                            type="number"
+                            value={formData.pricing_tiers.monthly}
+                            onChange={(e) => handlePricingChange('monthly', e.target.value)}
+                            placeholder="Enter monthly rate"
                             style={{
                               background: "rgba(255, 255, 255, 0.8)",
                               border: "2px solid rgba(255, 255, 255, 0.3)",
@@ -614,6 +662,24 @@ function DaycareProfile() {
                         </Form.Group>
                       </Col>
                       <Col md={6}>
+                        <Form.Group className="mb-3" controlId="daily_pricing">
+                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                            Daily Rate (৳)
+                          </Form.Label>
+                          <Form.Control
+                            type="number"
+                            value={formData.pricing_tiers.daily}
+                            onChange={(e) => handlePricingChange('daily', e.target.value)}
+                            placeholder="Enter daily rate"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.8)",
+                              border: "2px solid rgba(255, 255, 255, 0.3)",
+                              borderRadius: "10px"
+                            }}
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col md={12}>
                         <Form.Group className="mb-3" controlId="featured_services">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
                             Featured Services

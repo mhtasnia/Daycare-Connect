@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { bookingAPI, childrenAPI } from "../services/api";
+import { bookingAPI, childrenAPI, emergencyContactAPI } from "../services/api";
 import {
   Container,
   Row,
