@@ -7,7 +7,7 @@
 
 /* Page Header */
 .page-title {
-  color: #23395d;
+  color: #f48fb1;
   font-size: 2.2rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -313,4 +313,29 @@
 
 .ql-editor::-webkit-scrollbar-thumb:hover {
   background: rgba(144, 202, 249, 0.7);
+}
+
+.section-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #23395d;
+  border-bottom: 2px solid #90caf9;
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.form-section {
+  background: #f9fafe;
+  border: 1px solid #e3e7ed;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tier-row {
+  background-color: #eef5fb;
+  border: 1px dashed #90caf9;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }

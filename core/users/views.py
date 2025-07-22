@@ -367,6 +367,8 @@ def daycare_logout(request):
 def daycare_profile(request):
     try:
         daycare = request.user.daycare_profile
+        print("DEBUG: Daycare ID:", daycare.id)
+        print("DEBUG: Pricing tiers for daycare:", list(daycare.pricing_tiers.all()))
         serializer = DaycareProfileSerializer(daycare, context={'request': request})
         return Response(serializer.data)
     except DaycareCenter.DoesNotExist:
@@ -379,32 +381,12 @@ def daycare_profile(request):
 def update_daycare_profile(request):
     try:
         daycare = request.user.daycare_profile
-
-       
         data = request.data.copy()
-        pricing_tiers = data.get('pricing_tiers')
-        if pricing_tiers and isinstance(pricing_tiers, str):
-            import json
-            try:
-                parsed = json.loads(pricing_tiers)
-               
-                if isinstance(parsed, list) and all(isinstance(item, dict) for item in parsed):
-                    data['pricing_tiers'] = parsed
-                elif isinstance(parsed, list) and len(parsed) == 1 and isinstance(parsed[0], list):
-                    # If it's a list with a single list inside, flatten it
-                    data['pricing_tiers'] = parsed[0]
-                else:
-                    return Response({'pricing_tiers': ['Invalid format for pricing_tiers.']}, status=400)
-            except Exception:
-                return Response({'pricing_tiers': ['Invalid JSON format.']}, status=400)
-
-            print("DEBUG Backend (views): data['pricing_tiers'] before serializer:", data.get('pricing_tiers')) # ADD THIS LINE
-            serializer = UpdateDaycareProfileSerializer(daycare, data=data, partial=True)
-
-
-        serializer = UpdateDaycareProfileSerializer(daycare, data=data, partial=True)
+        # No need to parse pricing_tiers here; let the serializer handle it
+        serializer = UpdateDaycareProfileSerializer(
+            daycare, data=data, partial=True, context={'request': request}
+        )
         if serializer.is_valid():
-            print("DEBUG Backend (views): Serializer errors (even if valid):", serializer.errors) 
             serializer.save()
             updated_serializer = DaycareProfileSerializer(daycare, context={'request': request})
             return Response({

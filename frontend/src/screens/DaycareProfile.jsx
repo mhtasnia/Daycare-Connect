@@ -94,7 +94,8 @@ function DaycareProfile() {
         rating: data.rating || 0,
         nid_number: data.nid_number || "",
         main_image_url: data.main_image_url || "",
-        images: data.images || []
+        images: data.images || [],
+        pricing_tiers: data.pricing_tiers || [], // <-- ADD THIS LINE
       });
       
       setFormData({
@@ -107,7 +108,7 @@ function DaycareProfile() {
         area: data.area || "",
         images: [],
         imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
-        pricing_tiers: profileData.pricing_tiers || [],
+        pricing_tiers: data.pricing_tiers || [], // <-- CHANGE THIS LINE
       });
     } catch (err) {
       setAlert({ show: true, type: "danger", msg: "Failed to load profile." });

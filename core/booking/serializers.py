@@ -21,15 +21,18 @@ class DaycarePricingSerializer(serializers.ModelSerializer):
             fields = ['id', 'name', 'price', 'frequency', 'is_active']
 
         def to_internal_value(self, data):
+            # THIS IS THE CRITICAL DEBUG PRINT
             print("DEBUG DaycarePricingSerializer.to_internal_value: data received for single tier:", data)
             try:
                 # This is crucial: call the parent's to_internal_value for default processing
                 internal_value = super().to_internal_value(data)
+                # THIS IS ANOTHER CRITICAL DEBUG PRINT
                 print("DEBUG DaycarePricingSerializer.to_internal_value: internal_value processed for single tier:", internal_value)
                 return internal_value
             except serializers.ValidationError as e:
+                # THIS IS THE MOST CRITICAL DEBUG PRINT IF VALIDATION FAILS
                 print("DEBUG DaycarePricingSerializer.to_internal_value: Validation Error for single tier:", e.detail)
-                raise # Re-raise the error so DRF reports it properly
+                raise  # Re-raise the error so DRF reports it properly
 
 class DaycareSearchSerializer(serializers.ModelSerializer):
     """Serializer for daycare search results"""
@@ -200,7 +203,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         booking_type = validated_data['booking_type']
         
         try:
-            pricing = DaycarePricing.objects.get(daycare=daycare, booking_type=booking_type, is_active=True)
+            pricing = DaycarePricing.objects.get(daycare=daycare, frequency=booking_type, is_active=True)
             total_amount = pricing.price
         except DaycarePricing.DoesNotExist:
             # Default pricing if not set

@@ -9,62 +9,56 @@ from .models import (
 
 @admin.register(DaycarePricing)
 class DaycarePricingAdmin(admin.ModelAdmin):
-    list_display = [
-        'daycare', 'name', 'price', 'frequency'
-    ]
-    list_filter = ['frequency', 'daycare']
-    search_fields = ['daycare__name', 'name']
-    ordering = ['daycare__name', 'frequency']
-    
-    def daycare_name(self, obj):
-        return obj.daycare.name
-    daycare_name.short_description = 'Daycare'
-    daycare_name.admin_order_field = 'daycare__name'
-
+    list_display = ('daycare', 'name', 'price', 'frequency', 'is_active')
+    # Do NOT override the 'daycare' field as a text input!
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'parent_name', 'daycare_name', 'child_name', 
-        'booking_type', 'status', 'start_date', 'total_amount', 
-        'payment_status', 'created_at'
+        'id', 'parent_name', 'daycare_name', 'child_name',
+        'booking_type', 'status', 'start_date', 'total_amount',
+        'payment_status', 'created_at',
+        'emergency_contact_display', # Add this to list_display if you want to see it in the list view
+        'emergency_contact_phone_display', # Add this to list_display if you want to see it in the list view
     ]
     list_filter = [
-        'status', 'booking_type', 'payment_status', 
+        'status', 'booking_type', 'payment_status',
         'created_at', 'start_date', 'daycare__area'
     ]
     search_fields = [
         'parent__full_name', 'parent__user__email',
-        'daycare__name', 'child__full_name'
+        'daycare__name', 'child__full_name',
+        'emergency_contact__full_name', # Search by related emergency contact name
+        'emergency_contact__phone', # Search by related emergency contact phone
     ]
     readonly_fields = [
-        'created_at', 'updated_at', 'confirmed_at', 
+        'created_at', 'updated_at', 'confirmed_at',
         'cancelled_at', 'remaining_amount', 'duration_days'
     ]
     date_hierarchy = 'created_at'
     ordering = ['-created_at']
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('parent', 'daycare', 'child')
         }),
         ('Booking Details', {
             'fields': (
-                'booking_type', 'start_date', 'end_date', 
+                'booking_type', 'start_date', 'end_date',
                 'start_time', 'end_time', 'special_instructions'
             )
         }),
         ('Status & Payment', {
             'fields': (
-                'status', 'payment_status', 'total_amount', 
+                'status', 'payment_status', 'total_amount',
                 'paid_amount', 'remaining_amount'
             )
         }),
         ('Emergency Contact', {
-            'fields': ('emergency_contact_name', 'emergency_contact_phone')
+            'fields': ('emergency_contact',) # <<< CORRECTED: Only include the ForeignKey field
         }),
         ('Timestamps', {
             'fields': (
-                'created_at', 'updated_at', 'confirmed_at', 
+                'created_at', 'updated_at', 'confirmed_at',
                 'cancelled_at', 'duration_days'
             ),
             'classes': ('collapse',)
@@ -74,27 +68,35 @@ class BookingAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
-    
+
     def parent_name(self, obj):
         return obj.parent.full_name or obj.parent.user.email
     parent_name.short_description = 'Parent'
     parent_name.admin_order_field = 'parent__full_name'
-    
+
     def daycare_name(self, obj):
         return obj.daycare.name
     daycare_name.short_description = 'Daycare'
     daycare_name.admin_order_field = 'daycare__name'
-    
+
     def child_name(self, obj):
         return obj.child.full_name
     child_name.short_description = 'Child'
     child_name.admin_order_field = 'child__full_name'
-    
+
+    # Custom methods to display related fields in list_display (from previous fix)
+    @admin.display(description='Emergency Contact Name')
+    def emergency_contact_display(self, obj):
+        return obj.emergency_contact.full_name if obj.emergency_contact else '-'
+
+    @admin.display(description='Emergency Contact Phone')
+    def emergency_contact_phone_display(self, obj):
+        return obj.emergency_contact.phone if obj.emergency_contact else '-'
+
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
-            'parent', 'parent__user', 'daycare', 'child'
-        )
-
+            'parent', 'parent__user', 'daycare', 'child', 'emergency_contact'
+        )    
 
 @admin.register(BookingReview)
 class BookingReviewAdmin(admin.ModelAdmin):

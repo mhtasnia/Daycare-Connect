@@ -103,7 +103,7 @@ function ParentDaycareView() {
   const calculatePrice = () => {
     if (!daycare || !daycare.pricing_tiers) return 0;
     
-    const pricing = daycare.pricing_tiers.find(p => p.booking_type === bookingType);
+    const pricing = daycare.pricing_tiers.find(p => p.frequency === bookingType);
     return pricing ? pricing.price : 0;
   };
 
@@ -473,9 +473,9 @@ function ParentDaycareView() {
                 </Card.Header>
                 <Card.Body>
                   {daycare.pricing_tiers.map((pricing) => (
-                    <div key={pricing.booking_type} className="policy-item">
-                      <strong>{pricing.booking_type_display}:</strong>
-                      <p>৳{pricing.price.toLocaleString()}</p>
+                    <div key={pricing.frequency} className="policy-item">
+                      <strong>{pricing.frequency}:</strong>
+                      <p>৳{pricing.price}</p>
                       {pricing.description && (
                         <small className="text-muted">{pricing.description}</small>
                       )}
