@@ -8,26 +8,17 @@ from decimal import Decimal
 User = get_user_model()
 
 class DaycarePricing(models.Model):
-    BOOKING_TYPE_CHOICES = [
-        ('monthly', 'Monthly Care'),
-        ('daily', 'Daily Care'),
+    FREQUENCY_CHOICES = [
+        ('Monthly', 'Monthly'),
+        ('Daily', 'Daily'),
     ]
-    
-    daycare = models.ForeignKey(DaycareCenter, on_delete=models.CASCADE, related_name='pricing_tiers')
-    booking_type = models.CharField(max_length=20, choices=BOOKING_TYPE_CHOICES)
+    daycare = models.ForeignKey('users.DaycareCenter', on_delete=models.CASCADE, related_name='pricing_tiers')
+    name = models.CharField(max_length=100, null=True, blank=True)  # <-- add null=True, blank=True
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    duration_unit = models.CharField(max_length=20, default='month')
-    description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        unique_together = ['daycare', 'booking_type']
-        ordering = ['booking_type']
-    
+    frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES, default='Monthly')
+
     def __str__(self):
-        return f"{self.daycare.name} - {self.get_booking_type_display()}: ৳{self.price}"
+        return f"{self.name} ({self.get_frequency_display()}) - {self.price}"
 class Booking(models.Model):
     BOOKING_TYPE_CHOICES = [
         ('monthly', 'Monthly Care'),
@@ -82,7 +73,12 @@ class Booking(models.Model):
     
     # Additional Information
     special_instructions = models.TextField(blank=True)
-    emergency_contact = models.ForeignKey('users.EmergencyContact', on_delete=models.CASCADE, related_name='bookings')
+    emergency_contact = models.ForeignKey(
+        'users.EmergencyContact',
+        on_delete=models.CASCADE,
+        related_name='bookings',
+        null=True,  # <-- add this
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

@@ -10,12 +10,11 @@ from .models import (
 @admin.register(DaycarePricing)
 class DaycarePricingAdmin(admin.ModelAdmin):
     list_display = [
-        'daycare_name', 'booking_type', 'price', 'duration_unit', 
-        'is_active', 'created_at'
+        'daycare', 'name', 'price', 'frequency'
     ]
-    list_filter = ['booking_type', 'duration_unit', 'is_active', 'created_at']
-    search_fields = ['daycare__name']
-    ordering = ['daycare__name', 'booking_type']
+    list_filter = ['frequency', 'daycare']
+    search_fields = ['daycare__name', 'name']
+    ordering = ['daycare__name', 'frequency']
     
     def daycare_name(self, obj):
         return obj.daycare.name

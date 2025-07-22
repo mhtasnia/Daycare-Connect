@@ -31,6 +31,8 @@ class DaycarePricingListView(generics.ListAPIView):
         daycare = self.request.user.daycare_profile
         return DaycarePricing.objects.filter(daycare=daycare)
 from users.permissions import IsParent, IsDaycare
+import json
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsDaycare])
 def update_daycare_pricing(request):
@@ -39,10 +41,17 @@ def update_daycare_pricing(request):
     """
     daycare = request.user.daycare_profile
     pricing_data = request.data.get('pricing_tiers', [])
-    
+
+    # Fix: Parse JSON string if necessary
+    if isinstance(pricing_data, str):
+        try:
+            pricing_data = json.loads(pricing_data)
+        except Exception:
+            return Response({'error': 'Invalid pricing_tiers format'}, status=400)
+
     if not pricing_data:
         return Response({'error': 'No pricing data provided'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     updated_pricing = []
     
     for pricing_item in pricing_data:

@@ -12,6 +12,7 @@ import {
   Spinner,
   Badge,
   Image,
+  ListGroup
 } from "react-bootstrap";
 import { 
   FaUser, 
@@ -19,6 +20,7 @@ import {
   FaMapMarkerAlt, 
   FaImage, 
   FaEdit, 
+  FaDollarSign,
   FaSave, 
   FaArrowLeft, 
   FaCheckCircle,
@@ -51,10 +53,9 @@ function DaycareProfile() {
     area: "",
     images: [],
     imagePreviews: [],
-    pricing_tiers: {
-      monthly: "",
-      daily: ""
-    },
+    pricing_tiers: [
+      { name: '', price: '', frequency: 'Monthly' }
+    ],
   });
 
   const [profileData, setProfileData] = useState({
@@ -108,10 +109,11 @@ function DaycareProfile() {
         area: data.area || "",
         images: [],
         imagePreviews: data.images ? data.images.map(img => img.image_url || img.image) : [],
-        pricing_tiers: {
-          monthly: data.pricing_tiers?.find(p => p.booking_type === 'monthly')?.price || "",
-          daily: data.pricing_tiers?.find(p => p.booking_type === 'daily')?.price || ""
-        },
+        pricing_tiers: data.pricing_tiers?.map(tier => ({
+          name: tier.description || "",
+          price: tier.price || "",
+          frequency: tier.duration_unit === 'month' ? 'Monthly' : 'Daily'
+        })) || [],
       });
     } catch (err) {
       setAlert({ show: true, type: "danger", msg: "Failed to load profile." });
@@ -131,16 +133,33 @@ function DaycareProfile() {
     setFormData((prev) => ({ ...prev, description: value }));
   };
 
-  // Handle pricing changes
-  const handlePricingChange = (type, value) => {
+  // Handle pricing tier changes
+  const handleTierChange = (index, event) => {
+    const newTiers = formData.pricing_tiers.map((tier, i) => {
+      if (index === i) {
+        return { ...tier, [event.target.name]: event.target.value };
+      }
+      return tier;
+    });
+    setFormData((prev) => ({ ...prev, pricing_tiers: newTiers }));
+  };
+
+  // Add new pricing tier
+  const addTier = () => {
     setFormData((prev) => ({
       ...prev,
-      pricing_tiers: {
-        ...prev.pricing_tiers,
-        [type]: value
-      }
+      pricing_tiers: [...prev.pricing_tiers, { name: '', price: '', frequency: 'Monthly' }]
     }));
   };
+
+  // Remove pricing tier
+  const removeTier = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      pricing_tiers: prev.pricing_tiers.filter((_, i) => i !== index)
+    }));
+  };
+
   // Handle image uploads
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -178,26 +197,14 @@ function DaycareProfile() {
       data.append("area", formData.area);
       
       // Add pricing tiers
-      const pricingTiers = [];
-      if (formData.pricing_tiers.monthly) {
-        pricingTiers.push({
-          booking_type: 'monthly',
-          price: formData.pricing_tiers.monthly,
-          description: 'Monthly care rate for 30 days',
-          is_active: true
-        });
-      }
-      if (formData.pricing_tiers.daily) {
-        pricingTiers.push({
-          booking_type: 'daily',
-          price: formData.pricing_tiers.daily,
-          description: 'Daily care rate for 30 days',
-          is_active: true
-        });
-      }
-      if (pricingTiers.length > 0) {
-        data.append("pricing_tiers", JSON.stringify(pricingTiers));
-      }
+      const pricingTiers = formData.pricing_tiers.map(tier => ({
+        booking_type: tier.frequency === 'Monthly' ? 'monthly' : 'daily',
+        price: tier.price,
+        duration_unit: tier.frequency === 'Monthly' ? 'month' : 'day',
+        description: tier.name,
+        is_active: true
+      }));
+      data.append("pricing_tiers", JSON.stringify(pricingTiers));
       
       // Only append images if there are any
       if (formData.images && formData.images.length > 0) {
@@ -403,7 +410,8 @@ function DaycareProfile() {
                           borderRadius: "25px",
                           fontWeight: 600,
                         }}
-                        onClick={() => setEditMode(true)}
+                        onClick={() => setEditMode(true)
+                        }
                       >
                         <FaEdit className="me-2" />
                         Edit Profile
@@ -455,18 +463,36 @@ function DaycareProfile() {
                           dangerouslySetInnerHTML={{ __html: formData.description || "No description provided" }}
                         />
                       </Col>
+                      
+                      {/* 👇 NEW AND IMPROVED PRICING SECTION 👇 */}
                       <Col md={12} className="mb-3">
                         <strong style={{ color: "#23395d" }}>
                           Pricing:
                         </strong>
                         <div style={{ color: "#555" }}>
-                          {formData.pricing_tiers.monthly && (
-                            <p><strong>Monthly Care:</strong> ৳{formData.pricing_tiers.monthly} (30 days)</p>
-                          )}
-                          {formData.pricing_tiers.daily && (
-                            <p><strong>Daily Care:</strong> ৳{formData.pricing_tiers.daily} (30 days)</p>
-                          )}
-                          {!formData.pricing_tiers.monthly && !formData.pricing_tiers.daily && (
+                          {profileData.pricing_tiers && profileData.pricing_tiers.length > 0 ? (
+                            <ListGroup variant="flush">
+                              {profileData.pricing_tiers.map((tier, idx) => (
+                                <ListGroup.Item
+                                  key={idx}
+                                  className="d-flex justify-content-between align-items-center"
+                                  style={{ background: "transparent" }}
+                                >
+                                  <div>
+                                    <strong style={{ color: "#23395d" }}>
+                                      {tier.name || "Unnamed Plan"}
+                                    </strong>
+                                    <Badge bg="info" className="ms-2">
+                                      {tier.frequency}
+                                    </Badge>
+                                  </div>
+                                  <span className="h5" style={{ color: "#007bff" }}>
+                                    ৳{tier.price}
+                                  </span>
+                                </ListGroup.Item>
+                              ))}
+                            </ListGroup>
+                          ) : (
                             <p>Not provided</p>
                           )}
                         </div>
@@ -640,50 +666,82 @@ function DaycareProfile() {
                           />
                         </Form.Group>
                       </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="pricing">
+
+                      {/* Pricing Tiers */}
+                      <Col md={12}>
+                        <Form.Group className="mb-3">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
                             <FaDollarSign className="me-2" />
-                            Monthly Care Rate (৳)
+                            Pricing Tiers
                           </Form.Label>
-                          <Form.Control
-                            type="number"
-                            value={formData.pricing_tiers.monthly}
-                            onChange={(e) => handlePricingChange('monthly', e.target.value)}
-                            placeholder="Enter monthly care rate"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
+                          
+                          {formData.pricing_tiers.map((tier, index) => (
+                            <div key={index} className="d-flex gap-2 mb-3">
+                              <Form.Control
+                                type="text"
+                                name="name"
+                                placeholder="Tier Name"
+                                value={tier.name}
+                                onChange={(e) => handleTierChange(index, e)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.8)",
+                                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                                  borderRadius: "10px"
+                                }}
+                              />
+                              <Form.Control
+                                type="text"
+                                name="price"
+                                placeholder="Price"
+                                value={tier.price}
+                                onChange={(e) => handleTierChange(index, e)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.8)",
+                                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                                  borderRadius: "10px"
+                                }}
+                              />
+                              <Form.Select
+                                name="frequency"
+                                value={tier.frequency}
+                                onChange={(e) => handleTierChange(index, e)}
+                                style={{
+                                  background: "rgba(255, 255, 255, 0.8)",
+                                  border: "2px solid rgba(255, 255, 255, 0.3)",
+                                  borderRadius: "10px"
+                                }}
+                              >
+                                <option value="Monthly">Monthly</option>
+                                <option value="Daily">Daily</option>
+                              </Form.Select>
+                              <Button
+                                variant="danger"
+                                onClick={() => removeTier(index)}
+                                style={{ 
+                                  borderRadius: "10px",
+                                  padding: "10px 15px",
+                                  minWidth: "100px"
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                          
+                          <Button
+                            variant="outline-primary"
+                            onClick={addTier}
+                            style={{ 
+                              borderRadius: "10px",
+                              padding: "10px 15px",
+                              minWidth: "100px"
                             }}
-                          />
-                          <Form.Text className="text-muted">
-                            Rate for 30 days of monthly care
-                          </Form.Text>
+                          >
+                            Add Tier
+                          </Button>
                         </Form.Group>
                       </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3" controlId="daily_pricing">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
-                            <FaDollarSign className="me-2" />
-                            Daily Care Rate (৳)
-                          </Form.Label>
-                          <Form.Control
-                            type="number"
-                            value={formData.pricing_tiers.daily}
-                            onChange={(e) => handlePricingChange('daily', e.target.value)}
-                            placeholder="Enter daily care rate"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
-                          />
-                          <Form.Text className="text-muted">
-                            Rate for 30 days of daily care
-                          </Form.Text>
-                        </Form.Group>
-                      </Col>
+
                       <Col md={12}>
                         <Form.Group className="mb-3" controlId="featured_services">
                           <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>

@@ -379,11 +379,29 @@ def daycare_profile(request):
 def update_daycare_profile(request):
     try:
         daycare = request.user.daycare_profile
-        serializer = UpdateDaycareProfileSerializer(daycare, data=request.data, partial=True)
+
+       
+        data = request.data.copy()
+        pricing_tiers = data.get('pricing_tiers')
+        if pricing_tiers and isinstance(pricing_tiers, str):
+            import json
+            try:
+                parsed = json.loads(pricing_tiers)
+               
+                if isinstance(parsed, list) and all(isinstance(item, dict) for item in parsed):
+                    data['pricing_tiers'] = parsed
+                elif isinstance(parsed, list) and len(parsed) == 1 and isinstance(parsed[0], list):
+                    # If it's a list with a single list inside, flatten it
+                    data['pricing_tiers'] = parsed[0]
+                else:
+                    return Response({'pricing_tiers': ['Invalid format for pricing_tiers.']}, status=400)
+            except Exception:
+                return Response({'pricing_tiers': ['Invalid JSON format.']}, status=400)
+
+
+        serializer = UpdateDaycareProfileSerializer(daycare, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            
-            # Return updated profile data
             updated_serializer = DaycareProfileSerializer(daycare, context={'request': request})
             return Response({
                 'detail': 'Profile updated successfully.',
