@@ -78,7 +78,7 @@ class Booking(models.Model):
         'users.EmergencyContact',
         on_delete=models.CASCADE,
         related_name='bookings',
-        null=True,  # <-- add this
+        null=True, 
     )
     
     # Timestamps
@@ -108,7 +108,7 @@ class Booking(models.Model):
             if self.booking_type == 'monthly':
                 self.end_date = self.start_date + timedelta(days=30)
             else:  # daily care
-                self.end_date = self.start_date + timedelta(days=30)  # 1 month for daily bookings
+                self.end_date = self.start_date + timedelta(days=1)
         super().save(*args, **kwargs)
     
     @property

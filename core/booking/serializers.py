@@ -203,7 +203,14 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         booking_type = validated_data['booking_type']
         
         try:
-            pricing = DaycarePricing.objects.get(daycare=daycare, frequency=booking_type, is_active=True)
+            # Match booking_type with frequency ('monthly' -> 'Monthly', 'daily' -> 'Daily')
+            frequency_mapping = {
+                'monthly': 'Monthly',
+                'daily': 'Daily',
+            }
+            frequency = frequency_mapping.get(booking_type)
+            
+            pricing = DaycarePricing.objects.get(daycare=daycare, frequency=frequency, is_active=True)
             total_amount = pricing.price
         except DaycarePricing.DoesNotExist:
             # Default pricing if not set
@@ -217,7 +224,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         if booking_type == 'monthly':
             end_date = validated_data['start_date'] + timedelta(days=30)
         else:  # daily care
-            end_date = validated_data['start_date'] + timedelta(days=30)
+            end_date = validated_data['start_date'] + timedelta(days=1)
         
         # Create booking
         booking = Booking.objects.create(
@@ -231,7 +238,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
-    """Serializer for booking list and details"""
+    
     daycare_name = serializers.CharField(source='daycare.name', read_only=True)
     daycare_phone = serializers.CharField(source='daycare.phone', read_only=True)
     daycare_address = serializers.CharField(source='daycare.address', read_only=True)

@@ -28,7 +28,7 @@ class BookingAdmin(admin.ModelAdmin):
         'parent__full_name', 'parent__user__email',
         'daycare__name', 'child__full_name',
         'emergency_contact__full_name', # Search by related emergency contact name
-        'emergency_contact__phone', # Search by related emergency contact phone
+        'emergency_contact__phone_primary', # Search by related emergency contact phone
     ]
     readonly_fields = [
         'created_at', 'updated_at', 'confirmed_at',
@@ -54,7 +54,7 @@ class BookingAdmin(admin.ModelAdmin):
             )
         }),
         ('Emergency Contact', {
-            'fields': ('emergency_contact',) # <<< CORRECTED: Only include the ForeignKey field
+            'fields': ('emergency_contact',) 
         }),
         ('Timestamps', {
             'fields': (
@@ -91,7 +91,7 @@ class BookingAdmin(admin.ModelAdmin):
 
     @admin.display(description='Emergency Contact Phone')
     def emergency_contact_phone_display(self, obj):
-        return obj.emergency_contact.phone if obj.emergency_contact else '-'
+        return obj.emergency_contact.phone_primary if obj.emergency_contact else '-'
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(

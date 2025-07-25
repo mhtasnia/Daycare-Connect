@@ -204,7 +204,7 @@ function ParentBookings() {
                   </div>
                   <div className="info-item">
                     <FaDollarSign className="me-1" />
-                    <strong>Fee:</strong> ৳{booking.total_amount.toLocaleString()}
+                    <strong>Fee:</strong> ৳{booking.total_amount ? booking.total_amount.toLocaleString() : 'N/A'}
                   </div>
                 </Col>
                 <Col sm={6}>
@@ -480,6 +480,10 @@ function ParentBookings() {
                 <FaExclamationTriangle className="me-2" />
                 Are you sure you want to cancel your booking at {selectedBooking.daycare_name}?
               </Alert>
+
+              <div className="mb-3">
+                <strong>Booking Cost:</strong> ৳{selectedBooking.total_amount.toLocaleString()}
+              </div>
               
               <Form.Group className="mb-3">
                 <Form.Label>Reason for Cancellation *</Form.Label>
