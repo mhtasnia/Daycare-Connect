@@ -1,5 +1,1 @@
-Hello! I can help you with GitHub workflows.
-
-To start, could you please tell me what type of workflow you are looking for? For example, are you interested in CI/CD, a specific language (like Python, Node.js), or something else?
-
-Please note, I can help retrieve existing workflow data from a vector database. However, I currently do not have the ability to directly read your repository, generate new `.yml` workflow files from scratch, or push files to GitHub. After retrieving existing workflow data, I can present it to you for review.
+What kind of GitHub workflow do you want to automate? (e.g., CI/CD, testing, deployment, security scan, linting, formatting, etc.)
