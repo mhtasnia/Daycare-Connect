@@ -49,15 +49,15 @@ function ParentProfile() {
 
   // Area choices for dropdown
   const areaChoices = [
-    { value: 'gulshan', label: 'Gulshan' },
-    { value: 'banani', label: 'Banani' },
-    { value: 'uttara', label: 'Uttara' },
-    { value: 'mirpur', label: 'Mirpur' },
-    { value: 'wari', label: 'Wari' },
-    { value: 'dhanmondi', label: 'Dhanmondi' },
+    { value: "gulshan", label: "Gulshan" },
+    { value: "banani", label: "Banani" },
+    { value: "uttara", label: "Uttara" },
+    { value: "mirpur", label: "Mirpur" },
+    { value: "wari", label: "Wari" },
+    { value: "dhanmondi", label: "Dhanmondi" },
   ];
 
-  // Profile data state
+  // Area choices for dropdown
   const [profileData, setProfileData] = useState({
     email: "",
     user_type: "",
@@ -153,7 +153,8 @@ function ParentProfile() {
           email: data.emergency_contact.email || "",
           address: data.emergency_contact.address || "",
           photo: null,
-          is_authorized_pickup: data.emergency_contact.is_authorized_pickup || false,
+          is_authorized_pickup:
+            data.emergency_contact.is_authorized_pickup || false,
           notes: data.emergency_contact.notes || "",
         });
       }
@@ -508,7 +509,10 @@ function ParentProfile() {
                       roundedCircle
                       width={120}
                       height={120}
-                      style={{ objectFit: "cover", border: "4px solid #f48fb1" }}
+                      style={{
+                        objectFit: "cover",
+                        border: "4px solid #f48fb1",
+                      }}
                     />
                   ) : (
                     <div
@@ -555,7 +559,8 @@ function ParentProfile() {
                   </p>
                   <p style={{ color: "#23395d" }}>
                     <FaUserShield className="me-2" />
-                    {profileData.emergency_contact ? "1" : "0"} Emergency Contact
+                    {profileData.emergency_contact ? "1" : "0"} Emergency
+                    Contact
                   </p>
                 </div>
               </Card.Body>
@@ -902,7 +907,9 @@ function ParentProfile() {
                                 <div className="d-flex align-items-center">
                                   {profileData.emergency_contact.photo_url ? (
                                     <Image
-                                      src={profileData.emergency_contact.photo_url}
+                                      src={
+                                        profileData.emergency_contact.photo_url
+                                      }
                                       roundedCircle
                                       width={40}
                                       height={40}
@@ -926,11 +933,17 @@ function ParentProfile() {
                                     </div>
                                   )}
                                   <div>
-                                    <strong>{profileData.emergency_contact.full_name}</strong>
+                                    <strong>
+                                      {profileData.emergency_contact.full_name}
+                                    </strong>
                                     <br />
                                     <small className="text-muted">
-                                      {profileData.emergency_contact.relationship.charAt(0).toUpperCase() +
-                                        profileData.emergency_contact.relationship.slice(1)}
+                                      {profileData.emergency_contact.relationship
+                                        .charAt(0)
+                                        .toUpperCase() +
+                                        profileData.emergency_contact.relationship.slice(
+                                          1
+                                        )}
                                     </small>
                                   </div>
                                 </div>
@@ -958,13 +971,20 @@ function ParentProfile() {
                                     <p>
                                       <FaPhone className="me-2" />
                                       <strong>Primary:</strong>{" "}
-                                      {profileData.emergency_contact.phone_primary}
+                                      {
+                                        profileData.emergency_contact
+                                          .phone_primary
+                                      }
                                     </p>
-                                    {profileData.emergency_contact.phone_secondary && (
+                                    {profileData.emergency_contact
+                                      .phone_secondary && (
                                       <p>
                                         <FaPhone className="me-2" />
                                         <strong>Secondary:</strong>{" "}
-                                        {profileData.emergency_contact.phone_secondary}
+                                        {
+                                          profileData.emergency_contact
+                                            .phone_secondary
+                                        }
                                       </p>
                                     )}
                                     {profileData.emergency_contact.email && (
@@ -975,7 +995,8 @@ function ParentProfile() {
                                     )}
                                   </Col>
                                   <Col md={6}>
-                                    {profileData.emergency_contact.is_authorized_pickup && (
+                                    {profileData.emergency_contact
+                                      .is_authorized_pickup && (
                                       <Badge bg="success" className="mb-2">
                                         ✓ Authorized for Pickup
                                       </Badge>
@@ -1006,8 +1027,8 @@ function ParentProfile() {
                           <FaUserShield size={48} className="text-muted mb-3" />
                           <h5>No Emergency Contact</h5>
                           <p className="text-muted">
-                            Add an emergency contact for your children's safety and
-                            security.
+                            Add an emergency contact for your children's safety
+                            and security.
                           </p>
                           <Button
                             variant="primary"
@@ -1159,7 +1180,9 @@ function ParentProfile() {
         >
           <Modal.Header closeButton>
             <Modal.Title>
-              {profileData.emergency_contact ? "Edit Emergency Contact" : "Add Emergency Contact"}
+              {profileData.emergency_contact
+                ? "Edit Emergency Contact"
+                : "Add Emergency Contact"}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>

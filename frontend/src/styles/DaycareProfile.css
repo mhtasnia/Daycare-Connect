@@ -1,6 +1,6 @@
 /* Daycare Profile Styles */
 .daycare-profile-wrapper {
-  background: linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%);
+  background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
   min-height: 100vh;
   color: #333;
 }
@@ -24,17 +24,21 @@
   font-weight: 600;
   transition: all 0.3s ease;
   padding: 10px 20px;
+  border-color: #90caf9;
+  color: #23395d;
 }
 
 .back-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background-color: #90caf9;
+  color: white;
 }
 
 /* Profile Cards */
 .profile-info-card,
 .profile-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -57,7 +61,7 @@
 
 .avatar-placeholder {
   background: linear-gradient(45deg, #99f2c8, #90caf9);
-  border: 4px solid #90caf9;
+  border: 4px solid white;
 }
 
 /* Verification Badges */
@@ -81,6 +85,40 @@
   text-align: center;
 }
 
+/* Tabs */
+.profile-tabs .nav-link {
+  color: #666;
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.profile-tabs .nav-link.active {
+  color: #23395d;
+  border-bottom: 3px solid #90caf9;
+  background-color: transparent;
+}
+
+.tab-content-wrapper {
+  padding-top: 1.5rem;
+}
+
+.tab-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+}
+
+.section-title {
+  color: #23395d;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #90caf9;
+  padding-bottom: 0.5rem;
+}
+
 /* Form Controls */
 .form-label {
   font-weight: 600;
@@ -93,17 +131,16 @@
 .form-control,
 .form-select {
   background: rgba(255, 255, 255, 0.8) !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
   border-radius: 10px !important;
   padding: 12px 16px !important;
   font-size: 1rem !important;
   transition: all 0.3s ease !important;
-  backdrop-filter: blur(10px) !important;
 }
 
 .form-control:focus,
 .form-select:focus {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: white !important;
   border-color: #90caf9 !important;
   box-shadow: 0 0 0 0.2rem rgba(144, 202, 249, 0.25) !important;
 }
@@ -112,17 +149,17 @@
 .ql-toolbar {
   border-top-left-radius: 10px !important;
   border-top-right-radius: 10px !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
   background: rgba(255, 255, 255, 0.9) !important;
 }
 
 .ql-container {
   border-bottom-left-radius: 10px !important;
   border-bottom-right-radius: 10px !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid rgba(0, 0, 0, 0.1) !important;
   border-top: none !important;
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: white !important;
   min-height: 120px;
 }
 
@@ -133,65 +170,55 @@
 }
 
 /* Buttons */
-.btn-edit-profile,
-.btn-save-profile {
+.btn-profile-save {
   background: linear-gradient(45deg, #99f2c8, #90caf9) !important;
   border: none !important;
   color: #23395d !important;
   font-weight: 600 !important;
   border-radius: 25px !important;
-  padding: 10px 20px !important;
+  padding: 12px 30px !important;
   box-shadow: 0 4px 15px rgba(153, 242, 200, 0.3) !important;
   transition: all 0.3s ease !important;
 }
 
-.btn-edit-profile:hover:not(:disabled),
-.btn-save-profile:hover:not(:disabled) {
+.btn-profile-save:hover:not(:disabled) {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 20px rgba(153, 242, 200, 0.4) !important;
-  color: #23395d !important;
 }
 
-.btn-edit-profile:disabled,
-.btn-save-profile:disabled {
+.btn-profile-save:disabled {
   opacity: 0.7 !important;
   transform: none !important;
 }
 
 /* Image Gallery */
-.gallery-image {
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.gallery-image:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-}
-
-/* Image Preview Container */
-.image-preview-container {
+.gallery-image-container {
   position: relative;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-.image-preview-container .btn-danger {
+.gallery-image-container .btn-danger {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.image-preview-container:hover .btn-danger {
+.gallery-image-container:hover .btn-danger {
   opacity: 1;
 }
 
 /* Star Rating */
-.star-rating {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
 .star-rating .fa-star {
   font-size: 1.1rem;
 }
@@ -216,67 +243,28 @@
   color: #721c24 !important;
 }
 
-/* Loading Spinner */
-.spinner-border {
-  width: 1rem;
-  height: 1rem;
+/* Empty State Placeholder */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 1.8rem;
-  }
-  
-  .page-subtitle {
-    font-size: 1rem;
-  }
-  
-  .d-flex.justify-content-between {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .back-btn {
-    margin-top: 1rem;
-    align-self: center;
-  }
-  
-  .profile-info-card {
-    margin-bottom: 2rem;
-  }
-  
-  .verification-badges {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .verification-badges .badge {
-    align-self: center;
-  }
+.empty-state-icon {
+  font-size: 3rem;
+  color: #90caf9;
+  margin-bottom: 1rem;
 }
 
-@media (max-width: 576px) {
-  .profile-info-card .card-body {
-    padding: 1rem;
-  }
-  
-  .profile-card .card-body {
-    padding: 1rem;
-  }
-  
-  .btn-edit-profile,
-  .btn-save-profile {
-    font-size: 0.9rem;
-    padding: 8px 16px !important;
-  }
-  
-  .form-control,
-  .form-select {
-    font-size: 0.9rem !important;
-    padding: 10px 12px !important;
-  }
+/* Service and Staff Cards */
+.service-card, .staff-card {
+  transition: all 0.3s ease;
+}
+
+.service-card:hover, .staff-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 /* Animation for smooth transitions */
@@ -294,23 +282,4 @@
 .profile-info-card,
 .profile-card {
   animation: fadeIn 0.6s ease-out;
-}
-
-/* Custom scrollbar for description editor */
-.ql-editor::-webkit-scrollbar {
-  width: 6px;
-}
-
-.ql-editor::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.ql-editor::-webkit-scrollbar-thumb {
-  background: rgba(144, 202, 249, 0.5);
-  border-radius: 3px;
-}
-
-.ql-editor::-webkit-scrollbar-thumb:hover {
-  background: rgba(144, 202, 249, 0.7);
 }
