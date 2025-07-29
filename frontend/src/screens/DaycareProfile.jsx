@@ -12,7 +12,9 @@ import {
   Spinner,
   Badge,
   Image,
-  ListGroup
+  ListGroup,
+  Tab,
+  Nav,
 } from "react-bootstrap";
 import { 
   FaUser, 
@@ -30,10 +32,13 @@ import {
   FaBuilding,
   FaIdCard,
   FaImages,
-  FaTimes
+  FaTimes,
+  FaConciergeBell,
+  FaInfoCircle
 } from "react-icons/fa";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import "../styles/DaycareProfile.css";
 
 function DaycareProfile() {
   const location = useLocation();
@@ -42,6 +47,8 @@ function DaycareProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [alert, setAlert] = useState({ show: false, type: "success", msg: "" });
+  const [activeTab, setActiveTab] = useState("info");
+
 
   const [formData, setFormData] = useState({
     name: "",
@@ -260,7 +267,7 @@ function DaycareProfile() {
 
   if (isLoading) {
     return (
-      <div className="daycare-profile-wrapper" style={{ background: "linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%)", minHeight: "100vh" }}>
+      <div className="daycare-profile-wrapper">
         <Container className="py-5">
           <Row className="justify-content-center">
             <Col md={6} className="text-center">
@@ -274,18 +281,18 @@ function DaycareProfile() {
   }
 
   return (
-    <div className="daycare-profile-wrapper" style={{ background: "linear-gradient(120deg, #99f2c8 0%, #e0eafc 60%, #90caf9 100%)", minHeight: "100vh" }}>
+    <div className="daycare-profile-wrapper">
       <Container className="py-4">
         {/* Header */}
         <Row className="mb-4">
           <Col>
             <div className="d-flex justify-content-between align-items-center">
               <div>
-                <h1 className="page-title" style={{ color: "#23395d" }}>
+                <h1 className="page-title">
                   <FaBuilding className="me-2" />
                   Daycare Profile
                 </h1>
-                <p className="page-subtitle" style={{ color: "#23395d" }}>
+                <p className="page-subtitle">
                   Manage your daycare information and showcase your services
                 </p>
               </div>
@@ -294,7 +301,6 @@ function DaycareProfile() {
                 to="/daycare/dashboard"
                 variant="outline-secondary"
                 className="back-btn"
-                style={{ color: "#23395d", borderColor: "#90caf9" }}
               >
                 <FaArrowLeft className="me-2" />
                 Back to Dashboard
@@ -324,7 +330,7 @@ function DaycareProfile() {
         <Row>
           {/* Profile Info Card */}
           <Col lg={4} className="mb-4">
-            <Card className="profile-info-card h-100" style={{ border: "2px solid #90caf9", background: "rgba(153, 242, 200, 0.08)" }}>
+            <Card className="profile-info-card h-100">
               <Card.Body className="text-center">
                 <div className="profile-avatar mb-3">
                   {profileData.main_image_url ? (
@@ -333,25 +339,15 @@ function DaycareProfile() {
                       roundedCircle 
                       width={120} 
                       height={120}
-                      style={{ objectFit: 'cover', border: '4px solid #90caf9' }}
                     />
                   ) : (
-                    <div 
-                      className="avatar-placeholder d-flex align-items-center justify-content-center"
-                      style={{ 
-                        width: 120, 
-                        height: 120, 
-                        borderRadius: '50%', 
-                        background: 'linear-gradient(45deg, #99f2c8, #90caf9)',
-                        margin: '0 auto'
-                      }}
-                    >
+                    <div className="avatar-placeholder">
                       <FaBuilding size={40} color="#23395d" />
                     </div>
                   )}
                 </div>
                 
-                <h4 style={{ color: "#23395d" }}>{formData.name || "Daycare Name"}</h4>
+                <h4 className="daycare-name">{formData.name || "Daycare Name"}</h4>
                 
                 <div className="mb-3">
                   {renderStars(profileData.rating)}
@@ -373,16 +369,16 @@ function DaycareProfile() {
                 </div>
 
                 <div className="profile-details text-start">
-                  <p style={{ color: "#23395d" }}>
-                    <FaEnvelope className="me-2" />
+                  <p>
+                    <FaEnvelope/>
                     {profileData.email}
                   </p>
-                  <p style={{ color: "#23395d" }}>
-                    <FaCalendarAlt className="me-2" />
+                  <p>
+                    <FaCalendarAlt/>
                     Joined {formatDate(profileData.joined_at)}
                   </p>
-                  <p style={{ color: "#23395d" }}>
-                    <FaIdCard className="me-2" />
+                  <p>
+                    <FaIdCard/>
                     NID: {profileData.nid_number}
                   </p>
                 </div>
@@ -392,126 +388,98 @@ function DaycareProfile() {
 
           {/* Main Profile Card */}
           <Col lg={8}>
-            <Card className="profile-card" style={{ border: "2px solid #90caf9", background: "rgba(153, 242, 200, 0.08)" }}>
-              <Card.Body>
+            <Card className="profile-main-card">
+               <Card.Body>
                 {!editMode ? (
                   // View Mode
                   <div>
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 style={{ color: "#23395d" }}>
+                      <h4 className="section-title" style={{marginBottom: 0}}>
                         <FaUser className="me-2" />
                         Daycare Information
                       </h4>
                       <Button
                         className="btn-edit-profile"
-                        style={{
-                          background: "linear-gradient(45deg, #99f2c8, #90caf9)",
-                          color: "#23395d",
-                          border: "none",
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                        }}
-                        onClick={() => setEditMode(true)
-                        }
+                        onClick={() => setEditMode(true)}
                       >
                         <FaEdit className="me-2" />
                         Edit Profile
                       </Button>
                     </div>
+                    <hr/>
 
-                    <Row>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaBuilding className="me-2" />
-                          Daycare Name:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.name || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaPhone className="me-2" />
-                          Phone:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.phone || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaMapMarkerAlt className="me-2" />
-                          Area:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.area || "Not provided"}</p>
-                      </Col>
-                      <Col md={6} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Services:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.services || "Not provided"}</p>
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          <FaMapMarkerAlt className="me-2" />
-                          Full Address:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.address || "Not provided"}</p>
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Description:
-                        </strong>
+                    <div className="view-section">
+                      <Row>
+                        <Col md={6} className="mb-3">
+                          <strong><FaBuilding className="me-2" />Daycare Name:</strong>
+                          <p>{formData.name || "Not provided"}</p>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <strong><FaPhone className="me-2" />Phone:</strong>
+                          <p>{formData.phone || "Not provided"}</p>
+                        </Col>
+                        <Col md={6} className="mb-3">
+                          <strong><FaMapMarkerAlt className="me-2" />Area:</strong>
+                          <p>{formData.area || "Not provided"}</p>
+                        </Col>
+                         <Col md={6} className="mb-3">
+                          <strong><FaMapMarkerAlt className="me-2" />Full Address:</strong>
+                          <p>{formData.address || "Not provided"}</p>
+                        </Col>
+                      </Row>
+                    </div>
+                     <div className="view-section">
+                        <h5 className="section-title"><FaInfoCircle/> Description</h5>
                         <div
-                          className="mt-2"
-                          style={{ color: "#555" }}
+                          className="description-content"
                           dangerouslySetInnerHTML={{ __html: formData.description || "No description provided" }}
                         />
-                      </Col>
-                      
-                      {/* 👇 NEW AND IMPROVED PRICING SECTION 👇 */}
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Pricing:
-                        </strong>
-                        <div style={{ color: "#555" }}>
-                          {profileData.pricing_tiers && profileData.pricing_tiers.length > 0 ? (
-                            <ListGroup variant="flush">
-                              {profileData.pricing_tiers.map((tier, idx) => (
-                                <ListGroup.Item
-                                  key={idx}
-                                  className="d-flex justify-content-between align-items-center"
-                                  style={{ background: "transparent" }}
-                                >
-                                  <div>
-                                    <strong style={{ color: "#23395d" }}>
-                                      {tier.name || "Unnamed Plan"}
-                                    </strong>
-                                    <Badge bg="info" className="ms-2">
-                                      {tier.frequency}
-                                    </Badge>
-                                  </div>
-                                  <span className="h5" style={{ color: "#007bff" }}>
-                                    ৳{tier.price}
-                                  </span>
-                                </ListGroup.Item>
-                              ))}
-                            </ListGroup>
-                          ) : (
-                            <p>Not provided</p>
-                          )}
-                        </div>
-                      </Col>
-                      <Col md={12} className="mb-3">
-                        <strong style={{ color: "#23395d" }}>
-                          Featured Services:
-                        </strong>
-                        <p style={{ color: "#555" }}>{formData.featured_services || "Not provided"}</p>
-                      </Col>
-                    </Row>
+                    </div>
 
-                    {/* Gallery */}
-                    <div className="mt-4">
-                      <h5 style={{ color: "#23395d" }}>
-                        <FaImages className="me-2" />
-                        Photo Gallery
-                      </h5>
+                    <div className="view-section">
+                        <h5 className="section-title"><FaConciergeBell/> Services</h5>
+                        <Row>
+                            <Col md={6} className="mb-3">
+                                <strong>Services:</strong>
+                                <p>{formData.services || "Not provided"}</p>
+                            </Col>
+                            <Col md={6} className="mb-3">
+                                <strong>Featured Services:</strong>
+                                <p>{formData.featured_services || "Not provided"}</p>
+                            </Col>
+                        </Row>
+                    </div>
+
+                    <div className="view-section">
+                      <h5 className="section-title"><FaDollarSign/> Pricing</h5>
+                        {profileData.pricing_tiers && profileData.pricing_tiers.length > 0 ? (
+                          <ListGroup variant="flush" style={{ maxWidth: '500px', margin: '0 auto' }}>
+                            {profileData.pricing_tiers.map((tier, idx) => (
+                              <ListGroup.Item
+                                key={idx}
+                                className="d-flex justify-content-between align-items-center"
+                              >
+                                <div>
+                                  <strong style={{ color: "#23395d" }}>
+                                    {tier.name || "Unnamed Plan"}
+                                  </strong>
+                                  <Badge bg="info" className="ms-2">
+                                    {tier.frequency}
+                                  </Badge>
+                                </div>
+                                <span className="h5" style={{ color: "#007bff" }}>
+                                  ৳{tier.price}
+                                </span>
+                              </ListGroup.Item>
+                            ))}
+                          </ListGroup>
+                        ) : (
+                          <p>Not provided</p>
+                        )}
+                    </div>
+
+                    <div className="view-section">
+                      <h5 className="section-title"><FaImages/> Photo Gallery</h5>
                       <Row>
                         {profileData.images && profileData.images.length > 0 ? (
                           profileData.images.map((img, idx) => (
@@ -519,14 +487,7 @@ function DaycareProfile() {
                               <Image
                                 src={img.image_url || img.image}
                                 alt={`Gallery ${idx + 1}`}
-                                fluid
-                                rounded
-                                style={{
-                                  width: "100%",
-                                  height: "150px",
-                                  objectFit: "cover",
-                                  border: "2px solid #90caf9"
-                                }}
+                                className="gallery-image"
                               />
                             </Col>
                           ))
@@ -544,16 +505,16 @@ function DaycareProfile() {
                   // Edit Mode
                   <Form onSubmit={handleSave} encType="multipart/form-data">
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                      <h4 style={{ color: "#23395d" }}>
+                      <h4 className="section-title" style={{marginBottom: 0}}>
                         <FaEdit className="me-2" />
                         Edit Daycare Information
                       </h4>
                     </div>
-
+                    <hr/>
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="name">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaBuilding className="me-2" />
                             Daycare Name
                           </Form.Label>
@@ -563,17 +524,12 @@ function DaycareProfile() {
                             value={formData.name}
                             onChange={handleChange}
                             placeholder="Enter daycare name"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="phone">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaPhone className="me-2" />
                             Phone
                           </Form.Label>
@@ -583,17 +539,12 @@ function DaycareProfile() {
                             value={formData.phone}
                             onChange={handleChange}
                             placeholder="Enter phone number"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="area">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaMapMarkerAlt className="me-2" />
                             Area
                           </Form.Label>
@@ -603,17 +554,12 @@ function DaycareProfile() {
                             value={formData.area}
                             onChange={handleChange}
                             placeholder="Enter area/location"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3" controlId="services">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             Services Offered
                           </Form.Label>
                           <Form.Control
@@ -622,17 +568,12 @@ function DaycareProfile() {
                             value={formData.services}
                             onChange={handleChange}
                             placeholder="e.g., Full-time care, Part-time care, Meals"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={12}>
                         <Form.Group className="mb-3" controlId="address">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaMapMarkerAlt className="me-2" />
                             Full Address
                           </Form.Label>
@@ -643,27 +584,18 @@ function DaycareProfile() {
                             value={formData.address}
                             onChange={handleChange}
                             placeholder="Enter complete address"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={12}>
                         <Form.Group className="mb-3" controlId="description">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             Description
                           </Form.Label>
                           <ReactQuill
                             value={formData.description}
                             onChange={handleDescriptionChange}
                             placeholder="Describe your daycare, facilities, philosophy, etc."
-                            style={{
-                              background: "rgba(255, 255, 255, 0.9)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
@@ -671,72 +603,52 @@ function DaycareProfile() {
                       {/* Pricing Tiers */}
                       <Col md={12}>
                         <Form.Group className="mb-3">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaDollarSign className="me-2" />
                             Pricing Tiers
                           </Form.Label>
                           
                           {formData.pricing_tiers.map((tier, index) => (
-                            <div key={index} className="d-flex gap-2 mb-3">
-                              <Form.Control
-                                type="text"
-                                name="name"
-                                placeholder="Tier Name"
-                                value={tier.name}
-                                onChange={(e) => handleTierChange(index, e)}
-                                style={{
-                                  background: "rgba(255, 255, 255, 0.8)",
-                                  border: "2px solid rgba(255, 255, 255, 0.3)",
-                                  borderRadius: "10px"
-                                }}
-                              />
-                              <Form.Control
-                                type="text"
-                                name="price"
-                                placeholder="Price"
-                                value={tier.price}
-                                onChange={(e) => handleTierChange(index, e)}
-                                style={{
-                                  background: "rgba(255, 255, 255, 0.8)",
-                                  border: "2px solid rgba(255, 255, 255, 0.3)",
-                                  borderRadius: "10px"
-                                }}
-                              />
-                              <Form.Select
-                                name="frequency"
-                                value={tier.frequency}
-                                onChange={(e) => handleTierChange(index, e)}
-                                style={{
-                                  background: "rgba(255, 255, 255, 0.8)",
-                                  border: "2px solid rgba(255, 255, 255, 0.3)",
-                                  borderRadius: "10px"
-                                }}
-                              >
-                                <option value="Monthly">Monthly</option>
-                                <option value="Daily">Daily</option>
-                              </Form.Select>
-                              <Button
-                                variant="danger"
-                                onClick={() => removeTier(index)}
-                                style={{ 
-                                  borderRadius: "10px",
-                                  padding: "10px 15px",
-                                  minWidth: "100px"
-                                }}
-                              >
-                                Remove
-                              </Button>
-                            </div>
+                            <Card body className="mb-2 pricing-tier-card" key={index}>
+                              <div className="tier-edit-row">
+                                <div className="tier-input-group">
+                                  <Form.Control
+                                    type="text"
+                                    name="name"
+                                    placeholder="Tier Name (e.g., Full Day)"
+                                    value={tier.name}
+                                    onChange={(e) => handleTierChange(index, e)}
+                                  />
+                                  <Form.Control
+                                    type="number"
+                                    name="price"
+                                    placeholder="Price"
+                                    value={tier.price}
+                                    onChange={(e) => handleTierChange(index, e)}
+                                  />
+                                  <Form.Select
+                                    name="frequency"
+                                    value={tier.frequency}
+                                    onChange={(e) => handleTierChange(index, e)}
+                                  >
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Daily">Daily</option>
+                                  </Form.Select>
+                                </div>
+                                <Button
+                                  variant="danger"
+                                  className="btn-remove-tier"
+                                  onClick={() => removeTier(index)}
+                                >
+                                  <FaTimes />
+                                </Button>
+                              </div>
+                            </Card>
                           ))}
                           
                           <Button
                             variant="outline-primary"
                             onClick={addTier}
-                            style={{ 
-                              borderRadius: "10px",
-                              padding: "10px 15px",
-                              minWidth: "100px"
-                            }}
                           >
                             Add Tier
                           </Button>
@@ -745,7 +657,7 @@ function DaycareProfile() {
 
                       <Col md={12}>
                         <Form.Group className="mb-3" controlId="featured_services">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             Featured Services
                           </Form.Label>
                           <Form.Control
@@ -755,17 +667,12 @@ function DaycareProfile() {
                             value={formData.featured_services}
                             onChange={handleChange}
                             placeholder="Highlight your best services (e.g., special programs, activities)"
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                         </Form.Group>
                       </Col>
                       <Col md={12}>
                         <Form.Group className="mb-3" controlId="images">
-                          <Form.Label style={{ color: "#23395d", fontWeight: 600 }}>
+                          <Form.Label>
                             <FaImage className="me-2" />
                             Daycare Photos (multiple allowed)
                           </Form.Label>
@@ -775,11 +682,6 @@ function DaycareProfile() {
                             multiple
                             accept="image/*"
                             onChange={handleImageChange}
-                            style={{
-                              background: "rgba(255, 255, 255, 0.8)",
-                              border: "2px solid rgba(255, 255, 255, 0.3)",
-                              borderRadius: "10px"
-                            }}
                           />
                           
                           {/* Image Previews */}
@@ -788,30 +690,15 @@ function DaycareProfile() {
                               <Row>
                                 {formData.imagePreviews.map((src, idx) => (
                                   <Col md={3} sm={4} xs={6} key={idx} className="mb-2">
-                                    <div className="position-relative">
+                                    <div className="image-preview">
                                       <Image
                                         src={src}
                                         alt={`Preview ${idx + 1}`}
-                                        fluid
-                                        rounded
-                                        style={{
-                                          width: "100%",
-                                          height: "100px",
-                                          objectFit: "cover",
-                                          border: "2px solid #90caf9"
-                                        }}
                                       />
                                       <Button
                                         variant="danger"
                                         size="sm"
-                                        className="position-absolute top-0 end-0"
-                                        style={{ 
-                                          borderRadius: "50%", 
-                                          width: "25px", 
-                                          height: "25px",
-                                          padding: 0,
-                                          margin: "2px"
-                                        }}
+                                        className="btn-remove-image"
                                         onClick={() => removeImagePreview(idx)}
                                       >
                                         <FaTimes size={12} />
@@ -831,14 +718,6 @@ function DaycareProfile() {
                         type="submit"
                         disabled={saving}
                         className="btn-save-profile flex-fill"
-                        style={{
-                          background: "linear-gradient(45deg, #99f2c8, #90caf9)",
-                          color: "#23395d",
-                          border: "none",
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                          padding: "12px"
-                        }}
                       >
                         {saving ? (
                           <>
@@ -856,11 +735,7 @@ function DaycareProfile() {
                         variant="outline-secondary" 
                         onClick={() => setEditMode(false)} 
                         disabled={saving}
-                        style={{
-                          borderRadius: "25px",
-                          fontWeight: 600,
-                          padding: "12px 24px"
-                        }}
+                        className="btn-cancel"
                       >
                         Cancel
                       </Button>
