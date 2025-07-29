@@ -173,7 +173,7 @@ function ParentDaycareView() {
       cost: calculatePrice(),
     };
 
-    navigate("/parent/bookings", { state: bookingDetails });
+    navigate(`/parent/book/${daycare.id}`, { state: bookingDetails });
   };
 
   if (isLoading) {

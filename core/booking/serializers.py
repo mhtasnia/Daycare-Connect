@@ -152,7 +152,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = [
-            'daycare', 'child', 'booking_type', 'start_date',
+            'daycare', 'child', 'booking_type', 'start_date', 'end_date',
             'start_time', 'end_time', 'special_instructions',
             'emergency_contact', 'payment_method'
         ]
@@ -180,7 +180,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         if data['booking_type'] == 'monthly':
             end_date = data['start_date'] + timedelta(days=30)
         else:  # daily care
-            end_date = data['start_date'] + timedelta(days=30)  # 1 month for daily bookings
+            end_date = data['start_date'] + timedelta(days=1)
         
         # Check for overlapping bookings
         overlapping_bookings = Booking.objects.filter(
@@ -193,6 +193,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         if overlapping_bookings.exists():
             raise serializers.ValidationError("Child already has a booking during this period.")
         
+        data['end_date'] = end_date
         return data
     
     def create(self, validated_data):
@@ -230,7 +231,6 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         booking = Booking.objects.create(
             parent=parent,
             total_amount=total_amount,
-            end_date=end_date,
             **validated_data
         )
         

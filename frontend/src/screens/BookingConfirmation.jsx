@@ -57,13 +57,18 @@ function BookingConfirmation() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [isBooking, setIsBooking] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/parent/login");
+  };
 
   useEffect(() => {
     console.log("BookingConfirmation - location.state:", location.state);
     const { daycare } = location.state || {};
     console.log("BookingConfirmation - daycare from state:", daycare);
     if (!location.state || !daycare) {
-      // If no state is passed, redirect to search
       navigate("/parent/search");
       return;
     }
@@ -88,18 +93,25 @@ function BookingConfirmation() {
         setError("Failed to load required data. Please go back and try again.");
       } finally {
         setIsLoading(false);
+        console.log("isLoading set to false after fetchData");
       }
     };
 
     fetchData();
   }, [location.state, daycare, selectedChildId, navigate]);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/parent/login");
-  };
+  useEffect(() => {
+    if (showSuccess) {
+      alert("Booking request sent successfully!");
+      navigate("/parent/bookings");
+    }
+  }, [showSuccess, navigate]);
 
   const handleConfirmBooking = async () => {
+    console.log("handleConfirmBooking called");
+    console.log("selectedEmergencyContact:", selectedEmergencyContact);
+    console.log("agreedToTerms:", agreedToTerms);
+
     if (!selectedEmergencyContact) {
       alert("Please select an emergency contact.");
       return;
@@ -109,29 +121,41 @@ function BookingConfirmation() {
       return;
     }
 
-    setIsLoading(true);
+    setIsBooking(true); // Use a separate state for booking process
     try {
       const bookingPayload = {
         daycare: daycare.id,
         child: selectedChildId,
         booking_type: bookingType,
         start_date: bookingDate,
+        start_time: "09:00:00", // Default start time
+        end_time: "17:00:00",   // Default end time
         payment_method: paymentMethod,
         emergency_contact: parseInt(selectedEmergencyContact),
         special_instructions: specialInstructions,
       };
 
-      await bookingAPI.createBooking(bookingPayload);
-      setShowSuccess(true);
-      setTimeout(() => navigate("/parent/bookings"), 3000);
+      console.log("Sending booking payload:", bookingPayload);
+      const response = await bookingAPI.createBooking(bookingPayload);
+      console.log("Booking API response:", response);
+
+      if (response.data && response.data.message) {
+        alert("Booking request submitted successfully! The daycare will contact you soon.");
+        navigate("/parent/bookings");
+      } else {
+        setError("Received an unexpected response from the server.");
+      }
     } catch (err) {
       console.error("Booking creation error:", err);
+      console.error("Full error response:", err.response);
       const errorMessage =
         err.response?.data?.detail ||
+        (err.response?.data && JSON.stringify(err.response.data)) ||
         "An unexpected error occurred. Please try again.";
-      alert(errorMessage);
+      setError(errorMessage);
+      alert(`Booking Error: ${errorMessage}`); // Provide immediate feedback
     } finally {
-      setIsLoading(false);
+      setIsBooking(false);
     }
   };
 
@@ -280,7 +304,10 @@ function BookingConfirmation() {
               <Card.Body>
                 <Form.Group className="mb-3">
                   <Form.Label>Select Emergency Contact *</Form.Label>
-                  <Form.Select value={selectedEmergencyContact} onChange={(e) => setSelectedEmergencyContact(e.target.value)} required>
+                  <Form.Select value={selectedEmergencyContact} onChange={(e) => {
+                    setSelectedEmergencyContact(e.target.value);
+                    console.log("Selected Emergency Contact:", e.target.value);
+                  }} required>
                     <option value="">Choose an emergency contact...</option>
                     {emergencyContacts.map((contact) => (
                       <option key={contact.id} value={contact.id}>
@@ -314,7 +341,10 @@ function BookingConfirmation() {
                     <li>All children must have up-to-date vaccination records.</li>
                   </ul>
                 </div>
-                <Form.Check type="checkbox" id="terms-checkbox" label="I agree to the terms and conditions and daycare policies" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)} className="mt-3" />
+                <Form.Check type="checkbox" id="terms-checkbox" label="I agree to the terms and conditions and daycare policies" checked={agreedToTerms} onChange={(e) => {
+                  setAgreedToTerms(e.target.checked);
+                  console.log("Agreed to Terms:", e.target.checked);
+                }} className="mt-3" />
               </Card.Body>
             </Card>
           </Col>
@@ -355,6 +385,7 @@ function BookingConfirmation() {
             </Card>
 
             <div className="text-center">
+              {console.log(`Button disabled state: isLoading=${isLoading}, selectedEmergencyContact=${selectedEmergencyContact}, agreedToTerms=${agreedToTerms}`)}
               <Button variant="primary" size="lg" onClick={handleConfirmBooking} disabled={isLoading || !selectedEmergencyContact || !agreedToTerms} className="confirm-booking-btn">
                 {isLoading ? (
                   <><Spinner animation="border" size="sm" className="me-2" />Submitting...</>
