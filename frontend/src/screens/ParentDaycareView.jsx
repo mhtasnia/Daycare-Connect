@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import parse from 'html-react-parser';
 import { bookingAPI, childrenAPI, emergencyContactAPI } from "../services/api";
 import {
   Container,
@@ -372,7 +373,7 @@ function ParentDaycareView() {
                 <h4>About {daycare.name}</h4>
               </Card.Header>
               <Card.Body>
-                <p className="description">{daycare.description}</p>
+                <p className="description">{parse(daycare.description)}</p>
 
                 <Row className="mt-4">
                   <Col md={6}>

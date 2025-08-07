@@ -161,6 +161,33 @@ def accept_booking(request, booking_id):
     })
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsDaycare])
+def complete_booking(request, booking_id):
+    """
+    Daycare marks a booking as completed
+    """
+    try:
+        daycare = request.user.daycare_profile
+        booking = Booking.objects.get(id=booking_id, daycare=daycare)
+    except Booking.DoesNotExist:
+        return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if booking.status not in ['confirmed', 'active']:
+        return Response({'error': 'Only active or confirmed bookings can be marked as completed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if booking.end_date and booking.end_date > timezone.now().date():
+        return Response({'error': 'Booking cannot be marked as completed before the end date.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    booking.status = 'completed'
+    booking.save()
+
+    return Response({
+        'message': 'Booking marked as completed.',
+        'booking': BookingSerializer(booking, context={'request': request}).data
+    })
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsDaycare])
 def daycare_booking_history(request):

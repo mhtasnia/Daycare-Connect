@@ -91,6 +91,9 @@ export const bookingAPI = {
   // Daycare Booking Management
   getDaycareBookings: () => api.get('/bookings/daycare/bookings/'),
   updateDaycareBookingStatus: (id, status) => {
+    if (status === 'completed') {
+      return api.post(`/bookings/daycare/bookings/${id}/complete/`);
+    }
     const action = status === 'Accepted' ? 'accept' : 'decline';
     return api.post(`/bookings/daycare/bookings/${id}/${action}/`);
   },

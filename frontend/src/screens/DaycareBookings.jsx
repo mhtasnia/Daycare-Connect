@@ -45,6 +45,8 @@ const DaycareBookings = () => {
   const [error, setError] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showChildModal, setShowChildModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [bookingToComplete, setBookingToComplete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -157,110 +159,141 @@ const DaycareBookings = () => {
     }
   };
 
-  const BookingCard = ({ booking }) => (
-    <Card className="booking-card mb-4">
-      <Card.Body>
-        <Row>
-          <Col md={3}>
-            <div className="daycare-info">
-              <img
-                src={booking.child_profile_image || "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400"}
-                alt={booking.child_name}
-                className="daycare-thumbnail"
-              />
-              <div className="daycare-details">
-                <h6 className="daycare-name">{booking.child_name}</h6>
-                <p className="daycare-location">
-                  <FaUser className="me-1" />
-                  Parent: {booking.parent_profile?.full_name || "N/A"}
-                </p>
-              </div>
-            </div>
-          </Col>
-          <Col md={6}>
-            <div className="booking-details">
-              <div className="booking-header">
-                <div className="d-flex align-items-center mb-2">
-                  {getStatusIcon(booking.status)}
-                  <span className="booking-id ms-2">Booking #{booking.id}</span>
-                  {getStatusBadge(booking.status)}
+  const handleMarkAsCompleted = (booking) => {
+    setBookingToComplete(booking);
+    setShowCompleteModal(true);
+  };
+
+  const confirmCompleteBooking = async () => {
+    if (!bookingToComplete) return;
+    try {
+      await bookingAPI.updateDaycareBookingStatus(bookingToComplete.id, "completed");
+      fetchBookings();
+      setShowCompleteModal(false);
+      setBookingToComplete(null);
+    } catch (error) {
+      setError("Failed to mark booking as completed.");
+    }
+  };
+
+  const BookingCard = ({ booking }) => {
+    const isCompletable = new Date(booking.end_date) < new Date();
+
+    return (
+      <Card className="booking-card mb-4">
+        <Card.Body>
+          <Row>
+            <Col md={3}>
+              <div className="daycare-info">
+                <img
+                  src={booking.child_profile_image || "https://images.pexels.com/photos/8613089/pexels-photo-8613089.jpeg?auto=compress&cs=tinysrgb&w=400"}
+                  alt={booking.child_name}
+                  className="daycare-thumbnail"
+                />
+                <div className="daycare-details">
+                  <h6 className="daycare-name">{booking.child_name}</h6>
+                  <p className="daycare-location">
+                    <FaUser className="me-1" />
+                    Parent: {booking.parent_profile?.full_name || "N/A"}
+                  </p>
                 </div>
               </div>
-              <Row className="booking-info">
-                <Col sm={6}>
-                  <div className="info-item">
-                    <FaChild className="me-1" />
-                    <strong>Child:</strong> {booking.child_name} ({booking.child_age} years)
+            </Col>
+            <Col md={6}>
+              <div className="booking-details">
+                <div className="booking-header">
+                  <div className="d-flex align-items-center mb-2">
+                    {getStatusIcon(booking.status)}
+                    <span className="booking-id ms-2">Booking #{booking.id}</span>
+                    {getStatusBadge(booking.status)}
                   </div>
-                  <div className="info-item">
-                    <FaCalendarAlt className="me-1" />
-                    <strong>Start:</strong> {new Date(booking.start_date).toLocaleDateString()}
-                  </div>
-                  <div className="info-item">
-                    <FaDollarSign className="me-1" />
-                    <strong>Fee:</strong> ৳{booking.total_amount?.toLocaleString()}
-                  </div>
-                </Col>
-                <Col sm={6}>
-                  <div className="info-item">
-                    <FaClock className="me-1" />
-                    <strong>Type:</strong> {booking.booking_type_display}
-                  </div>
-                  <div className="info-item">
-                    <FaCalendarAlt className="me-1" />
-                    <strong>End:</strong> {booking.end_date ? new Date(booking.end_date).toLocaleDateString() : "Ongoing"}
-                  </div>
-                  <div className="info-item">
-                    <FaPhone className="me-1" />
-                    <strong>Contact:</strong> {booking.parent_profile?.phone || "N/A"}
-                  </div>
-                </Col>
-              </Row>
-              {booking.special_instructions && (
-                <div className="special-instructions">
-                  <strong>Special Instructions:</strong> {booking.special_instructions}
                 </div>
-              )}
-              {booking.cancellation_reason && (
-                <div className="cancel-reason">
-                  <strong>Cancellation Reason:</strong> {booking.cancellation_reason}
-                </div>
-              )}
-            </div>
-          </Col>
-          <Col md={3}>
-            <div className="booking-actions d-grid gap-2">
-              {booking.status?.toLowerCase() === "pending" && (
+                <Row className="booking-info">
+                  <Col sm={6}>
+                    <div className="info-item">
+                      <FaChild className="me-1" />
+                      <strong>Child:</strong> {booking.child_name} ({booking.child_age} years)
+                    </div>
+                    <div className="info-item">
+                      <FaCalendarAlt className="me-1" />
+                      <strong>Start:</strong> {new Date(booking.start_date).toLocaleDateString()}
+                    </div>
+                    <div className="info-item">
+                      <FaDollarSign className="me-1" />
+                      <strong>Fee:</strong> ৳{booking.total_amount?.toLocaleString()}
+                    </div>
+                  </Col>
+                  <Col sm={6}>
+                    <div className="info-item">
+                      <FaClock className="me-1" />
+                      <strong>Type:</strong> {booking.booking_type_display}
+                    </div>
+                    <div className="info-item">
+                      <FaCalendarAlt className="me-1" />
+                      <strong>End:</strong> {booking.end_date ? new Date(booking.end_date).toLocaleDateString() : "Ongoing"}
+                    </div>
+                    <div className="info-item">
+                      <FaPhone className="me-1" />
+                      <strong>Contact:</strong> {booking.parent_profile?.phone || "N/A"}
+                    </div>
+                  </Col>
+                </Row>
+                {booking.special_instructions && (
+                  <div className="special-instructions">
+                    <strong>Special Instructions:</strong> {booking.special_instructions}
+                  </div>
+                )}
+                {booking.cancellation_reason && (
+                  <div className="cancel-reason">
+                    <strong>Cancellation Reason:</strong> {booking.cancellation_reason}
+                  </div>
+                )}
+              </div>
+            </Col>
+            <Col md={3}>
+              <div className="booking-actions d-grid gap-2">
+                {booking.status?.toLowerCase() === "pending" && (
+                  <Button
+                    variant="success"
+                    size="sm"
+                    onClick={() => handleStatusUpdate(booking.id, "Accepted")}
+                  >
+                    <FaCheckCircle className="me-1" /> Accept
+                  </Button>
+                )}
+                {booking.status?.toLowerCase() === "pending" && (
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => handleCancel(booking.id)}
+                  >
+                    <FaTimes className="me-1" /> Cancel
+                  </Button>
+                )}
+                {["confirmed", "active", "accepted"].includes(booking.status?.toLowerCase()) && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => handleMarkAsCompleted(booking)}
+                    disabled={!isCompletable}
+                  >
+                    <FaCheckCircle className="me-1" /> Mark as Completed
+                  </Button>
+                )}
                 <Button
-                  variant="success"
+                  variant="outline-info"
                   size="sm"
-                  onClick={() => handleStatusUpdate(booking.id, "Accepted")}
+                  onClick={() => { setSelectedBooking(booking); setShowChildModal(true); }}
                 >
-                  <FaCheckCircle className="me-1" /> Accept
+                  <FaEye className="me-1" /> View Child Profile
                 </Button>
-              )}
-              {booking.status?.toLowerCase() === "pending" && (
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => handleCancel(booking.id)}
-                >
-                  <FaTimes className="me-1" /> Cancel
-                </Button>
-              )}
-              <Button
-                variant="outline-info"
-                size="sm"
-                onClick={() => { setSelectedBooking(booking); setShowChildModal(true); }}
-              >
-                <FaEye className="me-1" /> View Child Profile
-              </Button>
-            </div>
-          </Col>
-        </Row>
-      </Card.Body>
-    </Card>
-  );
+              </div>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -442,7 +475,23 @@ const DaycareBookings = () => {
         onHide={() => setShowChildModal(false)}
         booking={selectedBooking}
       />
-      
+      {/* Completion Confirmation Modal */}
+      <Modal show={showCompleteModal} onHide={() => setShowCompleteModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Completion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to mark this booking as completed?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCompleteModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={confirmCompleteBooking}>
+            Confirm
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import parse from 'html-react-parser';
 import { bookingAPI } from "../services/api";
 import {
   Container,
@@ -421,7 +422,7 @@ function ParentSearch() {
                     </div>
 
                     <p className="daycare-description">
-                      {daycare.description}
+                      {parse(daycare.description)}
                     </p>
 
                     <div className="daycare-actions">
